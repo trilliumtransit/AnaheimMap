@@ -1,0 +1,280 @@
+<html>
+
+<head>
+
+<script src='https://api.tiles.mapbox.com/mapbox.js/v2.1.4/mapbox.js'></script>
+<link href='https://api.tiles.mapbox.com/mapbox.js/v2.1.4/mapbox.css' rel='stylesheet' />
+<script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+
+</head>
+
+<body>
+
+<div id="interactive-map-holder" style="width:100%;height:100%;">
+</div>
+
+<script>
+console.log('just starting script');
+L.mapbox.accessToken = 'pk.eyJ1IjoidHJpbGxpdW10cmFuc2l0IiwiYSI6ImVUQ2x0blUifQ.2-Z9TGHmyjRzy5GC1J9BTw';
+var map = L.mapbox.map('interactive-map-holder', 'trilliumtransit.e8e8e512', { zoomControl: false });
+   
+   map.scrollWheelZoom.disable();
+   
+   new L.Control.Zoom({ position: 'bottomright' }).addTo(map);
+   
+function load_data(url, dataType) {
+			dataType = typeof dataType !== 'undefined' ? dataType : "json";
+
+			var returned_data = null;
+			$.ajax({
+				'async': false,
+				'global': false,
+				'url': url,
+				'dataType': dataType,
+				'success': function (data) {
+					returned_data = data;
+				}
+			});
+			return returned_data;
+		}
+
+function load_data_async(url, dataType, baseUrl, successResponse) {
+    dataType = typeof dataType !== 'undefined' ? dataType : null;
+    baseUrl = typeof baseUrl !== 'undefined' ? baseUrl : null;
+    dataType = dataType !== null ? dataType : "json";
+    baseUrl = baseUrl !== null ? baseUrl : map_app_base;
+    var returned_data = null;
+    successResponse = successResponse !== null ? successResponse : function(data){
+        returned_data = data;
+    };
+    console.log(baseUrl + url);
+    $.ajax({
+        'global': false,
+        'url': baseUrl + url,
+        'dataType': dataType,
+        'success': successResponse
+    });
+    return returned_data;
+}
+
+
+var route_ids_array = new Array(981,982);
+var route_ids_list = route_ids_array.join();
+
+var stops_layer_group = L.featureGroup();
+var stops = Array();
+var StopIcons = Array();
+var route_colors = Array();
+var stop_markers = Array();
+var default_icon_color = '575757';
+var routes = Array();
+var route_feature_group = new L.FeatureGroup();
+var routes_active = Array();
+var route_styles = Array();
+var route_layers = Array();
+
+
+// define the StopIcon
+var StopIcon = L.Icon.extend({
+    options: {
+        iconSize: [10, 10],
+        iconAnchor: [5, 5],
+        popupAnchor: [0, 0]
+    }
+});
+
+var api_base_url = 'http://archive.oregon-gtfs.com/gtfs-api/';
+var proxy_script = 'php-simple-proxy-master/ba-simple-proxy.php';
+
+// Load an object with the routes
+function load_routes() {
+
+	var load_data_url = generate_proxy_url(api_base_url+'routes/by-feed/anaheim-ca-us/route-id/'+route_ids_list);
+	
+	console.log(load_data_url);
+	console.log('just before load_data (load routes)');
+
+    routes = load_data(load_data_url).contents;
+	console.log('routes: '+routes);
+}
+
+// old junk, but i am keeping this note around for now -- alternative way of getting an array with unique values
+// from http://stackoverflow.com/questions/1960473/unique-values-in-an-array
+
+
+function isInArray(value, array) {
+  return array.indexOf(value) > -1;
+}
+
+// go back to this
+function stop_icons() {
+	
+	console.log("doin' the stop_icons thing");
+	
+    for (i = 0; i < routes.length; i++) {
+    	if (!isInArray(routes[i].route_color,route_colors)) {
+		    route_colors.push(routes[i].route_color);
+		    }
+        }
+
+		StopIcons[default_icon_color] = new StopIcon({iconUrl:"create_image.php?r=15&&bw=3&bc="+default_icon_color});
+
+        for (i = 0; i < route_colors.length; i++) {
+                StopIcons[route_colors[i]] = new StopIcon({iconUrl:"create_image.php?r=10&bc="+route_colors[i]});
+            }
+	
+	console.log('route_colors: '+route_colors);
+	
+	}
+
+
+function generate_proxy_url(url) {
+	
+	if (typeof url === 'undefined') { query = ''; }
+			
+	console.log('api_query_url:' + url);
+	
+	var api_query_url_proxy = proxy_script + '?url=' + encodeURIComponent(url);
+	
+	return api_query_url_proxy;
+	
+	} 
+
+
+/*pushing items into array each by each and then add markers*/
+console.log('just before defining load_stop_markers');
+function load_stop_markers() {
+
+    // if the map has the stops_layer_group, get rid of it
+    if (map.hasLayer(stops_layer_group)) {
+        map.removeLayer(stops_layer_group);
+    }
+
+    // clear out the current stops array
+    // stops_layer_group = L.layerGroup();
+
+		
+	var load_data_url = generate_proxy_url(api_base_url+'stops/by-feed/anaheim-ca-us/route-id/981,982');
+
+	console.log('just before load_data');
+
+//  async approach
+    load_data_async(load_data_url, null,'', function(data){
+    
+    console.log(data);
+	
+	stop_icons();
+	
+		console.log('load_data_was_fired');
+        stops = data.contents;
+        console.log(stops);
+        if (stops !== null) {
+
+            for (i = 0; i < stops.length; i++) {
+				// old code to set the color of the stop -- this will need to change to pull colors based on route
+                // if(typeof(stops[i].color) === 'undefined' || stops[i].color == '') {
+                    stops[i].color ='575757'
+                // }
+                
+                var LamMarker = new L.marker([stops[i].geojson.coordinates[1], stops[i].geojson.coordinates[0]], {
+                    icon: StopIcons[default_icon_color]
+                }).bindPopup(stops[i].stop_name, {maxWidth: 400});
+                
+                
+                LamMarker.stop_id = stops[i].stop_id;
+                LamMarker.marker_id = i;
+                LamMarker.stop_name = stops[i].stop_name;
+
+                LamMarker.on('click', update_stop_info);
+				
+				console.log(LamMarker);
+				
+				console.log(LamMarker.getLatLng());
+
+                stop_markers.push(LamMarker);
+                stops_layer_group.addLayer(stop_markers[i]);
+            }
+
+        }
+        map.addLayer(stops_layer_group);
+        map.fitBounds(stops_layer_group.getBounds());
+    });
+
+
+}
+
+
+function update_stop_info(e) {
+
+e.target.setPopupContent(e.target.stop_name);
+
+}
+
+load_routes();
+console.log('just before calling load_stop_markers');
+load_stop_markers();
+
+// Adding alignments
+
+function get_routes_array_index_from_id(id) {
+    var index = -1;
+    for (var i = 0, len = routes.length; i < len; i++) {
+        if (routes[i].route_id == id) {
+            index = i;
+            // console.log(index);
+            break;
+        }
+    }
+
+    return index;
+}
+
+function add_route_alignment(ids) {
+		
+		var weight = 7;
+		
+	    for (var i = 0, len = ids.length; i < len; i++) {
+	    	var id = ids[i];
+
+	    if (typeof route_layers[id] == 'undefined' || route_layers[id] == null) {
+	    
+			var index = get_routes_array_index_from_id(id);
+
+			var geojson = routes[index].shared_arcs_geojson;
+
+					route_styles[id] = [];
+					
+					
+					route_styles[id][0] = {
+						"color": '#' + routes[index].route_color,
+						"weight": weight,
+						"opacity": 1,
+						// "dashArray": [10,10],
+						"clickable": true
+					};
+
+					route_layers[id] = L.geoJson(geojson, {
+						style: route_styles[id][0]
+					});
+
+
+
+	    }
+	        route_layers[id].addTo(map);
+
+	    if (routes_active.indexOf(parseInt(id)) == -1) {
+	        routes_active.push(parseInt(id));
+	        // console.log('adding route_id '+id+' to routes_active');
+	    }
+	
+	weight = weight -2;
+	
+	}
+
+}
+
+add_route_alignment(route_ids_array);
+
+</script>
+
+</body>
