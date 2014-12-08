@@ -8,9 +8,9 @@
 
 </head>
 
-<body>
+<body style="background-color:#2068A7">
 
-<div id="interactive-map-holder" style="width:100%;height:100%;">
+<div id="interactive-map-holder" style="width:100%;height:100%;background-color:#2068A7;">
 </div>
 
 <script>
@@ -58,7 +58,7 @@ function load_data_async(url, dataType, baseUrl, successResponse) {
 }
 
 
-var route_ids_array = new Array(981,982);
+var route_ids_array = new Array(981,982,983,984,985,986,987,988,989,990,991);
 var route_ids_list = route_ids_array.join();
 
 var stops_layer_group = L.featureGroup();
@@ -77,8 +77,8 @@ var route_layers = Array();
 // define the StopIcon
 var StopIcon = L.Icon.extend({
     options: {
-        iconSize: [10, 10],
-        iconAnchor: [5, 5],
+        iconSize: [14, 14],
+        iconAnchor: [7, 7],
         popupAnchor: [0, 0]
     }
 });
@@ -106,6 +106,7 @@ function isInArray(value, array) {
   return array.indexOf(value) > -1;
 }
 
+
 // go back to this
 function stop_icons() {
 	
@@ -113,11 +114,11 @@ function stop_icons() {
 	
     for (i = 0; i < routes.length; i++) {
     	if (!isInArray(routes[i].route_color,route_colors)) {
-		    route_colors.push(routes[i].route_color);
+    		route_colors.push(routes[i].route_color);
 		    }
         }
 
-		StopIcons[default_icon_color] = new StopIcon({iconUrl:"create_image.php?r=15&&bw=3&bc="+default_icon_color});
+		StopIcons[default_icon_color] = new StopIcon({iconUrl:"create_image.php?r=14&bw=3&bc="+default_icon_color});
 
         for (i = 0; i < route_colors.length; i++) {
                 StopIcons[route_colors[i]] = new StopIcon({iconUrl:"create_image.php?r=10&bc="+route_colors[i]});
@@ -127,15 +128,25 @@ function stop_icons() {
 	
 	}
 
+function get_route_color_for_id(route_id_lookup) {
+var result;
+console.log('routes: '+routes);
+console.log('routes.length: '+routes.length);
+for(var route_i = 0; route_i < routes.length; route_i++) {
+	console.log (routes[route_i]);
+	console.log (routes[route_i].route_id);
+    if( routes[route_i].route_id === route_id_lookup ) {
+        result = routes[route_i].route_color;
+        break;
+    }
+}
+return result;
+}
 
 function generate_proxy_url(url) {
-	
 	if (typeof url === 'undefined') { query = ''; }
-			
 	console.log('api_query_url:' + url);
-	
 	var api_query_url_proxy = proxy_script + '?url=' + encodeURIComponent(url);
-	
 	return api_query_url_proxy;
 	
 	} 
@@ -154,7 +165,7 @@ function load_stop_markers() {
     // stops_layer_group = L.layerGroup();
 
 		
-	var load_data_url = generate_proxy_url(api_base_url+'stops/by-feed/anaheim-ca-us/route-id/981,982');
+	var load_data_url = generate_proxy_url(api_base_url+'stops/by-feed/anaheim-ca-us/route-id/'+route_ids_list);
 
 	console.log('just before load_data');
 
@@ -171,13 +182,20 @@ function load_stop_markers() {
         if (stops !== null) {
 
             for (i = 0; i < stops.length; i++) {
-				// old code to set the color of the stop -- this will need to change to pull colors based on route
-                // if(typeof(stops[i].color) === 'undefined' || stops[i].color == '') {
-                    stops[i].color ='575757'
-                // }
+
+					
+					if (stops[i].routes.length > 1) {
+						stops[i].color ='575757';
+					}
+					else {
+						console.log(stops[i].routes[0].route_id);
+						stops[i].color = get_route_color_for_id(stops[i].routes[0].route_id);
+						console.log('stops['+i+'].color: '+stops[i].color);
+					}
+                    
                 
                 var LamMarker = new L.marker([stops[i].geojson.coordinates[1], stops[i].geojson.coordinates[0]], {
-                    icon: StopIcons[default_icon_color]
+                    icon: StopIcons[stops[i].color]
                 }).bindPopup(stops[i].stop_name, {maxWidth: 400});
                 
                 
@@ -231,7 +249,7 @@ function get_routes_array_index_from_id(id) {
 
 function add_route_alignment(ids) {
 		
-		var weight = 7;
+		var weight = 5;
 		
 	    for (var i = 0, len = ids.length; i < len; i++) {
 	    	var id = ids[i];
@@ -267,8 +285,6 @@ function add_route_alignment(ids) {
 	        // console.log('adding route_id '+id+' to routes_active');
 	    }
 	
-	weight = weight -2;
-	
 	}
 
 }
@@ -278,3 +294,4 @@ add_route_alignment(route_ids_array);
 </script>
 
 </body>
+</html>
