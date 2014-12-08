@@ -14,6 +14,10 @@
 </div>
 
 <script>
+
+var route_ids_array = new Array(981,982,983,984,985,986,987,988,989,990,991,992,993,994,995,996,997,998,1016,1025,1413);
+var system_map = true;
+
 console.log('just starting script');
 L.mapbox.accessToken = 'pk.eyJ1IjoidHJpbGxpdW10cmFuc2l0IiwiYSI6ImVUQ2x0blUifQ.2-Z9TGHmyjRzy5GC1J9BTw';
 var map = L.mapbox.map('interactive-map-holder', 'trilliumtransit.e8e8e512', { zoomControl: false });
@@ -58,7 +62,6 @@ function load_data_async(url, dataType, baseUrl, successResponse) {
 }
 
 
-var route_ids_array = new Array(981,982,983,984,985,986,987,988,989,990,991);
 var route_ids_list = route_ids_array.join();
 
 var stops_layer_group = L.featureGroup();
@@ -284,12 +287,31 @@ function add_route_alignment(ids) {
 	        routes_active.push(parseInt(id));
 	        // console.log('adding route_id '+id+' to routes_active');
 	    }
-	
 	}
-
 }
 
-add_route_alignment(route_ids_array);
+var topPane;
+var topLayer;
+
+var route_alignments_tiles = 'trilliumtransit.fbf63437';
+var tile_layer = new Array();
+tile_layer[0] = new L.tileLayer('http://{s}.tiles.mapbox.com/v3/' + route_alignments_tiles + '/{z}/{x}/{y}.png');
+// tile_layer[1] = new L.tileLayer('http://{s}.tiles.mapbox.com/v3/'+map_id_labels+'/{z}/{x}/{y}.png');
+
+
+function add_tile_layer(layer_id,z_index) {
+	if (typeof (tile_layer[layer_id]) != "undefined") {
+		console.log(tile_layer[layer_id]);
+		topLayer = tile_layer[layer_id].addTo(map);
+		topPane.appendChild(topLayer.getContainer());
+		topLayer.setZIndex(z_index);
+	}
+}
+
+if (system_map) {
+	add_tile_layer(0,5);
+}
+else {add_route_alignment(route_ids_array);}
 
 </script>
 
