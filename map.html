@@ -133,14 +133,15 @@ function stop_icons() {
 	}
 
 function get_route_color_for_id(route_id_lookup) {
+var result = get_route_info_for_id(route_id_lookup).route_color;
+return result;
+}
+
+function get_route_info_for_id(route_id_lookup) {
 var result;
-//console.log('routes: '+routes);
-//console.log('routes.length: '+routes.length);
 for(var route_i = 0; route_i < routes.length; route_i++) {
-	//console.log (routes[route_i]);
-	//console.log (routes[route_i].route_id);
     if( routes[route_i].route_id === route_id_lookup ) {
-        result = routes[route_i].route_color;
+        result = routes[route_i];
         break;
     }
 }
@@ -200,12 +201,13 @@ function load_stop_markers() {
                 
                 var LamMarker = new L.marker([stops[i].geojson.coordinates[1], stops[i].geojson.coordinates[0]], {
                     icon: StopIcons[stops[i].color]
-                }).bindPopup(stops[i].stop_name, {maxWidth: 400});
+                }).bindPopup('', {maxWidth: 400});
                 
                 
                 LamMarker.stop_id = stops[i].stop_id;
                 LamMarker.marker_id = i;
                 LamMarker.stop_name = stops[i].stop_name;
+                LamMarker.stop_code = stops[i].stop_code;
 
                 LamMarker.on('click', update_stop_info);
 				
@@ -228,7 +230,22 @@ function load_stop_markers() {
 
 function update_stop_info(e) {
 
-e.target.setPopupContent(e.target.stop_name);
+var popup_content = '<h3 class="stop_name">'+e.target.stop_name+'</h3><p>text2go code: '+e.target.stop_code+'</p>';
+
+var route_ids_array = get_routes_for_stop_id(e.target.stop_id);
+
+console.log(routes);
+console.log(route_ids_array);
+
+for (var i = 0, len = route_ids_array.length; i < len; i++) {
+	console.log(route_ids_array[i]);
+	var route_info = get_route_info_for_id(route_ids_array[i]);
+	console.log(route_info);
+	popup_content = popup_content + '<div class="route_short_name" style="display:inline-block;margin-right:8px;padding:3px;margin:3px;font-weight:bold;font-size:14pt;color:'+route_info.route_text_color+';background-color:#'+route_info.route_color+'">'+route_info.route_short_name+'</div>';
+	
+}
+
+e.target.setPopupContent(popup_content);
 
 }
 
@@ -249,6 +266,32 @@ function get_routes_array_index_from_id(id) {
     }
 
     return index;
+}
+
+function get_stops_array_index_from_id(id) {
+    var index = -1;
+    for (var i = 0, len = stops.length; i < len; i++) {
+        if (stops[i].stop_id == id) {
+            index = i;
+            // console.log(index);
+            break;
+        }
+    }
+
+    return index;
+}
+
+function get_routes_for_stop_id(stop_id) {
+	
+	var stops_array_index = get_stops_array_index_from_id(stop_id);
+	var specific_routes = stops[stops_array_index].routes;
+	var route_ids_array = Array();
+	
+    for (var i = 0, len = specific_routes.length; i < len; i++) {
+       route_ids_array.push(specific_routes[i].route_id);
+    }
+
+    return route_ids_array;
 }
 
 function add_route_alignment(ids) {
@@ -304,7 +347,7 @@ function add_tile_layer(layer_id,z_index) {
 	if (typeof (tile_layer[layer_id]) != "undefined") {
 		//console.log(tile_layer[layer_id]);
 		topLayer = tile_layer[layer_id].addTo(map);
-		topPane.appendChild(topLayer.getContainer());
+//		topPane.appendChild(topLayer.getContainer());
 		topLayer.setZIndex(z_index);
 	}
 }
