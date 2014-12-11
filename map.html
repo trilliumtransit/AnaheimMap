@@ -16,7 +16,7 @@
 <script>
 
 var route_ids_array = new Array(981,982,983,984,985,986,987,988,989,990,991,992,993,994,995,996,997,998,1016,1025,1413);
-var system_map = true;
+var system_map = false;
 var map_files_base = "http://trilliumtransit.com/clients/anaheim/";
 
 //console.log('just starting script');
@@ -228,17 +228,43 @@ function load_stop_markers() {
 }
 
 
+function highlight_route_alignment(route_ids) {
+		
+		console.log('highlight_route_alignment. route_ids: '.route_ids);
+
+	    for (var i = 0, len = route_ids.length; i < len; i++) {
+			console.log('highlight this alignment: '+route_ids[i]);
+			var route_id = route_ids[i];
+	    	if (routes_active.indexOf(route_id) > -1) {
+				route_layers[route_id].bringToFront();
+				route_layers[route_id].setStyle(route_styles[route_id][1]);
+		    }
+
+	    }
+}
+
+function unhighlight_route_alignment(route_ids) {
+
+	    for (var i = 0, len = route_ids.length; i < len; i++) {
+	    	var route_id = route_ids[i];
+		    route_layers[route_id].setStyle(route_styles[route_id][0]);
+	    }
+
+}
+
 function update_stop_info(e) {
 
 var popup_content = '<h3 class="stop_name">'+e.target.stop_name+'</h3><p>text2go code: '+e.target.stop_code+'</p>';
 
 var route_ids_array = get_routes_for_stop_id(e.target.stop_id);
+highlight_route_alignment(route_ids_array);
 
 console.log(routes);
 console.log(route_ids_array);
 
 for (var i = 0, len = route_ids_array.length; i < len; i++) {
-	console.log(route_ids_array[i]);
+	// console.log(route_ids_array[i]);
+	
 	var route_info = get_route_info_for_id(route_ids_array[i]);
 	console.log(route_info);
 	popup_content = popup_content + '<div class="route_short_name" style="display:inline-block;margin-right:8px;padding:3px;margin:3px;font-weight:bold;font-size:14pt;color:'+route_info.route_text_color+';background-color:#'+route_info.route_color+'">'+route_info.route_short_name+'</div>';
@@ -247,6 +273,11 @@ for (var i = 0, len = route_ids_array.length; i < len; i++) {
 
 e.target.setPopupContent(popup_content);
 
+}
+
+function close_popup_update_map(e) {
+var route_ids_array = get_routes_for_stop_id(e.target.stop_id);
+unhighlight_route_alignment(route_ids_array);
 }
 
 load_routes();
@@ -294,9 +325,11 @@ function get_routes_for_stop_id(stop_id) {
     return route_ids_array;
 }
 
+var unhighlighted_weight = 5;
+var highlighted_weight = 10;
+
 function add_route_alignment(ids) {
-		
-		var weight = 5;
+
 		
 	    for (var i = 0, len = ids.length; i < len; i++) {
 	    	var id = ids[i];
@@ -312,7 +345,15 @@ function add_route_alignment(ids) {
 					
 					route_styles[id][0] = {
 						"color": '#' + routes[index].route_color,
-						"weight": weight,
+						"weight": unhighlighted_weight,
+						"opacity": 1,
+						// "dashArray": [10,10],
+						"clickable": true
+					};
+					
+					route_styles[id][1] = {
+						"color": '#' + routes[index].route_color,
+						"weight": highlighted_weight,
 						"opacity": 1,
 						// "dashArray": [10,10],
 						"clickable": true
