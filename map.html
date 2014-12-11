@@ -15,7 +15,7 @@
 
 <script>
 
-var route_ids_array = new Array(981,982,983,984,985,986,987,988,989,990,991,992,993,994,995,996,997,998,1016,1025,1413);
+var route_ids_array = new Array(1696,1697,1698,1699,1700,1701,1702,1703,1704,1705,1706,1707,1708,1709,1710,1711,1712,1713,1714,1716);
 var system_map = false;
 var map_files_base = "http://trilliumtransit.com/clients/anaheim/";
 
@@ -93,7 +93,7 @@ var proxy_script = 'php-simple-proxy-master/ba-simple-proxy.php';
 // Load an object with the routes
 function load_routes() {
 
-	var load_data_url = generate_proxy_url(api_base_url+'routes/by-feed/anaheim-ca-us/route-id/'+route_ids_list);
+	var load_data_url = generate_proxy_url(api_base_url+'routes/by-feed/anaheim-new-ca-us/route-id/'+route_ids_list);
 	
 	//console.log(load_data_url);
 	//console.log('just before load_data (load routes)');
@@ -170,7 +170,7 @@ function load_stop_markers() {
     // stops_layer_group = L.layerGroup();
 
 		
-	var load_data_url = generate_proxy_url(api_base_url+'stops/by-feed/anaheim-ca-us/route-id/'+route_ids_list);
+	var load_data_url = generate_proxy_url(api_base_url+'stops/by-feed/anaheim-new-ca-us/route-id/'+route_ids_list);
 
 	//console.log('just before load_data');
 
