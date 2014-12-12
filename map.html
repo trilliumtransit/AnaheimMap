@@ -4,7 +4,10 @@
 
 <script src='https://api.tiles.mapbox.com/mapbox.js/v2.1.4/mapbox.js'></script>
 <link href='https://api.tiles.mapbox.com/mapbox.js/v2.1.4/mapbox.css' rel='stylesheet' />
+<link href='map-icons_temp.css' rel='stylesheet' />
 <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+<script src="jquery.csv-0.71.min.js"></script>
+
 
 </head>
 
@@ -115,7 +118,7 @@ function stop_icons() {
 	
 	//console.log("doin' the stop_icons thing");
 	
-    for (i = 0; i < routes.length; i++) {
+    for (var i = 0; i < routes.length; i++) {
     	if (!isInArray(routes[i].route_color,route_colors)) {
     		route_colors.push(routes[i].route_color);
 		    }
@@ -123,7 +126,7 @@ function stop_icons() {
 
 		StopIcons[default_icon_color] = new StopIcon({iconUrl:map_files_base+"create_image.php?r=12&bw=3&&bc=ffffff&fg="+default_icon_color});
 
-        for (i = 0; i < route_colors.length; i++) {
+        for (var i = 0; i < route_colors.length; i++) {
                 StopIcons[route_colors[i]] = new StopIcon({iconUrl:map_files_base+"create_image.php?r=12&bc=ffffff&fg="+route_colors[i]});
             }
 	
@@ -181,7 +184,7 @@ function load_stop_markers() {
         //console.log(stops);
         if (stops !== null) {
 
-            for (i = 0; i < stops.length; i++) {
+            for (var i = 0; i < stops.length; i++) {
 
 					
 					if (stops[i].routes.length > 1) {
@@ -205,6 +208,7 @@ function load_stop_markers() {
                 LamMarker.stop_code = stops[i].stop_code;
 
                 LamMarker.on('click', update_stop_info);
+                LamMarker.on('popupclose', close_popup_update_map);
 				
 				//console.log(LamMarker);
 				
@@ -222,14 +226,23 @@ function load_stop_markers() {
 
 }
 
+function encapsulate_in_array(variable) {
+	if (Array.isArray(variable)) {return variable;}
+	else {
+		var new_array = Array();
+		new_array.push(variable);
+		return new_array;
+		}
+	}	
 
 function highlight_route_alignment(route_ids) {
 		
+		route_ids = encapsulate_in_array(route_ids);
 		console.log('highlight_route_alignment. route_ids: '.route_ids);
 
 	    for (var i = 0, len = route_ids.length; i < len; i++) {
 			console.log('highlight this alignment: '+route_ids[i]);
-			var route_id = route_ids[i];
+			var route_id = parseInt(route_ids[i]);
 	    	if (routes_active.indexOf(route_id) > -1) {
 				route_layers[route_id].bringToFront();
 				route_layers[route_id].setStyle(route_styles[route_id][1]);
@@ -240,8 +253,10 @@ function highlight_route_alignment(route_ids) {
 
 function unhighlight_route_alignment(route_ids) {
 
+		route_ids = encapsulate_in_array(route_ids);
+
 	    for (var i = 0, len = route_ids.length; i < len; i++) {
-	    	var route_id = route_ids[i];
+	    	var route_id = parseInt(route_ids[i]);
 		    route_layers[route_id].setStyle(route_styles[route_id][0]);
 	    }
 
@@ -392,6 +407,88 @@ if (system_map) {
 	add_tile_layer(0,5);
 }
 else {add_route_alignment(route_ids_array);}
+
+
+
+
+var landmarks = Array();
+var landmark_icons = Array();
+// var landmarks_csv;
+// var icons_csv;
+
+function get_icon_index_for_icon(icon_id) {
+var result;
+for(var i = 0; i < landmark_icons.length; i++) {
+    if( landmark_icons[i].id === icon_id ) {
+        result = i;
+        break;
+    }
+}
+return result;
+}
+
+$.ajax({
+    url: "icons.csv",
+    async: false,
+    success: function (csvd) {
+        landmark_icons =  $.csv.toObjects(csvd);
+    },
+    dataType: "text"
+});
+
+var landmark_markers = Array();
+
+$.ajax({
+    url: "selected_landmarks.csv",
+    async: false,
+    success: function (csvd) {
+        var landmarks_array_temp =  $.csv.toObjects(csvd);
+        
+        for (var i = 0, len = ids.length; i < len; i++) {
+        
+        landmarks[landmarks_array_temp[i].landmark_id].landmark_name = landmarks_array_temp[i].landmark_name;
+        landmarks[landmarks_array_temp[i].landmark_id].category_name = landmarks_array_temp[i].category_name;
+        landmarks[landmarks_array_temp[i].landmark_id].landmark_url = landmarks_array_temp[i].landmark_url;
+		var landmark_lat_temp = landmarks_array_temp[i].lat;
+        landmarks[landmarks_array_temp[i].landmark_id].lat = landmark_lat_temp;
+		var landmark_lon_temp = landmarks_array_temp[i].lon;
+        landmarks[landmarks_array_temp[i].landmark_id].lon = landmark_lon_temp;
+        landmarks[landmarks_array_temp[i].landmark_id].icon_id = landmarks_array_temp[i].icon_id;
+        
+        var icon_index = get_icon_index_for_icon(landmarks_array_temp[i].icon_id);
+        
+        landmarks[landmarks_array_temp[i].landmark_id].icon_index = icon_index;
+        
+        // add the icon
+        landmark_icons[icon_index].icon = L.divIcon({ 
+		iconSize: new L.Point(landmark_icons[icon_index].width, landmark_icons[icon_index].height), 
+		className: 'map-icon-with-text '+'_'+landmark_icons[icon_index].landmark_id+'_mapicon'});
+		
+		landmark_markers[i] = L.marker([landmark_lat_temp, landmark_lon_temp], {icon: landmark_icons[icon_index].icon});
+		landmark_markers[i].addTo(map);
+		
+		}
+		
+		},
+    dataType: "text"
+		
+});
+     	
+     	// http://jsfiddle.net/7go98fe4/
+     	   
+ 
+
+
+// Object
+// height: "184"
+// id: "downtown_disney_district"
+// landmark_id: ""
+// width: "190"
+// x: "248"
+// y: "16"
+// __proto__: Object
+
+
 
 </script>
 

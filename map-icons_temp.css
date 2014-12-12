@@ -1,0 +1,26 @@
+.map-icon-with-text {
+	background-image: url('http://trilliumtransit.com/clients/anaheim/images/art-map-icons-with-text.png');
+	float: left;
+}
+.map-icon-without-text {
+	background-image: url('http://trilliumtransit.com/clients/anaheim/images/art-map-icons-without-text.png');
+	float: left;
+
+}
+	
+	/*** http://stackoverflow.com/questions/448981/what-characters-are-valid-in-css-class-selectors ***/
+	
+	 ._60_map_icon { background-position:-0px -0px; width:239px; height:198px; }			 
+	 .__map_icon { background-position:-248px -16px; width:190px; height:184px; }			 
+	 .__map_icon { background-position:-446px -68px; width:194px; height:108px; }			 
+	 ._7_map_icon { background-position:-646px -78px; width:161px; height:116px; }			 
+	 .__map_icon { background-position:-2px -224px; width:297px; height:168px; }			 
+	 .__map_icon { background-position:-314px -278px; width:110px; height:98px; }			 
+	 ._41_map_icon { background-position:-461px -278px; width:123px; height:112px; }			 
+	 ._21_map_icon { background-position:-589px -252px; width:255px; height:150px; }			 
+	 .__map_icon { background-position:-14px -395px; width:204px; height:193px; }			 
+	 ._3_map_icon { background-position:-283px -425px; width:248px; height:138px; }			 
+	 .__map_icon { background-position:-610px -423px; width:196px; height:152px; }			 
+	 .__map_icon { background-position:-873px -453px; width:126px; height:118px; }			 
+	 ._78_map_icon { background-position:-28px -587px; width:145px; height:157px; }			 
+	 ._96_map_icon { background-position:-244px -598px; width:169px; height:156px; }	

@@ -1,0 +1,8 @@
+feed_name,landmark_id,landmark_name,category_name,landmark_url,icon_id,lat,lon
+anaheim-new-ca-us,3, Anaheim Convention Center,Attractions,,anaheim_convention_center,33.799796,-117.920064
+anaheim-new-ca-us,7, City Hall,Attractions,,anaheim_city_hall,33.834503,-117.912898
+anaheim-new-ca-us,21, Honda Center,Attractions,,honda_center,33.807331,-117.876535
+anaheim-new-ca-us,41,Anaheim GardenWalk Dining & Entertainment District ,,,gardenwalk,33.806436,-117.911792
+anaheim-new-ca-us,60,Disneyland Resort,Attractions,,disneyland,33.809761,-117.91897
+anaheim-new-ca-us,78,Outlets at Orange ,Attractions,,outlets_at_the_orange,33.782408,-117.893917
+anaheim-new-ca-us,96,Westfield MainPlace Mall,Attractions,,westfield_mainplace,33.775235,-117.86914
