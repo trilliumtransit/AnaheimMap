@@ -4,7 +4,6 @@
 
 <script src='https://api.tiles.mapbox.com/mapbox.js/v2.1.4/mapbox.js'></script>
 <link href='https://api.tiles.mapbox.com/mapbox.js/v2.1.4/mapbox.css' rel='stylesheet' />
-<link href='map-icons_temp.css' rel='stylesheet' />
 <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
 <script src="jquery.csv-0.71.min.js"></script>
 
@@ -91,6 +90,7 @@ var StopIcon = L.Icon.extend({
 });
 
 var api_base_url = 'http://archive.oregon-gtfs.com/gtfs-api/';
+var proxy_script = 'php-simple-proxy-master/ba-simple-proxy.php';
 
 // Load an object with the routes
 function load_routes() {
@@ -100,7 +100,7 @@ function load_routes() {
 	//console.log(load_data_url);
 	//console.log('just before load_data (load routes)');
 
-    routes = load_data(load_data_url);
+    routes = load_data(load_data_url).contents;
 	//console.log('routes: '+routes);
 }
 
@@ -151,7 +151,11 @@ return result;
 }
 
 function generate_proxy_url(url) {
-    return url;
+	if (typeof url === 'undefined') { query = ''; }
+	//console.log('api_query_url:' + url);
+	var api_query_url_proxy = proxy_script + '?url=' + encodeURIComponent(url);
+	return api_query_url_proxy;
+	
 	} 
 
 
@@ -180,7 +184,7 @@ function load_stop_markers() {
 	stop_icons();
 	
 		//console.log('load_data_was_fired');
-        stops = data;
+        stops = data.contents;
         //console.log(stops);
         if (stops !== null) {
 
@@ -409,6 +413,26 @@ if (system_map) {
 else {add_route_alignment(route_ids_array);}
 
 
+var disneyIcon_small = L.icon({
+    iconUrl: 'icons/disneyland-icon.png',
+
+    iconSize:     [200, 167], // size of the icon
+    iconAnchor:   [100, 83.5], // point of the icon which will correspond to marker's location
+    popupAnchor:  [0, 0] // point from which the popup should open relative to the iconAnchor
+});
+
+// L.marker([33.811870, -117.919054], {icon: disneyIcon_small}).addTo(map);
+
+
+var disneyIcon_large = L.icon({
+    iconUrl: 'icons/disneyland-icon.png',
+
+    iconSize:     [300, 250], // size of the icon
+    iconAnchor:   [150, 125], // point of the icon which will correspond to marker's location
+    popupAnchor:  [0, 0] // point from which the popup should open relative to the iconAnchor
+});
+
+// L.marker([33.816960, -117.912899], {icon: disneyIcon_large}).addTo(map);
 
 
 var landmarks = Array();
@@ -438,30 +462,13 @@ $.ajax({
 
 var landmark_markers = Array();
 
-var zoom_icon_scale = Array();
-zoom_icon_scale[12] = .25;
-zoom_icon_scale[13] = .4;
-zoom_icon_scale[14] = .6;
-zoom_icon_scale[15] = .7;
-zoom_icon_scale[16] = 1;
-zoom_icon_scale[17] = 1;
-zoom_icon_scale[18] = 1;
-zoom_icon_scale[19] = 1;
-
 $.ajax({
     url: "selected_landmarks.csv",
     async: false,
     success: function (csvd) {
-        
         var landmarks_array_temp =  $.csv.toObjects(csvd);
         
-        console.log(landmarks_array_temp);
-        
-        for (var i = 0, len = landmarks_array_temp.length; i < len; i++) {
-        
-        console.log(landmarks_array_temp[i].landmark_id);
-        
-        landmarks[landmarks_array_temp[i].landmark_id] = {};
+        for (var i = 0, len = ids.length; i < len; i++) {
         
         landmarks[landmarks_array_temp[i].landmark_id].landmark_name = landmarks_array_temp[i].landmark_name;
         landmarks[landmarks_array_temp[i].landmark_id].category_name = landmarks_array_temp[i].category_name;
@@ -475,18 +482,14 @@ $.ajax({
         var icon_index = get_icon_index_for_icon(landmarks_array_temp[i].icon_id);
         
         landmarks[landmarks_array_temp[i].landmark_id].icon_index = icon_index;
-                
-        var width = landmark_icons[icon_index].width;
-        var height = landmark_icons[icon_index].height;
-        var width = landmark_icons[icon_index].width;
-        var landmark_id = landmarks_array_temp[i].landmark_id;     
         
-        // var current_zoom = map.getZoom();
-		console.log('current_zoom: '+map.getZoom());
-        
-        apply_landmark_marker(i,width,height,landmark_id,icon_index,landmark_lat_temp,landmark_lon_temp);
-        
-
+        // add the icon
+        landmark_icons[icon_index].icon = L.divIcon({ 
+		iconSize: new L.Point(landmark_icons[icon_index].width, landmark_icons[icon_index].height), 
+		className: 'map-icon-with-text '+'_'+landmark_icons[icon_index].landmark_id+'_mapicon'});
+		
+		landmark_markers[i] = L.marker([landmark_lat_temp, landmark_lon_temp], {icon: landmark_icons[icon_index].icon});
+		landmark_markers[i].addTo(map);
 		
 		}
 		
@@ -494,36 +497,6 @@ $.ajax({
     dataType: "text"
 		
 });
-
-function apply_landmark_marker(i,width,height,landmark_id,icon_index,landmark_lat,landmark_lon) {
-
-console.log('icon_index: '+icon_index);
-// var current_zoom = map.getZoom();
-var current_zoom = 17;
-console.log('current_zoom: '+current_zoom);
-
-console.log('height: '+height);
-console.log('width: '+width);
-
-var scaled_width = zoom_icon_scale[current_zoom] * width;
-var scaled_height = zoom_icon_scale[current_zoom] * height;
-console.log('scaled_width: '+scaled_width);
-console.log('scaled_height: '+scaled_height);
-
-landmark_icons[icon_index].icons = [];
-landmark_icons[icon_index].icons[current_zoom] = {};
-
-landmark_icons[icon_index].icons[current_zoom] = L.divIcon({ 
-		iconSize: new L.Point(scaled_width, scaled_height), 
-		className: 'map-icon-with-text '+'_'+landmark_id+'_map_icon'});
-
-var zoom_level_icon = landmark_icons[icon_index].icons[current_zoom];
-
-		landmark_markers[i] = L.marker([landmark_lat, landmark_lon], {icon: zoom_level_icon, landmark_id: landmark_id });
-		landmark_markers[i].addTo(map);
-
-}
-
      	
      	// http://jsfiddle.net/7go98fe4/
      	   
@@ -545,4 +518,3 @@ var zoom_level_icon = landmark_icons[icon_index].icons[current_zoom];
 
 </body>
 </html>
-
