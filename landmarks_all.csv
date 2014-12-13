@@ -1,0 +1,102 @@
+feed_name,landmark_id,landmark_name,category_name,landmark_url,icon_id,lat,lon,major
+anaheim-new-ca-us,1, America's Best Value Inn,Hotels,,hotel_icon,33.803533,-117.913191,0
+anaheim-new-ca-us,2, Anaheim Brewery,Restaurants,,restaurant_icon,33.832474,-117.91274,0
+anaheim-new-ca-us,3, Anaheim Convention Center,Attractions,,anaheim_convention_center,33.799796,-117.920064,1
+anaheim-new-ca-us,4,Angel Stadium of Anaheim,Attractions,,angel_stadium,33.799298,-117.883872,1
+anaheim-new-ca-us,5, Bodies THE EXHIBITION,Attractions,,attraction_icon,33.851058,-117.99837,0
+anaheim-new-ca-us,6, Carrows Restaurant,Restaurants,,restaurant_icon,33.821224,-117.915463,0
+anaheim-new-ca-us,7, City Hall,Attractions,,anaheim_city_hall,33.834503,-117.912898,1
+anaheim-new-ca-us,8, Clarion Hotel,Hotels,,hotel_icon,33.79957,-117.916168,0
+anaheim-new-ca-us,9, Coffee  Bean & Tea Leaf,Restaurants,,restaurant_icon,33.839685,-117.888818,0
+anaheim-new-ca-us,10, Cortona Inn & Suites,Hotels,,hotel_icon,33.798158,-117.915911,0
+anaheim-new-ca-us,11, Courtyard by Marriott,Hotels,,hotel_icon,33.797708,-117.916598,0
+anaheim-new-ca-us,12, Denny's Restaurant,Restaurants,,restaurant_icon,33.802903,-117.927147,0
+anaheim-new-ca-us,13, Dolphin's Cove,Hotels,,hotel_icon,33.796231,-117.9135,0
+anaheim-new-ca-us,14, Econolodge ,Hotels,,hotel_icon,33.847164,-117.980096,0
+anaheim-new-ca-us,15, Extended Stay,Hotels,,hotel_icon,33.804656,-117.908755,0
+anaheim-new-ca-us,16, GreenWood Suites,Hotels,,hotel_icon,33.805027,-117.906794,0
+anaheim-new-ca-us,17,The Blind Rabbitt (Speak Easy),Restaurants,,restaurant_icon,33.831405,-117.911619,0
+anaheim-new-ca-us,18, Hilton Anaheim,Hotels,,hotel_icon,33.79988,-117.918414,0
+anaheim-new-ca-us,19, Holiday Inn Anaheim Resort,Hotels,,hotel_icon,33.800514,-117.901128,0
+anaheim-new-ca-us,20, Homewood Suites,Hotels,,hotel_icon,33.788242,-117.917371,0
+anaheim-new-ca-us,21, Honda Center,Attractions,,honda_center,33.807331,-117.876535,1
+anaheim-new-ca-us,22, Hyatt House,Hotels,,hotel_icon,33.808213,-118.029842,0
+anaheim-new-ca-us,23, Hyatt Place,Hotels,,hotel_icon,33.79836,-117.9163,0
+anaheim-new-ca-us,24, L3 Interstate Electronics,Attractions,,attraction_icon,33.82436,-117.903405,0
+anaheim-new-ca-us,25, Morton's The Steakhouse,Restaurants,,restaurant_icon,33.800135,-117.915834,0
+anaheim-new-ca-us,26, National Grove of Anaheim,Attractions,,attraction_icon,33.803105,-117.886238,0
+anaheim-new-ca-us,27, Pirates Dinner Adventure,Restaurants,,restaurant_icon,33.853479,-117.997618,0
+anaheim-new-ca-us,28, Ramada Maingate North,Hotels,,hotel_icon,33.820963,-117.915477,0
+anaheim-new-ca-us,29, Anaheim Residence Inn Maingate,Hotels,,hotel_icon,33.806108,-117.909248,0
+anaheim-new-ca-us,30, Sheraton Park,Hotels,,hotel_icon,33.800766,-117.915625,0
+anaheim-new-ca-us,31, Sprinhgill Suites,Hotels,,hotel_icon,33.802964,-117.915979,0
+anaheim-new-ca-us,32, Target,Attractions,,attraction_icon,33.831188,-117.942574,0
+anaheim-new-ca-us,33, The White House,Attractions,,attraction_icon,33.823601,-117.910368,0
+anaheim-new-ca-us,34, Tiffy's Restaurant,Restaurants,,restaurant_icon,33.802891,-117.923692,0
+anaheim-new-ca-us,35, TITANIC The Artifact Exhibition,Attractions,,attraction_icon,33.851058,-117.99837,0
+anaheim-new-ca-us,36, Unami Burger,Restaurants,,restaurant_icon,33.832636,-117.912765,0
+anaheim-new-ca-us,37, US Postal Office,Attractions,,attraction_icon,33.832758,-117.916576,0
+anaheim-new-ca-us,38, WSS Shoe store,Attractions,,attraction_icon,33.831654,-117.941111,0
+anaheim-new-ca-us,39,America's Best Value Inn (W) Ball Rd.,Hotels,,hotel_icon,33.817867,-117.913775,0
+anaheim-new-ca-us,40,Anabella Hotel,Hotels,,hotel_icon,33.802315,-117.921958,0
+anaheim-new-ca-us,41,Anaheim GardenWalk Dining & Entertainment District ,Attractions,,gardenwalk,33.806436,-117.911792,1
+anaheim-new-ca-us,42,Anaheim Grayline Tour Center ,Attractions,,attraction_icon,33.798895,-117.899139,0
+anaheim-new-ca-us,43,Anaheim Islander Inn & Suites,Hotels,,hotel_icon,33.80307,-117.91305,0
+anaheim-new-ca-us,44,Anaheim Plaza Shopping Center,Attractions,,attraction_icon,33.837906,-117.938505,0
+anaheim-new-ca-us,46,Anaheim Resort RV Park,Hotels,,hotel_icon,33.812487,-117.90742,0
+anaheim-new-ca-us,47,Anahiem Police Department,Attractions,,attraction_icon,33.829707,-117.919106,0
+anaheim-new-ca-us,48,Arena Corporate Center,Attractions,,attraction_icon,33.810707,-117.876405,0
+anaheim-new-ca-us,49,Ayres Hotel Anaheim,Hotels,,hotel_icon,33.805597,-117.878143,0
+anaheim-new-ca-us,50,Ayres Inn Orange,Hotels,,hotel_icon,33.789326,-117.89141,0
+anaheim-new-ca-us,51,Best Western Pavilions,Hotels,,hotel_icon,33.803067,-117.92752,0
+anaheim-new-ca-us,52,Best Western Raffles,Hotels,,hotel_icon,33.79768,-117.914811,0
+anaheim-new-ca-us,53,Best Western Stovall's,Hotels,,hotel_icon,33.803042,-117.924806,0
+anaheim-new-ca-us,54,Best Western Mereidian,Hotels,,hotel_icon,33.775904,-117.891,0
+anaheim-new-ca-us,55,Coco's Restaurant,Restaurants,,restaurant_icon,33.803042,-117.924806,0
+anaheim-new-ca-us,56,CVS/pharmacy,Attractions,,attraction_icon,33.802969,-117.91554,0
+anaheim-new-ca-us,57,Dad Miller Golf Course,Attractions,,attraction_icon,33.83516,-117.967573,0
+anaheim-new-ca-us,58,Days Inn Anaheim ,Hotels,,hotel_icon,33.79269,-117.914585,0
+anaheim-new-ca-us,59,Desert Palm Suite ,Hotels,,hotel_icon,33.803552,-117.916159,0
+anaheim-new-ca-us,60,Disneyland Resort,Attractions,,disneyland,33.809761,-117.91897,1
+anaheim-new-ca-us,61,Double Tree Guest Suites,Hotels,,hotel_icon,33.796705,-117.915799,0
+anaheim-new-ca-us,62,Downtown Anaheim -- Anaheim Muzeo,Attractions,,attraction_icon,33.833297,-117.914037,0
+anaheim-new-ca-us,63,Embassy Suites,Hotels,,hotel_icon,33.79129,-117.91637,0
+anaheim-new-ca-us,64,Harbor RV Park,Hotels,,hotel_icon,33.820141,-117.915154,0
+anaheim-new-ca-us,65,Holiday Inn Express,Hotels,,hotel_icon,33.774791,-117.908259,0
+anaheim-new-ca-us,66,Holiday Inn Hotel & Suites,Hotels,,hotel_icon,33.816634,-117.928083,0
+anaheim-new-ca-us,67,Hotel Menage  ,Hotels,,hotel_icon,33.81747,-117.915851,0
+anaheim-new-ca-us,68,Howard Johnson Anaheim,Hotels,,hotel_icon,33.812858,-117.91412,0
+anaheim-new-ca-us,69,IHOP,Restaurants,,restaurant_icon,33.809194,-117.915132,0
+anaheim-new-ca-us,70,Kaiser Perminente Medical Center,Attractions,,attraction_icon,33.853261,-117.844353,0
+anaheim-new-ca-us,71,Knight's Inn,Hotels,,hotel_icon,33.817876,-117.913404,0
+anaheim-new-ca-us,72,Knott's Berry Farm,Attractions,,attraction_icon,33.84422,-118.000193,0
+anaheim-new-ca-us,73,Ky'a Restaurant,Restaurants,,restaurant_icon,33.817475,-117.915887,0
+anaheim-new-ca-us,74,La Quinta Inn & Suites,Hotels,,hotel_icon,33.804312,-117.909884,0
+anaheim-new-ca-us,75,Marri's Restaurant,Restaurants,,restaurant_icon,33.80281,-117.928073,0
+anaheim-new-ca-us,76,Medieval Times Dinner & Tournament,Restaurants,,restaurant_icon,33.851548,-117.99666,0
+anaheim-new-ca-us,77,Motel 6,Hotels,,hotel_icon,33.806014,117.90796,0
+anaheim-new-ca-us,78,Outlets at Orange ,Attractions,,outlets_at_the_orange,33.782408,-117.893917,1
+anaheim-new-ca-us,79,Peacock Suites,Hotels,,hotel_icon,33.804776,-117.906848,0
+anaheim-new-ca-us,80,Portofino Inn & Suites,Hotels,,hotel_icon,33.8023,-117.915648,0
+anaheim-new-ca-us,81,Quality Inn & Suites (Courtyard and Residence Inn 2016),Hotels,,hotel_icon,33.811853,-117.912379,0
+anaheim-new-ca-us,82,Ramada Plaza,Hotels,,hotel_icon,33.803561,-117.913937,0
+anaheim-new-ca-us,83,Red Lion Hotel,Hotels,,hotel_icon,33.801673,-117.9148,0
+anaheim-new-ca-us,84,Roscoes Chicken & Waffles ,Restaurants,,restaurant_icon,34.098572,-118.322207,0
+anaheim-new-ca-us,85,Ruth Chris Steakhouse,Restaurants,,restaurant_icon,33.797683,-117.915601,0
+anaheim-new-ca-us,86,Shakey's Pizza,Restaurants,,restaurant_icon,33.819491,-117.915283,0
+anaheim-new-ca-us,87,Springhill Suites ,Hotels,,hotel_icon,33.817797,-117.926615,0
+anaheim-new-ca-us,88,Stanford Inn & Suites,Hotels,,hotel_icon,33.793846,-117.915296,0
+anaheim-new-ca-us,89,Staybridge Suites,Hotels,,hotel_icon,33.800922,-117.901206,0
+anaheim-new-ca-us,90,Tagerine Grill,Restaurants,,restaurant_icon,33.803149,-117.923054,0
+anaheim-new-ca-us,91,Team Disney Administration Building,Attractions,,attraction_icon,33.817472,-117.918938,0
+anaheim-new-ca-us,92,The Sand Box,Restaurants,,restaurant_icon,33.803552,-117.916157,0
+anaheim-new-ca-us,93,TownPlace Suties ,Hotels,,hotel_icon,33.804593,-117.88882,0
+anaheim-new-ca-us,94,Toy Story Transportation Center,Attractions,,attraction_icon,33.799806,-117.911892,0
+anaheim-new-ca-us,95,Walmart Neighborhood Market,Attractions,,attraction_icon,33.801296,-117.9422,0
+anaheim-new-ca-us,96,Westfield MainPlace Mall,Attractions,,westfield_mainplace,33.775235,-117.86914,1
+anaheim-new-ca-us,97,WorldMark Anaheim,Hotels,,hotel_icon,33.803568,-117.908994,0
+anaheim-new-ca-us,98,Anaheim Packing District,Restaurants,,anaheim_packing_district,33.831566,-117.911955,1
+anaheim-new-ca-us,99,ARTIC,Attractions,,artic,33.803667,-117.877553,1
+anaheim-new-ca-us,100,Center Street Promenade,Attractions,,center_street_promenade,33.833778,-117.916034,1
+anaheim-new-ca-us,101,Disney California Adventure,Attractions,,disney_california_adventure,33.805876,-117.91949,1
+anaheim-new-ca-us,102,Downtown Disney District,Attractions,,downtown_disney_district,33.809023,-117.923382,1

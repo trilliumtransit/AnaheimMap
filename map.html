@@ -17,7 +17,8 @@
 
 <script>
 
-var route_ids_array = new Array(1696,1697,1698,1699,1700,1701,1702,1703,1704,1705,1706,1707,1708,1709,1710,1711,1712,1713,1714,1716);
+var route_ids_array = [1696,1697,1698,1699,1700,1701,1702,1703,1704,1705,1706,1707,1708,1709,1710,1711,1712,1713,1714,1716];
+
 var ZoomLevelThreshhold = 13;
 var system_map = true;
 var map_files_base = "http://trilliumtransit.com/clients/anaheim/";
@@ -65,8 +66,8 @@ function load_data_async(url, dataType, baseUrl, successResponse) {
     return returned_data;
 }
 
-
-var route_ids_list = route_ids_array.join();
+if (route_ids_array.length == 1) {route_ids_list = route_ids_array[0];}
+else {var route_ids_list = route_ids_array.join();}
 
 var stops_layer_group = L.featureGroup();
 var stops = Array();
@@ -484,9 +485,9 @@ var landmark_markers = Array();
 
 var zoom_icon_scale = Array();
 zoom_icon_scale[12] = .25;
-zoom_icon_scale[13] = .4;
-zoom_icon_scale[14] = .55;
-zoom_icon_scale[15] = .7;
+zoom_icon_scale[13] = .3;
+zoom_icon_scale[14] = .35;
+zoom_icon_scale[15] = .6;
 zoom_icon_scale[16] = 1;
 zoom_icon_scale[17] = 1;
 zoom_icon_scale[18] = 1;
@@ -495,7 +496,7 @@ zoom_icon_scale[19] = 1;
 
 
 $.ajax({
-    url: map_files_base+ "selected_landmarks.csv",
+    url: map_files_base+ "landmarks.csv",
     async: true,
     success: function (csvd) {
         
