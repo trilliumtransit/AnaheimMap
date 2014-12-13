@@ -7,6 +7,54 @@
 	float: left;
 
 }
+
+.zoom-12 {
+    -ms-transform: scale(0.25,0.25); /* IE 9 */
+    -webkit-transform: scale(0.25,0.25); /* Chrome, Safari, Opera */
+    transform: scale(0.25,0.25);
+}
+
+.zoom-13 {
+    -ms-transform: scale(0.25,0.25); /* IE 9 */
+    -webkit-transform: scale(0.25,0.25); /* Chrome, Safari, Opera */
+    transform: scale(0.25,0.25);
+}
+
+.zoom-14 {
+    -ms-transform: scale(0.4,0.4); /* IE 9 */
+    -webkit-transform: scale(0.4,0.4); /* Chrome, Safari, Opera */
+    transform: scale(0.4,0.4);
+}
+
+.zoom-15 {
+    -ms-transform: scale(0.6,0.6); /* IE 9 */
+    -webkit-transform: scale(0.6,0.6); /* Chrome, Safari, Opera */
+    transform: scale(0.6,0.6);
+}
+
+.zoom-16 {
+    -ms-transform: scale(0.7,0.7); /* IE 9 */
+    -webkit-transform: scale(0.7,0.7); /* Chrome, Safari, Opera */
+    transform: scale(0.7,0.7);
+}
+
+.zoom-17 {
+    -ms-transform: scale(1,1); /* IE 9 */
+    -webkit-transform: scale(1,1); /* Chrome, Safari, Opera */
+    transform: scale(1,1);
+}
+
+.zoom-18 {
+    -ms-transform: scale(1,1); /* IE 9 */
+    -webkit-transform: scale(1,1); /* Chrome, Safari, Opera */
+    transform: scale(1,1);
+}
+
+.zoom-19 {
+    -ms-transform: scale(1,1); /* IE 9 */
+    -webkit-transform: scale(1,1); /* Chrome, Safari, Opera */
+    transform: scale(1,1);
+}
 	
 	/*** http://stackoverflow.com/questions/448981/what-characters-are-valid-in-css-class-selectors ***/
 	
@@ -24,3 +72,5 @@
 	 .__map_icon { background-position:-873px -453px; width:126px; height:118px; }			 
 	 ._78_map_icon { background-position:-28px -587px; width:145px; height:157px; }			 
 	 ._96_map_icon { background-position:-244px -598px; width:169px; height:156px; }	
+	 
+	 
