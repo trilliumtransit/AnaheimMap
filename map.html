@@ -4,7 +4,6 @@
 
 <script src='https://api.tiles.mapbox.com/mapbox.js/v2.1.4/mapbox.js'></script>
 <link href='https://api.tiles.mapbox.com/mapbox.js/v2.1.4/mapbox.css' rel='stylesheet' />
-<link href='map-icons_temp.css' rel='stylesheet' />
 <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
 <script src="jquery.csv-0.71.min.js"></script>
 
@@ -583,7 +582,7 @@ function landmark_icon(width,height,icon_index,filename) {
 	console.log('scaled_height: '+scaled_height);
 
 	landmark_icons[icon_index].icons[current_zoom] = new L.Icon({ 
-		iconUrl: 'map_icons/'+filename,
+		iconUrl: map_files_base+'map_icons/'+filename,
 		iconSize: [scaled_width, scaled_height],
 		iconAnchor: [scaled_width/2, scaled_height/2]
 		});
