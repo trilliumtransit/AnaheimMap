@@ -472,7 +472,7 @@ return result;
 }
 
 $.ajax({
-    url: "icons.csv",
+    url: map_files_base+"icons.csv",
     async: false,
     success: function (csvd) {
         landmark_icons =  $.csv.toObjects(csvd);
@@ -495,7 +495,7 @@ zoom_icon_scale[19] = 1;
 
 
 $.ajax({
-    url: "selected_landmarks.csv",
+    url: map_files_base+ "selected_landmarks.csv",
     async: true,
     success: function (csvd) {
         
