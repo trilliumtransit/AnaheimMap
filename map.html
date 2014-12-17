@@ -17,20 +17,74 @@
 
 <script>
 
+// initialize global variables
+var stops_layer_group = L.featureGroup();
+var stops = Array();
+var StopIcons = Array();
+var route_colors = Array();
+var stop_markers = Array();
+var routes = Array();
+var route_feature_group = new L.FeatureGroup();
+var routes_active = Array();
+var route_styles = Array();
+var route_layers = Array();
+var topPane;
+var topLayer;
+var zoom_icon_scale = Array();
+var landmarks = Array();
+var landmark_icons = Array();
+
+var tile_layer = new Array();
+// tile_layer[1] = new L.tileLayer('http://{s}.tiles.mapbox.com/v3/'+map_id_labels+'/{z}/{x}/{y}.png');
+
+var landmark_markers = Array();
+
+// define which routes
 var route_ids_array = [1696,1697,1698,1699,1700,1701,1702,1703,1704,1705,1706,1707,1708,1709,1710,1711,1712,1713,1714,1716];
 
-var ZoomLevelThreshhold = 13;
-var system_map = true;
+// define other variables
 var map_files_base = "http://trilliumtransit.com/clients/anaheim/";
+var api_base_url = 'http://archive.oregon-gtfs.com/gtfs-api/';
+var route_alignments_tiles = 'trilliumtransit.fbf63437';
+tile_layer[0] = new L.tileLayer('http://{s}.tiles.mapbox.com/v3/' + route_alignments_tiles + '/{z}/{x}/{y}.png');
+var default_icon_color = '575757';
+var system_map = true;
+var ZoomLevelThreshhold = 13;
 
-//console.log('just starting script');
+// define the StopIcon
+var StopIcon = L.Icon.extend({
+    options: {
+        iconSize: [12, 12],
+        iconAnchor: [6, 6],
+        popupAnchor: [0, 0]
+    }
+});
+
+zoom_icon_scale[12] = .25;
+zoom_icon_scale[13] = .3;
+zoom_icon_scale[14] = .35;
+zoom_icon_scale[15] = .6;
+zoom_icon_scale[16] = 1;
+zoom_icon_scale[17] = 1;
+zoom_icon_scale[18] = 1;
+zoom_icon_scale[19] = 1;
+
+var unhighlighted_weight = 5;
+var highlighted_weight = 10;
+
+
+if (route_ids_array.length == 1) {route_ids_list = route_ids_array[0];}
+else {var route_ids_list = route_ids_array.join();}
+
+// mapbox token, basemap
 L.mapbox.accessToken = 'pk.eyJ1IjoidHJpbGxpdW10cmFuc2l0IiwiYSI6ImVUQ2x0blUifQ.2-Z9TGHmyjRzy5GC1J9BTw';
 var map = L.mapbox.map('interactive-map-holder', 'trilliumtransit.e8e8e512', { zoomControl: false });
-   
-   map.scrollWheelZoom.disable();
-   
-   new L.Control.Zoom({ position: 'bottomright' }).addTo(map);
-   
+
+// map controls
+map.scrollWheelZoom.disable();
+new L.Control.Zoom({ position: 'bottomright' }).addTo(map);
+
+// set up functions
 function load_data(url, dataType) {
 			dataType = typeof dataType !== 'undefined' ? dataType : "json";
 
@@ -66,33 +120,6 @@ function load_data_async(url, dataType, baseUrl, successResponse) {
     return returned_data;
 }
 
-if (route_ids_array.length == 1) {route_ids_list = route_ids_array[0];}
-else {var route_ids_list = route_ids_array.join();}
-
-var stops_layer_group = L.featureGroup();
-var stops = Array();
-var StopIcons = Array();
-var route_colors = Array();
-var stop_markers = Array();
-var default_icon_color = '575757';
-var routes = Array();
-var route_feature_group = new L.FeatureGroup();
-var routes_active = Array();
-var route_styles = Array();
-var route_layers = Array();
-
-
-// define the StopIcon
-var StopIcon = L.Icon.extend({
-    options: {
-        iconSize: [12, 12],
-        iconAnchor: [6, 6],
-        popupAnchor: [0, 0]
-    }
-});
-
-var api_base_url = 'http://archive.oregon-gtfs.com/gtfs-api/';
-
 // Load an object with the routes
 function load_routes() {
 
@@ -113,12 +140,17 @@ function isInArray(value, array) {
   return array.indexOf(value) > -1;
 }
 
+function encapsulate_in_array(variable) {
+	if (Array.isArray(variable)) {return variable;}
+	else {
+		var new_array = Array();
+		new_array.push(variable);
+		return new_array;
+		}
+	}
 
-// go back to this
 function stop_icons() {
-	
-	//console.log("doin' the stop_icons thing");
-	
+		
     for (var i = 0; i < routes.length; i++) {
     	if (!isInArray(routes[i].route_color,route_colors)) {
     		route_colors.push(routes[i].route_color);
@@ -130,9 +162,7 @@ function stop_icons() {
         for (var i = 0; i < route_colors.length; i++) {
                 StopIcons[route_colors[i]] = new StopIcon({iconUrl:map_files_base+"create_image.php?r=12&bc=ffffff&fg="+route_colors[i]});
             }
-	
-	//console.log('route_colors: '+route_colors);
-	
+		
 	}
 
 function get_route_color_for_id(route_id_lookup) {
@@ -233,18 +263,8 @@ function load_stop_markers() {
 	        }
         
     });
-
-
 }
 
-function encapsulate_in_array(variable) {
-	if (Array.isArray(variable)) {return variable;}
-	else {
-		var new_array = Array();
-		new_array.push(variable);
-		return new_array;
-		}
-	}	
 
 function highlight_route_alignment(route_ids) {
 		
@@ -309,11 +329,6 @@ var route_ids_array = get_routes_for_stop_id(e.target.stop_id);
 unhighlight_route_alignment(route_ids_array);
 }
 
-load_routes();
-//console.log('just before calling load_stop_markers');
-load_stop_markers();
-
-// Adding alignments
 
 function get_routes_array_index_from_id(id) {
     var index = -1;
@@ -354,12 +369,8 @@ function get_routes_for_stop_id(stop_id) {
     return route_ids_array;
 }
 
-var unhighlighted_weight = 5;
-var highlighted_weight = 10;
-
 function add_route_alignment(ids) {
 
-		
 	    for (var i = 0, len = ids.length; i < len; i++) {
 	    	var id = ids[i];
 
@@ -430,14 +441,6 @@ function remove_from_array(value, array) {
     }
 }
 
-var topPane;
-var topLayer;
-
-var route_alignments_tiles = 'trilliumtransit.fbf63437';
-var tile_layer = new Array();
-tile_layer[0] = new L.tileLayer('http://{s}.tiles.mapbox.com/v3/' + route_alignments_tiles + '/{z}/{x}/{y}.png');
-// tile_layer[1] = new L.tileLayer('http://{s}.tiles.mapbox.com/v3/'+map_id_labels+'/{z}/{x}/{y}.png');
-
 
 function add_tile_layer(layer_id,z_index) {
 	if (typeof (tile_layer[layer_id]) != "undefined") {
@@ -447,19 +450,6 @@ function add_tile_layer(layer_id,z_index) {
 		topLayer.setZIndex(z_index);
 	}
 }
-
-if (system_map) {
-	add_tile_layer(0,5);
-}
-else {add_route_alignment(route_ids_array);}
-
-
-
-
-var landmarks = Array();
-var landmark_icons = Array();
-// var landmarks_csv;
-// var icons_csv;
 
 function get_icon_index_for_icon(icon_id) {
 var result;
@@ -472,6 +462,86 @@ for(var i = 0; i < landmark_icons.length; i++) {
 return result;
 }
 
+function create_landmark_marker(i,width,height,landmark_id,icon_index,landmark_lat,landmark_lon,filename) {
+
+console.log('icon_index: '+icon_index);
+
+var zoom_level_icon = landmark_icon(width,height,icon_index,filename);
+
+		landmark_markers[i] = L.marker([landmark_lat, landmark_lon], {icon: zoom_level_icon});
+		landmark_markers[i].landmark_id = landmark_id;
+		landmark_markers[i].addTo(map);
+
+}
+
+function landmark_icon(width,height,icon_index,filename) {
+	var current_zoom = map.getZoom();
+	if(typeof current_zoom == 'undefined'){current_zoom = 15;}
+	console.log('current_zoom: '+current_zoom);
+	
+	if (typeof landmark_icons[icon_index].icons == 'undefined') {
+		landmark_icons[icon_index].icons = [];
+		}
+	
+	if (typeof landmark_icons[icon_index].icons[current_zoom] == 'undefined') {
+	
+	landmark_icons[icon_index].icons[current_zoom] = {};
+	
+	console.log('height: '+height);
+	console.log('width: '+width);
+
+	var scaled_width = zoom_icon_scale[current_zoom] * width;
+	var scaled_height = zoom_icon_scale[current_zoom] * height;
+	console.log('scaled_width: '+scaled_width);
+	console.log('scaled_height: '+scaled_height);
+
+	landmark_icons[icon_index].icons[current_zoom] = new L.Icon({ 
+		iconUrl: map_files_base+'map_icons/'+filename,
+		iconSize: [scaled_width, scaled_height],
+		iconAnchor: [scaled_width/2, scaled_height/2]
+		});
+		
+	}
+
+	console.log(landmark_icons[icon_index].icons[current_zoom]);
+	
+	return landmark_icons[icon_index].icons[current_zoom];
+}
+
+function change_landmark_sizes() {
+	
+    for (var i = 0; i < landmark_markers.length; i++) {
+    	if (typeof landmark_markers[i] !== 'undefined') {
+			var landmark_id = landmark_markers[i].landmark_id;
+			var icon_index = landmarks[landmark_id].icon_index;
+			console.log ('icon_index: '+icon_index);
+			var height = landmark_icons[icon_index].height;
+			console.log ('height: '+height);
+			var width = landmark_icons[icon_index].width;
+			var filename = landmark_icons[icon_index].filename;
+			landmark_markers[i].setIcon(landmark_icon(width,height,icon_index,filename));
+    	}
+    }
+
+}
+
+function toggle_stop_visibility() {
+    if (map.getZoom() < ZoomLevelThreshhold && map.hasLayer(stops_layer_group)) {
+        map.removeLayer(stops_layer_group);
+    }
+    if (map.getZoom() >= ZoomLevelThreshhold && map.hasLayer(stops_layer_group) == false) {
+        load_stop_markers();
+    }
+}
+
+load_routes();
+load_stop_markers();
+
+if (system_map) {
+	add_tile_layer(0,5);
+}
+else {add_route_alignment(route_ids_array);}
+
 $.ajax({
     url: map_files_base+"icons.csv",
     async: false,
@@ -480,20 +550,6 @@ $.ajax({
     },
     dataType: "text"
 });
-
-var landmark_markers = Array();
-
-var zoom_icon_scale = Array();
-zoom_icon_scale[12] = .25;
-zoom_icon_scale[13] = .3;
-zoom_icon_scale[14] = .35;
-zoom_icon_scale[15] = .6;
-zoom_icon_scale[16] = 1;
-zoom_icon_scale[17] = 1;
-zoom_icon_scale[18] = 1;
-zoom_icon_scale[19] = 1;
-
-
 
 $.ajax({
     url: map_files_base+ "landmarks.csv",
@@ -548,88 +604,14 @@ $.ajax({
 		
 });
 
-function create_landmark_marker(i,width,height,landmark_id,icon_index,landmark_lat,landmark_lon,filename) {
-
-console.log('icon_index: '+icon_index);
-
-
-var zoom_level_icon = landmark_icon(width,height,icon_index,filename);
-
-		landmark_markers[i] = L.marker([landmark_lat, landmark_lon], {icon: zoom_level_icon});
-		landmark_markers[i].landmark_id = landmark_id;
-		landmark_markers[i].addTo(map);
-
-}
-
-function landmark_icon(width,height,icon_index,filename) {
-	var current_zoom = map.getZoom();
-	if(typeof current_zoom == 'undefined'){current_zoom = 15;}
-	console.log('current_zoom: '+current_zoom);
-	
-	if (typeof landmark_icons[icon_index].icons == 'undefined') {
-		landmark_icons[icon_index].icons = [];
-		}
-	
-	if (typeof landmark_icons[icon_index].icons[current_zoom] == 'undefined') {
-	
-	landmark_icons[icon_index].icons[current_zoom] = {};
-	
-	console.log('height: '+height);
-	console.log('width: '+width);
-
-	var scaled_width = zoom_icon_scale[current_zoom] * width;
-	var scaled_height = zoom_icon_scale[current_zoom] * height;
-	console.log('scaled_width: '+scaled_width);
-	console.log('scaled_height: '+scaled_height);
-
-	landmark_icons[icon_index].icons[current_zoom] = new L.Icon({ 
-		iconUrl: map_files_base+'map_icons/'+filename,
-		iconSize: [scaled_width, scaled_height],
-		iconAnchor: [scaled_width/2, scaled_height/2]
-		});
-		
-	}
-
-	console.log(landmark_icons[icon_index].icons[current_zoom]);
-	
-	return landmark_icons[icon_index].icons[current_zoom];
-}
-
-function change_landmark_sizes() {
-	
-	console.log('change_landmark_sizes happened.');
-
-    for (var i = 0; i < landmark_markers.length; i++) {
-    	if (typeof landmark_markers[i] !== 'undefined') {
-			var landmark_id = landmark_markers[i].landmark_id;
-			var icon_index = landmarks[landmark_id].icon_index;
-			console.log ('icon_index: '+icon_index);
-			var height = landmark_icons[icon_index].height;
-			console.log ('height: '+height);
-			var width = landmark_icons[icon_index].width;
-			var filename = landmark_icons[icon_index].filename;
-			landmark_markers[i].setIcon(landmark_icon(width,height,icon_index,filename));
-    	}
-    }
-
-}
-
-function toggle_stop_visibility() {
-    if (map.getZoom() < ZoomLevelThreshhold && map.hasLayer(stops_layer_group)) {
-        map.removeLayer(stops_layer_group);
-    }
-    if (map.getZoom() >= ZoomLevelThreshhold && map.hasLayer(stops_layer_group) == false) {
-        load_stop_markers();
-    }
-}
-
+// executable code
 map.on('load',  function() {
 
-map.on('zoomend', function() {
-	console.log('zoomend happened.');
-    change_landmark_sizes();
-    toggle_stop_visibility();
-});
+	map.on('zoomend', function() {
+		console.log('zoomend happened.');
+		change_landmark_sizes();
+		toggle_stop_visibility();
+	});
 
 });
 
