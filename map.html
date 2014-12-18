@@ -6,15 +6,18 @@
 <link href='https://api.tiles.mapbox.com/mapbox.js/v2.1.4/mapbox.css' rel='stylesheet' />
 <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
 <script src="jquery.csv-0.71.min.js"></script>
+<script src="layout.js"></script>
 
 
 </head>
 
 <body style="background-color:#2068A7">
+<div id="interactive-map-holder-wrap" style="width:100%;height:100%;position: relative;">
+<div id="interactive-map-holder" style="width:100%;height:100%;background-color:#2068A7; z-index: 10; ">
 
-<div id="interactive-map-holder" style="width:100%;height:100%;background-color:#2068A7;">
 </div>
-
+ <img id="draggingDisabled" src="images/map-gradient-overlay-copy.png" style="width: 100%; height: 100%; z-index: 999; position: absolute; top: 0; pointer-events: none;" /> 
+</div>
 <script>
 
 // initialize global variables
@@ -575,38 +578,38 @@ $.ajax({
         
         for (var i = 0, len = landmarks_array_temp.length; i < len; i++) {
         
-        console.log(landmarks_array_temp[i].landmark_id);
-        
-        landmarks[landmarks_array_temp[i].landmark_id] = {};
-        
-        landmarks[landmarks_array_temp[i].landmark_id].landmark_name = landmarks_array_temp[i].landmark_name;
-        landmarks[landmarks_array_temp[i].landmark_id].category_name = landmarks_array_temp[i].category_name;
-        landmarks[landmarks_array_temp[i].landmark_id].landmark_url = landmarks_array_temp[i].landmark_url;
-		var landmark_lat_temp = landmarks_array_temp[i].lat;
-        landmarks[landmarks_array_temp[i].landmark_id].lat = landmark_lat_temp;
-		var landmark_lon_temp = landmarks_array_temp[i].lon;
-        landmarks[landmarks_array_temp[i].landmark_id].lon = landmark_lon_temp;
-        landmarks[landmarks_array_temp[i].landmark_id].icon_id = landmarks_array_temp[i].icon_id;
-        
-        var icon_index = get_icon_index_for_icon(landmarks_array_temp[i].icon_id);
-        
-        if (typeof icon_index !== 'undefined') {
-        
-        landmarks[landmarks_array_temp[i].landmark_id].icon_index = icon_index;
+			console.log(landmarks_array_temp[i].landmark_id);
+		
+			landmarks[landmarks_array_temp[i].landmark_id] = {};
+		
+			landmarks[landmarks_array_temp[i].landmark_id].landmark_name = landmarks_array_temp[i].landmark_name;
+			landmarks[landmarks_array_temp[i].landmark_id].category_name = landmarks_array_temp[i].category_name;
+			landmarks[landmarks_array_temp[i].landmark_id].landmark_url = landmarks_array_temp[i].landmark_url;
+			var landmark_lat_temp = landmarks_array_temp[i].lat;
+			landmarks[landmarks_array_temp[i].landmark_id].lat = landmark_lat_temp;
+			var landmark_lon_temp = landmarks_array_temp[i].lon;
+			landmarks[landmarks_array_temp[i].landmark_id].lon = landmark_lon_temp;
+			landmarks[landmarks_array_temp[i].landmark_id].icon_id = landmarks_array_temp[i].icon_id;
+		
+			var icon_index = get_icon_index_for_icon(landmarks_array_temp[i].icon_id);
+		
+			if (typeof icon_index !== 'undefined') {
+		
+				landmarks[landmarks_array_temp[i].landmark_id].icon_index = icon_index;
 
-		console.log(icon_index);
+				console.log(icon_index);
 
-        var width = landmark_icons[icon_index].width;
-        var height = landmark_icons[icon_index].height;
-        var filename = landmark_icons[icon_index].filename;
-        var landmark_id = landmarks_array_temp[i].landmark_id;     
-        
-        // var current_zoom = map.getZoom();
-		console.log('current_zoom: '+map.getZoom());
-        
-        create_landmark_marker(i,width,height,landmark_id,icon_index,landmark_lat_temp,landmark_lon_temp,filename);
-        
-        }
+				var width = landmark_icons[icon_index].width;
+				var height = landmark_icons[icon_index].height;
+				var filename = landmark_icons[icon_index].filename;
+				var landmark_id = landmarks_array_temp[i].landmark_id;     
+		
+				// var current_zoom = map.getZoom();
+				console.log('current_zoom: '+map.getZoom());
+		
+				create_landmark_marker(i,width,height,landmark_id,icon_index,landmark_lat_temp,landmark_lon_temp,filename);
+		
+        	}
         
 
 		
