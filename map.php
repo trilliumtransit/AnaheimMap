@@ -28,7 +28,7 @@ if (strpos($link, 'localhost') !== FALSE) { // check if on mamp/apache localhost
 }
 $link = str_replace("map.php","", $link);
 ?>
-<script src="generate-map-js.php?routes=1696,1697,1698,1699,1700,1701,1702,1703,1704,1705,1706,1707,1708,1709,1710,1711,1712,1713,1714,1716&system_map=true&map_files_base='<?php echo $link; ?>'"></script>
+<script src="generate-map-js.php?routes=1696,1697,1698,1699,1700,1701,1702,1703,1704,1705,1706,1707,1708,1709,1710,1711,1712,1713,1714,1716&system_map=true&container_id=interactive-map-holder"></script>
 
 
 

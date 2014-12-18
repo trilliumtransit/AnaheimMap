@@ -1,13 +1,17 @@
 <?php
 if (isset($_GET['system_map'])) {$system_map = $_GET['system_map'];}
 if (isset($_GET['routes'])) {$routes = $_GET['routes'];}
-if (isset($_GET['map_files_base'])) {$map_files_base = $_GET['map_files_base'];}
+if (isset($_GET['container_id'])) {$container_id = $_GET['container_id'];}
  
-?>
+
 //
 
+$map_files_base =  "//$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]"; 
+if (strpos($map_files_base, 'localhost') !== FALSE) { // check if on mamp/apache localhost
 
-
+}
+$map_files_base_split = explode("generate-map-js.php", $map_files_base);
+?>
 // initialize global variables
 var stops_layer_group = L.featureGroup();
 var stops = Array();
@@ -34,7 +38,7 @@ var landmark_markers = Array();
 var route_ids_array = [<?php echo $routes ?>];
 var system_map = <?php echo $system_map ?>;
 // define other variables
-var map_files_base = <?php echo $map_files_base ?>;
+var map_files_base = '<?php echo $map_files_base_split[0] ?>';
 var api_base_url = 'http://archive.oregon-gtfs.com/gtfs-api/';
 var route_alignments_tiles = 'trilliumtransit.ca9f8a4a';
 var road_label_tiles = 'trilliumtransit.b1c25bd2';
@@ -71,7 +75,7 @@ else {var route_ids_list = route_ids_array.join();}
 
 // mapbox token, basemap
 L.mapbox.accessToken = 'pk.eyJ1IjoidHJpbGxpdW10cmFuc2l0IiwiYSI6ImVUQ2x0blUifQ.2-Z9TGHmyjRzy5GC1J9BTw';
-var map = L.mapbox.map('interactive-map-holder', 'trilliumtransit.e8e8e512', { zoomControl: false });
+var map = L.mapbox.map('<?php echo $container_id; ?>', 'trilliumtransit.e8e8e512', { zoomControl: false });
 
 // map controls
 map.scrollWheelZoom.disable();
