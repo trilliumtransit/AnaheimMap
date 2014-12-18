@@ -4,6 +4,8 @@
 
 <script src='https://api.tiles.mapbox.com/mapbox.js/v2.1.4/mapbox.js'></script>
 <link href='https://api.tiles.mapbox.com/mapbox.js/v2.1.4/mapbox.css' rel='stylesheet' />
+<link href='http://rideart.org/wp-content/themes/art/library/css/route-icons.css' rel='stylesheet' />
+<link href='map_layout.css' rel='stylesheet' />
 <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
 <script src="jquery.csv-0.71.min.js"></script>
 <script src="layout.js"></script>
@@ -13,7 +15,7 @@
 
 <body style="background-color:#2068A7">
 <div id="interactive-map-holder-wrap" style="width:100%;height:100%;position: relative;">
-<div id="interactive-map-holder" style="width:100%;height:100%;background-color:#2068A7; z-index: 10; ">
+<div id="interactive-map-holder" style="width:100%;height:100%;background-color:#2068A7;  ">
 
 </div>
  <img id="draggingDisabled" src="images/map-gradient-overlay-copy.png" style="width: 100%; height: 100%; z-index: 999; position: absolute; top: 0; pointer-events: none;" /> 
@@ -44,16 +46,16 @@ var landmark_markers = Array();
 
 // define which routes
 var route_ids_array = [1696,1697,1698,1699,1700,1701,1702,1703,1704,1705,1706,1707,1708,1709,1710,1711,1712,1713,1714,1716];
-
+var system_map = true;
 // define other variables
 var map_files_base = "http://trilliumtransit.com/clients/anaheim/";
 var api_base_url = 'http://archive.oregon-gtfs.com/gtfs-api/';
-var route_alignments_tiles = 'trilliumtransit.fbf63437';
+var route_alignments_tiles = 'trilliumtransit.ca9f8a4a';
 var road_label_tiles = 'trilliumtransit.b1c25bd2';
 tile_layer[0] = new L.tileLayer('http://{s}.tiles.mapbox.com/v3/' + route_alignments_tiles + '/{z}/{x}/{y}.png');
 tile_layer[1] = new L.tileLayer('http://{s}.tiles.mapbox.com/v3/' + road_label_tiles + '/{z}/{x}/{y}.png');
 var default_icon_color = '575757';
-var system_map = true;
+
 var ZoomLevelThreshhold = 13;
 
 // define the StopIcon
@@ -252,6 +254,7 @@ function add_route_alignment(ids) {
 					route_styles[id] = [];
 					
 					
+					
 					route_styles[id][0] = {
 						"color": '#' + routes[index].route_color,
 						"weight": unhighlighted_weight,
@@ -260,22 +263,30 @@ function add_route_alignment(ids) {
 						"clickable": true
 					};
 					
+					
+					
 					route_styles[id][1] = {
 						"color": '#' + routes[index].route_color,
 						"weight": highlighted_weight,
 						"opacity": 1,
+						
 						// "dashArray": [10,10],
 						"clickable": true
 					};
+					
 
 					route_layers[id] = L.geoJson(geojson, {
 						style: route_styles[id][0]
 					});
+					
+					
+					
 
 
 
 	    }
 	        route_layers[id].addTo(map);
+	        
 
 	    if (routes_active.indexOf(parseInt(id)) == -1) {
 	        routes_active.push(parseInt(id));
@@ -292,10 +303,10 @@ function stop_icons() {
 		    }
         }
 
-		StopIcons[default_icon_color] = new StopIcon({iconUrl:map_files_base+"create_image.php?r=12&bw=3&&bc=ffffff&fg="+default_icon_color});
+		StopIcons[default_icon_color] = new StopIcon({iconUrl:map_files_base+"create_image.php?r=13&bw=3&&bc=ffffff&fg="+default_icon_color});
 
         for (var i = 0; i < route_colors.length; i++) {
-                StopIcons[route_colors[i]] = new StopIcon({iconUrl:map_files_base+"create_image.php?r=12&bc=ffffff&fg="+route_colors[i]});
+                StopIcons[route_colors[i]] = new StopIcon({iconUrl:map_files_base+"create_image.php?r=13&bc=ffffff&fg="+route_colors[i]});
             }
 		
 	}
@@ -435,7 +446,7 @@ function landmark_icon(width,height,icon_index,filename) {
 	console.log('scaled_height: '+scaled_height);
 
 	landmark_icons[icon_index].icons[current_zoom] = new L.Icon({ 
-		iconUrl: map_files_base+'map_icons/'+filename,
+		iconUrl: 'map_icons/'+filename,
 		iconSize: [scaled_width, scaled_height],
 		iconAnchor: [scaled_width/2, scaled_height/2]
 		});
@@ -477,9 +488,11 @@ for (var i = 0, len = route_ids_array.length; i < len; i++) {
 	
 	var route_info = get_route_info_for_id(route_ids_array[i]);
 	console.log(route_info);
-	popup_content = popup_content + '<div class="route_short_name" style="display:inline-block;margin-right:8px;padding:3px;margin:3px;font-weight:bold;font-size:14pt;color:'+route_info.route_text_color+';background-color:#'+route_info.route_color+'">'+route_info.route_short_name+'</div>';
+	popup_content = popup_content + '<i id="icon-xsml-'+route_info.route_short_name+'" class="linked-div" rel="/route-and-schedules/" style="float: left;" ></i>'; // need to add link in the rel.
 	
 }
+
+popup_content = popup_content + '<br style="clear: both;" />';
 
 e.target.setPopupContent(popup_content);
 
@@ -627,6 +640,7 @@ map.on('load',  function() {
 		console.log('zoomend happened.');
 		change_landmark_sizes();
 		toggle_stop_visibility();
+
 	});
 
 });
