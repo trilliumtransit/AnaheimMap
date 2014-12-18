@@ -84,7 +84,9 @@ var map = L.mapbox.map('interactive-map-holder', 'trilliumtransit.e8e8e512', { z
 map.scrollWheelZoom.disable();
 new L.Control.Zoom({ position: 'bottomright' }).addTo(map);
 
-// set up functions
+// FUNCTIONS
+
+// load data
 function load_data(url, dataType) {
 			dataType = typeof dataType !== 'undefined' ? dataType : "json";
 
@@ -120,22 +122,7 @@ function load_data_async(url, dataType, baseUrl, successResponse) {
     return returned_data;
 }
 
-// Load an object with the routes
-function load_routes() {
-
-	var load_data_url = generate_proxy_url(api_base_url+'routes/by-feed/anaheim-new-ca-us/route-id/'+route_ids_list);
-	
-	//console.log(load_data_url);
-	//console.log('just before load_data (load routes)');
-
-    routes = load_data(load_data_url);
-	//console.log('routes: '+routes);
-}
-
-// old junk, but i am keeping this note around for now -- alternative way of getting an array with unique values
-// from http://stackoverflow.com/questions/1960473/unique-values-in-an-array
-
-
+//utilities
 function isInArray(value, array) {
   return array.indexOf(value) > -1;
 }
@@ -148,6 +135,149 @@ function encapsulate_in_array(variable) {
 		return new_array;
 		}
 	}
+
+
+// Load an object with the routes
+function load_routes() {
+
+	var load_data_url = generate_proxy_url(api_base_url+'routes/by-feed/anaheim-new-ca-us/route-id/'+route_ids_list);
+	
+	//console.log(load_data_url);
+	//console.log('just before load_data (load routes)');
+
+    routes = load_data(load_data_url);
+	//console.log('routes: '+routes);
+}
+
+function get_index(value, array) {
+	var index = array.indexOf(parseInt(value));
+	return index;
+}
+
+function remove_from_array(value, array) {
+    var index = get_index(value, array);
+    if (index > -1) {
+        array.splice(index, 1);
+    }
+}
+
+function get_icon_index_for_icon(icon_id) {
+var result;
+for(var i = 0; i < landmark_icons.length; i++) {
+    if( landmark_icons[i].id === icon_id ) {
+        result = i;
+        break;
+    }
+}
+return result;
+}
+
+// old junk, but i am keeping this note around for now -- alternative way of getting an array with unique values
+// from http://stackoverflow.com/questions/1960473/unique-values-in-an-array
+
+// lookup functions
+function get_routes_array_index_from_id(id) {
+    var index = -1;
+    for (var i = 0, len = routes.length; i < len; i++) {
+        if (routes[i].route_id == id) {
+            index = i;
+            // console.log(index);
+            break;
+        }
+    }
+
+    return index;
+}
+
+function get_stops_array_index_from_id(id) {
+    var index = -1;
+    for (var i = 0, len = stops.length; i < len; i++) {
+        if (stops[i].stop_id == id) {
+            index = i;
+            // console.log(index);
+            break;
+        }
+    }
+
+    return index;
+}
+
+function get_routes_for_stop_id(stop_id) {
+	
+	var stops_array_index = get_stops_array_index_from_id(stop_id);
+	var specific_routes = stops[stops_array_index].routes;
+	var route_ids_array = Array();
+	
+    for (var i = 0, len = specific_routes.length; i < len; i++) {
+       route_ids_array.push(specific_routes[i].route_id);
+    }
+
+    return route_ids_array;
+}
+
+function get_route_color_for_id(route_id_lookup) {
+var result = get_route_info_for_id(route_id_lookup).route_color;
+return result;
+}
+
+function get_route_info_for_id(route_id_lookup) {
+var result;
+for(var route_i = 0; route_i < routes.length; route_i++) {
+    if( routes[route_i].route_id === route_id_lookup ) {
+        result = routes[route_i];
+        break;
+    }
+}
+return result;
+}
+
+
+// add map & remove map content
+function add_route_alignment(ids) {
+
+	    for (var i = 0, len = ids.length; i < len; i++) {
+	    	var id = ids[i];
+
+	    if (typeof route_layers[id] == 'undefined' || route_layers[id] == null) {
+	    
+			var index = get_routes_array_index_from_id(id);
+
+			var geojson = routes[index].shared_arcs_geojson || routes[index].geojson;
+
+					route_styles[id] = [];
+					
+					
+					route_styles[id][0] = {
+						"color": '#' + routes[index].route_color,
+						"weight": unhighlighted_weight,
+						"opacity": 1,
+						// "dashArray": [10,10],
+						"clickable": true
+					};
+					
+					route_styles[id][1] = {
+						"color": '#' + routes[index].route_color,
+						"weight": highlighted_weight,
+						"opacity": 1,
+						// "dashArray": [10,10],
+						"clickable": true
+					};
+
+					route_layers[id] = L.geoJson(geojson, {
+						style: route_styles[id][0]
+					});
+
+
+
+	    }
+	        route_layers[id].addTo(map);
+
+	    if (routes_active.indexOf(parseInt(id)) == -1) {
+	        routes_active.push(parseInt(id));
+	        // console.log('adding route_id '+id+' to routes_active');
+	    }
+	}
+}
 
 function stop_icons() {
 		
@@ -165,21 +295,7 @@ function stop_icons() {
 		
 	}
 
-function get_route_color_for_id(route_id_lookup) {
-var result = get_route_info_for_id(route_id_lookup).route_color;
-return result;
-}
 
-function get_route_info_for_id(route_id_lookup) {
-var result;
-for(var route_i = 0; route_i < routes.length; route_i++) {
-    if( routes[route_i].route_id === route_id_lookup ) {
-        result = routes[route_i];
-        break;
-    }
-}
-return result;
-}
 
 function generate_proxy_url(url) {
     return url;
@@ -266,156 +382,6 @@ function load_stop_markers() {
 }
 
 
-function highlight_route_alignment(route_ids) {
-		
-		route_ids = encapsulate_in_array(route_ids);
-		console.log('highlight_route_alignment. route_ids: '.route_ids);
-		
-		if (system_map) {add_route_alignment(route_ids);}
-
-	    for (var i = 0, len = route_ids.length; i < len; i++) {
-			console.log('highlight this alignment: '+route_ids[i]);
-			var route_id = parseInt(route_ids[i]);
-	    	if (routes_active.indexOf(route_id) > -1) {
-				route_layers[route_id].bringToFront();
-				route_layers[route_id].setStyle(route_styles[route_id][1]);
-		    }
-
-	    }
-}
-
-function unhighlight_route_alignment(route_ids) {
-
-		route_ids = encapsulate_in_array(route_ids);
-		
-		if (system_map) {remove_route_alignment(route_ids);}
-
-	    for (var i = 0, len = route_ids.length; i < len; i++) {
-	    	var route_id = parseInt(route_ids[i]);
-		    route_layers[route_id].setStyle(route_styles[route_id][0]);
-	    }
-
-}
-
-function update_stop_info(e) {
-
-var popup_content = '<h3 class="stop_name">'+e.target.stop_name+'</h3>';
-
-if (e.target.stop_code != '') {
-	popup_content = popup_content+ '<p>text2go code: '+e.target.stop_code+'</p>';
-}
-
-var route_ids_array = get_routes_for_stop_id(e.target.stop_id);
-highlight_route_alignment(route_ids_array);
-
-console.log(routes);
-console.log(route_ids_array);
-
-for (var i = 0, len = route_ids_array.length; i < len; i++) {
-	// console.log(route_ids_array[i]);
-	
-	var route_info = get_route_info_for_id(route_ids_array[i]);
-	console.log(route_info);
-	popup_content = popup_content + '<div class="route_short_name" style="display:inline-block;margin-right:8px;padding:3px;margin:3px;font-weight:bold;font-size:14pt;color:'+route_info.route_text_color+';background-color:#'+route_info.route_color+'">'+route_info.route_short_name+'</div>';
-	
-}
-
-e.target.setPopupContent(popup_content);
-
-}
-
-function close_popup_update_map(e) {
-var route_ids_array = get_routes_for_stop_id(e.target.stop_id);
-unhighlight_route_alignment(route_ids_array);
-}
-
-
-function get_routes_array_index_from_id(id) {
-    var index = -1;
-    for (var i = 0, len = routes.length; i < len; i++) {
-        if (routes[i].route_id == id) {
-            index = i;
-            // console.log(index);
-            break;
-        }
-    }
-
-    return index;
-}
-
-function get_stops_array_index_from_id(id) {
-    var index = -1;
-    for (var i = 0, len = stops.length; i < len; i++) {
-        if (stops[i].stop_id == id) {
-            index = i;
-            // console.log(index);
-            break;
-        }
-    }
-
-    return index;
-}
-
-function get_routes_for_stop_id(stop_id) {
-	
-	var stops_array_index = get_stops_array_index_from_id(stop_id);
-	var specific_routes = stops[stops_array_index].routes;
-	var route_ids_array = Array();
-	
-    for (var i = 0, len = specific_routes.length; i < len; i++) {
-       route_ids_array.push(specific_routes[i].route_id);
-    }
-
-    return route_ids_array;
-}
-
-function add_route_alignment(ids) {
-
-	    for (var i = 0, len = ids.length; i < len; i++) {
-	    	var id = ids[i];
-
-	    if (typeof route_layers[id] == 'undefined' || route_layers[id] == null) {
-	    
-			var index = get_routes_array_index_from_id(id);
-
-			var geojson = routes[index].shared_arcs_geojson;
-
-					route_styles[id] = [];
-					
-					
-					route_styles[id][0] = {
-						"color": '#' + routes[index].route_color,
-						"weight": unhighlighted_weight,
-						"opacity": 1,
-						// "dashArray": [10,10],
-						"clickable": true
-					};
-					
-					route_styles[id][1] = {
-						"color": '#' + routes[index].route_color,
-						"weight": highlighted_weight,
-						"opacity": 1,
-						// "dashArray": [10,10],
-						"clickable": true
-					};
-
-					route_layers[id] = L.geoJson(geojson, {
-						style: route_styles[id][0]
-					});
-
-
-
-	    }
-	        route_layers[id].addTo(map);
-
-	    if (routes_active.indexOf(parseInt(id)) == -1) {
-	        routes_active.push(parseInt(id));
-	        // console.log('adding route_id '+id+' to routes_active');
-	    }
-	}
-}
-
-
 function remove_route_alignment(ids) {
 	ids = encapsulate_in_array(ids);
 
@@ -429,38 +395,6 @@ function remove_route_alignment(ids) {
 }
 }
 
-function get_index(value, array) {
-	var index = array.indexOf(parseInt(value));
-	return index;
-}
-
-function remove_from_array(value, array) {
-    var index = get_index(value, array);
-    if (index > -1) {
-        array.splice(index, 1);
-    }
-}
-
-
-function add_tile_layer(layer_id,z_index) {
-	if (typeof (tile_layer[layer_id]) != "undefined") {
-		//console.log(tile_layer[layer_id]);
-		topLayer = tile_layer[layer_id].addTo(map);
-//		topPane.appendChild(topLayer.getContainer());
-		topLayer.setZIndex(z_index);
-	}
-}
-
-function get_icon_index_for_icon(icon_id) {
-var result;
-for(var i = 0; i < landmark_icons.length; i++) {
-    if( landmark_icons[i].id === icon_id ) {
-        result = i;
-        break;
-    }
-}
-return result;
-}
 
 function create_landmark_marker(i,width,height,landmark_id,icon_index,landmark_lat,landmark_lon,filename) {
 
@@ -508,6 +442,80 @@ function landmark_icon(width,height,icon_index,filename) {
 	return landmark_icons[icon_index].icons[current_zoom];
 }
 
+function add_tile_layer(layer_id,z_index) {
+	if (typeof (tile_layer[layer_id]) != "undefined") {
+		//console.log(tile_layer[layer_id]);
+		topLayer = tile_layer[layer_id].addTo(map);
+//		topPane.appendChild(topLayer.getContainer());
+		topLayer.setZIndex(z_index);
+	}
+}
+
+// map interactivity
+
+function update_stop_info(e) {
+
+var popup_content = '<h3 class="stop_name">'+e.target.stop_name+'</h3>';
+
+if (e.target.stop_code != '') {
+	popup_content = popup_content+ '<p>text2go code: '+e.target.stop_code+'</p>';
+}
+
+var route_ids_array = get_routes_for_stop_id(e.target.stop_id);
+highlight_route_alignment(route_ids_array);
+
+console.log(routes);
+console.log(route_ids_array);
+
+for (var i = 0, len = route_ids_array.length; i < len; i++) {
+	// console.log(route_ids_array[i]);
+	
+	var route_info = get_route_info_for_id(route_ids_array[i]);
+	console.log(route_info);
+	popup_content = popup_content + '<div class="route_short_name" style="display:inline-block;margin-right:8px;padding:3px;margin:3px;font-weight:bold;font-size:14pt;color:'+route_info.route_text_color+';background-color:#'+route_info.route_color+'">'+route_info.route_short_name+'</div>';
+	
+}
+
+e.target.setPopupContent(popup_content);
+
+}
+
+function close_popup_update_map(e) {
+var route_ids_array = get_routes_for_stop_id(e.target.stop_id);
+unhighlight_route_alignment(route_ids_array);
+}
+
+function highlight_route_alignment(route_ids) {
+		
+		route_ids = encapsulate_in_array(route_ids);
+		console.log('highlight_route_alignment. route_ids: '.route_ids);
+		
+		if (system_map) {add_route_alignment(route_ids);}
+
+	    for (var i = 0, len = route_ids.length; i < len; i++) {
+			console.log('highlight this alignment: '+route_ids[i]);
+			var route_id = parseInt(route_ids[i]);
+	    	if (routes_active.indexOf(route_id) > -1) {
+				route_layers[route_id].bringToFront();
+				route_layers[route_id].setStyle(route_styles[route_id][1]);
+		    }
+
+	    }
+}
+
+function unhighlight_route_alignment(route_ids) {
+
+		route_ids = encapsulate_in_array(route_ids);
+		
+		if (system_map) {remove_route_alignment(route_ids);}
+
+	    for (var i = 0, len = route_ids.length; i < len; i++) {
+	    	var route_id = parseInt(route_ids[i]);
+		    route_layers[route_id].setStyle(route_styles[route_id][0]);
+	    }
+
+}
+
 function change_landmark_sizes() {
 	
     for (var i = 0; i < landmark_markers.length; i++) {
@@ -533,6 +541,8 @@ function toggle_stop_visibility() {
         load_stop_markers();
     }
 }
+
+// execute this to set up map
 
 load_routes();
 load_stop_markers();
