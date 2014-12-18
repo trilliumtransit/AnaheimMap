@@ -46,7 +46,9 @@ var route_ids_array = [1696,1697,1698,1699,1700,1701,1702,1703,1704,1705,1706,17
 var map_files_base = "http://trilliumtransit.com/clients/anaheim/";
 var api_base_url = 'http://archive.oregon-gtfs.com/gtfs-api/';
 var route_alignments_tiles = 'trilliumtransit.fbf63437';
+var road_label_tiles = 'trilliumtransit.b1c25bd2';
 tile_layer[0] = new L.tileLayer('http://{s}.tiles.mapbox.com/v3/' + route_alignments_tiles + '/{z}/{x}/{y}.png');
+tile_layer[1] = new L.tileLayer('http://{s}.tiles.mapbox.com/v3/' + road_label_tiles + '/{z}/{x}/{y}.png');
 var default_icon_color = '575757';
 var system_map = true;
 var ZoomLevelThreshhold = 13;
@@ -549,6 +551,7 @@ load_stop_markers();
 
 if (system_map) {
 	add_tile_layer(0,5);
+	add_tile_layer(1,10);
 }
 else {add_route_alignment(route_ids_array);}
 
