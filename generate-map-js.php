@@ -432,7 +432,7 @@ function landmark_icon(width,height,icon_index,filename) {
 	console.log('scaled_height: '+scaled_height);
 
 	landmark_icons[icon_index].icons[current_zoom] = new L.Icon({ 
-		iconUrl: 'map_icons/'+filename,
+		iconUrl: map_files_base+'map_icons/'+filename,
 		iconSize: [scaled_width, scaled_height],
 		iconAnchor: [scaled_width/2, scaled_height/2]
 		});
