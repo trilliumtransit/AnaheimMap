@@ -1,4 +1,11 @@
 <?php
+
+if(function_exists('imagepng')){
+  echo  "//imagepng() -Exists-";
+}else{
+  echo "//imagepng() ==== DOES NOT ==== Exist";
+}
+
 if (isset($_GET['system_map'])) {$system_map = $_GET['system_map'];}
 if (isset($_GET['routes'])) {$routes = $_GET['routes'];}
 if (isset($_GET['container_id'])) {$container_id = $_GET['container_id'];}
@@ -7,8 +14,10 @@ if (isset($_GET['container_id'])) {$container_id = $_GET['container_id'];}
 //
 
 $map_files_base =  "//$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]"; 
+$naked_url_base = "$_SERVER[HTTP_HOST]"; 
 if (strpos($map_files_base, 'localhost') !== FALSE) { // check if on mamp/apache localhost
-
+$dragable_icons = "true";
+$naked_url_base .= "/art/";
 }
 $map_files_base_split = explode("generate-map-js.php", $map_files_base);
 ?>
@@ -23,6 +32,7 @@ var route_feature_group = new L.FeatureGroup();
 var routes_active = Array();
 var route_styles = Array();
 var route_layers = Array();
+var route_shadows = Array();
 var topPane;
 var topLayer;
 var zoom_icon_scale = Array();
@@ -51,7 +61,7 @@ var ZoomLevelThreshhold = 13;
 // define the StopIcon
 var StopIcon = L.Icon.extend({
     options: {
-        iconSize: [12, 12],
+        iconSize: [22, 22],
         iconAnchor: [6, 6],
         popupAnchor: [0, 0]
     }
@@ -285,21 +295,61 @@ function add_route_alignment(ids) {
 	}
 }
 
+function update_route_alignment_shadow(ids) {
+	
+	route_shadows.forEach(function clearShadow(shadow) {
+	 	map.removeLayer(shadow);
+	});
+		
+	
+
+
+	 for (var i = 0, len = routes_active.length; i < len; i++) {
+			var id = routes_active[i];
+
+		if (typeof route_shadows[id] == 'undefined' || route_shadows[id] == null) {
+	    
+			var index = get_routes_array_index_from_id(id);
+
+			var geojson = routes[index].shared_arcs_geojson || routes[index].geojson;
+
+
+			route_shadows[id] = L.geoJson(geojson, {
+				style: {
+				"color": '#fff',
+				"weight": highlighted_weight+4,
+				"opacity": 1,
+				
+				// "dashArray": [10,10],
+				"clickable": true
+			}
+			});
+
+
+	    }
+	    	route_shadows[id].addTo(map);
+
+	}
+}
+
 function stop_icons() {
+		
+		
 		
     for (var i = 0; i < routes.length; i++) {
     	if (!isInArray(routes[i].route_color,route_colors)) {
     		route_colors.push(routes[i].route_color);
 		    }
-        }
+    }
 
-		StopIcons[default_icon_color] = new StopIcon({iconUrl:map_files_base+"create_image.php?r=13&bw=3&&bc=ffffff&fg="+default_icon_color});
-
-        for (var i = 0; i < route_colors.length; i++) {
-                StopIcons[route_colors[i]] = new StopIcon({iconUrl:map_files_base+"create_image.php?r=13&bc=ffffff&fg="+route_colors[i]});
-            }
-		
+	//StopIcons[default_icon_color] = new StopIcon({iconUrl:map_files_base+"create_image.php?r=13&bw=3&&bc=ffffff&fg="+default_icon_color});
+	StopIcons['-1'] = new StopIcon({iconUrl:"http://<?php echo $naked_url_base; ?>wp-content/themes/art/library/images/route-icons-individual/xsml-multi.png"});	
+	for (var i = 0; i < 22; i++) {
+			var route_info = get_route_info_for_id(route_ids_array[i]);
+			StopIcons[""+i] = new StopIcon({iconUrl:"http://<?php echo $naked_url_base; ?>wp-content/themes/art/library/images/route-icons-individual/xsml-"+i+".png"});
 	}
+		
+}
 
 
 
@@ -342,16 +392,23 @@ function load_stop_markers() {
 					
 					if (stops[i].routes.length > 1) {
 						stops[i].color ='575757';
+						stops[i].route_short_name = '-1';
 					}
 					else {
 						//console.log(stops[i].routes[0].route_id);
 						stops[i].color = get_route_color_for_id(stops[i].routes[0].route_id);
+						
+						var route_info = get_route_info_for_id(stops[i].routes[0].route_id);
+						console.log("route_short_name:"+route_info.route_short_name+"-");
+						stops[i].route_short_name = route_info.route_short_name;
 						//console.log('stops['+i+'].color: '+stops[i].color);
 					}
                     
-                
+                console.log("icon_id:"+ stops[i].icon_id);
                 var LamMarker = new L.marker([stops[i].geojson.coordinates[1], stops[i].geojson.coordinates[0]], {
-                    icon: StopIcons[stops[i].color]
+                   // icon: StopIcons[stops[i].color]
+                   draggable: <?php echo $dragable_icons; ?>,
+                   icon: StopIcons[stops[i].route_short_name]
                 }).bindPopup('', {maxWidth: 400});
                 
                 
@@ -408,7 +465,7 @@ console.log('icon_index: '+icon_index);
 
 var zoom_level_icon = landmark_icon(width,height,icon_index,filename);
 
-		landmark_markers[i] = L.marker([landmark_lat, landmark_lon], {icon: zoom_level_icon});
+		landmark_markers[i] = L.marker([landmark_lat, landmark_lon], {draggable: <?php echo $dragable_icons; ?>,icon: zoom_level_icon});
 		landmark_markers[i].landmark_id = landmark_id;
 		landmark_markers[i].addTo(map);
 
@@ -498,7 +555,10 @@ function highlight_route_alignment(route_ids) {
 		route_ids = encapsulate_in_array(route_ids);
 		console.log('highlight_route_alignment. route_ids: '.route_ids);
 		
-		if (system_map) {add_route_alignment(route_ids);}
+		if (system_map) {
+			add_route_alignment(route_ids);
+			update_route_alignment_shadow(route_ids);
+		}
 
 	    for (var i = 0, len = route_ids.length; i < len; i++) {
 			console.log('highlight this alignment: '+route_ids[i]);
@@ -515,7 +575,8 @@ function unhighlight_route_alignment(route_ids) {
 
 		route_ids = encapsulate_in_array(route_ids);
 		
-		if (system_map) {remove_route_alignment(route_ids);}
+		if (system_map) {remove_route_alignment(route_ids);
+		update_route_alignment_shadow(route_ids);}
 
 	    for (var i = 0, len = route_ids.length; i < len; i++) {
 	    	var route_id = parseInt(route_ids[i]);
@@ -559,7 +620,9 @@ if (system_map) {
 	add_tile_layer(0,5);
 	add_tile_layer(1,10);
 }
-else {add_route_alignment(route_ids_array);}
+else {add_route_alignment(route_ids_array);
+update_route_alignment_shadow(route_ids_array);
+}
 
 $.ajax({
     url: map_files_base+"icons.csv",
