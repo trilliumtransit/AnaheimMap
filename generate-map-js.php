@@ -1,27 +1,26 @@
-<html>
+<?php
 
-<head>
+if(function_exists('imagepng')){
+  echo  "//imagepng() -Exists-";
+}else{
+  echo "//imagepng() ==== DOES NOT ==== Exist";
+}
 
-<script src='https://api.tiles.mapbox.com/mapbox.js/v2.1.4/mapbox.js'></script>
-<link href='https://api.tiles.mapbox.com/mapbox.js/v2.1.4/mapbox.css' rel='stylesheet' />
-<link href='http://rideart.org/wp-content/themes/art/library/css/route-icons.css' rel='stylesheet' />
-<link href='map_layout.css' rel='stylesheet' />
-<script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
-<script src="jquery.csv-0.71.min.js"></script>
-<script src="layout.js"></script>
+if (isset($_GET['system_map'])) {$system_map = $_GET['system_map'];}
+if (isset($_GET['routes'])) {$routes = $_GET['routes'];}
+if (isset($_GET['container_id'])) {$container_id = $_GET['container_id'];}
+ 
 
+//
 
-</head>
-
-<body style="background-color:#2068A7">
-<div id="interactive-map-holder-wrap" style="width:100%;height:100%;position: relative;">
-<div id="interactive-map-holder" style="width:100%;height:100%;background-color:#2068A7;  ">
-
-</div>
- <img id="draggingDisabled" src="images/map-gradient-overlay-copy.png" style="width: 100%; height: 100%; z-index: 999; position: absolute; top: 0; pointer-events: none;" /> 
-</div>
-<script>
-
+$map_files_base =  "//$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]"; 
+$naked_url_base = "$_SERVER[HTTP_HOST]"; 
+if (strpos($map_files_base, 'localhost') !== FALSE) { // check if on mamp/apache localhost
+$dragable_icons = "true";
+$naked_url_base .= "/art/";
+}
+$map_files_base_split = explode("generate-map-js.php", $map_files_base);
+?>
 // initialize global variables
 var stops_layer_group = L.featureGroup();
 var stops = Array();
@@ -33,6 +32,7 @@ var route_feature_group = new L.FeatureGroup();
 var routes_active = Array();
 var route_styles = Array();
 var route_layers = Array();
+var route_shadows = Array();
 var topPane;
 var topLayer;
 var zoom_icon_scale = Array();
@@ -45,10 +45,10 @@ var tile_layer = new Array();
 var landmark_markers = Array();
 
 // define which routes
-var route_ids_array = [1696,1697,1698,1699,1700,1701,1702,1703,1704,1705,1706,1707,1708,1709,1710,1711,1712,1713,1714,1716];
-var system_map = true;
+var route_ids_array = [<?php echo $routes ?>];
+var system_map = <?php echo $system_map ?>;
 // define other variables
-var map_files_base = "http://trilliumtransit.com/clients/anaheim/";
+var map_files_base = '<?php echo $map_files_base_split[0] ?>';
 var api_base_url = 'http://archive.oregon-gtfs.com/gtfs-api/';
 var route_alignments_tiles = 'trilliumtransit.ca9f8a4a';
 var road_label_tiles = 'trilliumtransit.b1c25bd2';
@@ -61,7 +61,7 @@ var ZoomLevelThreshhold = 13;
 // define the StopIcon
 var StopIcon = L.Icon.extend({
     options: {
-        iconSize: [12, 12],
+        iconSize: [22, 22],
         iconAnchor: [6, 6],
         popupAnchor: [0, 0]
     }
@@ -85,7 +85,7 @@ else {var route_ids_list = route_ids_array.join();}
 
 // mapbox token, basemap
 L.mapbox.accessToken = 'pk.eyJ1IjoidHJpbGxpdW10cmFuc2l0IiwiYSI6ImVUQ2x0blUifQ.2-Z9TGHmyjRzy5GC1J9BTw';
-var map = L.mapbox.map('interactive-map-holder', 'trilliumtransit.e8e8e512', { zoomControl: false });
+var map = L.mapbox.map('<?php echo $container_id; ?>', 'trilliumtransit.e8e8e512', { zoomControl: false });
 
 // map controls
 map.scrollWheelZoom.disable();
@@ -295,21 +295,61 @@ function add_route_alignment(ids) {
 	}
 }
 
+function update_route_alignment_shadow(ids) {
+	
+	route_shadows.forEach(function clearShadow(shadow) {
+	 	map.removeLayer(shadow);
+	});
+		
+	
+
+
+	 for (var i = 0, len = routes_active.length; i < len; i++) {
+			var id = routes_active[i];
+
+		if (typeof route_shadows[id] == 'undefined' || route_shadows[id] == null) {
+	    
+			var index = get_routes_array_index_from_id(id);
+
+			var geojson = routes[index].shared_arcs_geojson || routes[index].geojson;
+
+
+			route_shadows[id] = L.geoJson(geojson, {
+				style: {
+				"color": '#fff',
+				"weight": highlighted_weight+4,
+				"opacity": 1,
+				
+				// "dashArray": [10,10],
+				"clickable": true
+			}
+			});
+
+
+	    }
+	    	route_shadows[id].addTo(map);
+
+	}
+}
+
 function stop_icons() {
+		
+		
 		
     for (var i = 0; i < routes.length; i++) {
     	if (!isInArray(routes[i].route_color,route_colors)) {
     		route_colors.push(routes[i].route_color);
 		    }
-        }
+    }
 
-		StopIcons[default_icon_color] = new StopIcon({iconUrl:map_files_base+"create_image.php?r=13&bw=3&&bc=ffffff&fg="+default_icon_color});
-
-        for (var i = 0; i < route_colors.length; i++) {
-                StopIcons[route_colors[i]] = new StopIcon({iconUrl:map_files_base+"create_image.php?r=13&bc=ffffff&fg="+route_colors[i]});
-            }
-		
+	//StopIcons[default_icon_color] = new StopIcon({iconUrl:map_files_base+"create_image.php?r=13&bw=3&&bc=ffffff&fg="+default_icon_color});
+	StopIcons['-1'] = new StopIcon({iconUrl:"http://<?php echo $naked_url_base; ?>wp-content/themes/art/library/images/route-icons-individual/xsml-multi.png"});	
+	for (var i = 0; i < 22; i++) {
+			var route_info = get_route_info_for_id(route_ids_array[i]);
+			StopIcons[""+i] = new StopIcon({iconUrl:"http://<?php echo $naked_url_base; ?>wp-content/themes/art/library/images/route-icons-individual/xsml-"+i+".png"});
 	}
+		
+}
 
 
 
@@ -352,16 +392,23 @@ function load_stop_markers() {
 					
 					if (stops[i].routes.length > 1) {
 						stops[i].color ='575757';
+						stops[i].route_short_name = '-1';
 					}
 					else {
 						//console.log(stops[i].routes[0].route_id);
 						stops[i].color = get_route_color_for_id(stops[i].routes[0].route_id);
+						
+						var route_info = get_route_info_for_id(stops[i].routes[0].route_id);
+						console.log("route_short_name:"+route_info.route_short_name+"-");
+						stops[i].route_short_name = route_info.route_short_name;
 						//console.log('stops['+i+'].color: '+stops[i].color);
 					}
                     
-                
+                console.log("icon_id:"+ stops[i].icon_id);
                 var LamMarker = new L.marker([stops[i].geojson.coordinates[1], stops[i].geojson.coordinates[0]], {
-                    icon: StopIcons[stops[i].color]
+                   // icon: StopIcons[stops[i].color]
+                   draggable: <?php echo $dragable_icons; ?>,
+                   icon: StopIcons[stops[i].route_short_name]
                 }).bindPopup('', {maxWidth: 400});
                 
                 
@@ -418,7 +465,7 @@ console.log('icon_index: '+icon_index);
 
 var zoom_level_icon = landmark_icon(width,height,icon_index,filename);
 
-		landmark_markers[i] = L.marker([landmark_lat, landmark_lon], {icon: zoom_level_icon});
+		landmark_markers[i] = L.marker([landmark_lat, landmark_lon], {draggable: <?php echo $dragable_icons; ?>,icon: zoom_level_icon});
 		landmark_markers[i].landmark_id = landmark_id;
 		landmark_markers[i].addTo(map);
 
@@ -446,7 +493,7 @@ function landmark_icon(width,height,icon_index,filename) {
 	console.log('scaled_height: '+scaled_height);
 
 	landmark_icons[icon_index].icons[current_zoom] = new L.Icon({ 
-		iconUrl: 'map_icons/'+filename,
+		iconUrl: map_files_base+'map_icons/'+filename,
 		iconSize: [scaled_width, scaled_height],
 		iconAnchor: [scaled_width/2, scaled_height/2]
 		});
@@ -508,7 +555,10 @@ function highlight_route_alignment(route_ids) {
 		route_ids = encapsulate_in_array(route_ids);
 		console.log('highlight_route_alignment. route_ids: '.route_ids);
 		
-		if (system_map) {add_route_alignment(route_ids);}
+		if (system_map) {
+			add_route_alignment(route_ids);
+			update_route_alignment_shadow(route_ids);
+		}
 
 	    for (var i = 0, len = route_ids.length; i < len; i++) {
 			console.log('highlight this alignment: '+route_ids[i]);
@@ -525,7 +575,8 @@ function unhighlight_route_alignment(route_ids) {
 
 		route_ids = encapsulate_in_array(route_ids);
 		
-		if (system_map) {remove_route_alignment(route_ids);}
+		if (system_map) {remove_route_alignment(route_ids);
+		update_route_alignment_shadow(route_ids);}
 
 	    for (var i = 0, len = route_ids.length; i < len; i++) {
 	    	var route_id = parseInt(route_ids[i]);
@@ -569,7 +620,9 @@ if (system_map) {
 	add_tile_layer(0,5);
 	add_tile_layer(1,10);
 }
-else {add_route_alignment(route_ids_array);}
+else {add_route_alignment(route_ids_array);
+update_route_alignment_shadow(route_ids_array);
+}
 
 $.ajax({
     url: map_files_base+"icons.csv",
@@ -660,10 +713,4 @@ map.on('load',  function() {
 // y: "16"
 // __proto__: Object
 
-
-
-</script>
-
-</body>
-</html>
 
