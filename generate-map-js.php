@@ -417,7 +417,7 @@ function load_stop_markers() {
                 LamMarker.stop_name = stops[i].stop_name;
                 LamMarker.stop_code = stops[i].stop_code;
 
-                LamMarker.on('click', update_stop_info);
+                LamMarker.on('popupopen', update_stop_info);
                 LamMarker.on('popupclose', close_popup_update_map);
 				
 				//console.log(LamMarker);
