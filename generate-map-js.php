@@ -343,10 +343,10 @@ function stop_icons() {
     }
 
 	//StopIcons[default_icon_color] = new StopIcon({iconUrl:map_files_base+"create_image.php?r=13&bw=3&&bc=ffffff&fg="+default_icon_color});
-	StopIcons['-1'] = new StopIcon({iconUrl:"http://<?php echo $naked_url_base; ?>wp-content/themes/art/library/images/route-icons-individual/xsml-multi.png"});	
+	StopIcons['-1'] = new StopIcon({iconUrl:"http://<?php echo $naked_url_base; ?>/wp-content/themes/art/library/images/route-icons-individual/xsml-multi.png"});	
 	for (var i = 0; i < 22; i++) {
 			var route_info = get_route_info_for_id(route_ids_array[i]);
-			StopIcons[""+i] = new StopIcon({iconUrl:"http://<?php echo $naked_url_base; ?>wp-content/themes/art/library/images/route-icons-individual/xsml-"+i+".png"});
+			StopIcons[""+i] = new StopIcon({iconUrl:"http://<?php echo $naked_url_base; ?>/wp-content/themes/art/library/images/route-icons-individual/xsml-"+i+".png"});
 	}
 		
 }
@@ -407,7 +407,7 @@ function load_stop_markers() {
                 console.log("icon_id:"+ stops[i].icon_id);
                 var LamMarker = new L.marker([stops[i].geojson.coordinates[1], stops[i].geojson.coordinates[0]], {
                    // icon: StopIcons[stops[i].color]
-                   draggable: <?php echo $dragable_icons; ?>,
+                   // draggable: <?php echo $dragable_icons; ?>,
                    icon: StopIcons[stops[i].route_short_name]
                 }).bindPopup('', {maxWidth: 400});
                 
@@ -465,7 +465,9 @@ console.log('icon_index: '+icon_index);
 
 var zoom_level_icon = landmark_icon(width,height,icon_index,filename);
 
-		landmark_markers[i] = L.marker([landmark_lat, landmark_lon], {draggable: <?php echo $dragable_icons; ?>,icon: zoom_level_icon});
+		landmark_markers[i] = L.marker([landmark_lat, landmark_lon], {
+		// draggable: <?php echo $dragable_icons; ?>,
+		icon: zoom_level_icon});
 		landmark_markers[i].landmark_id = landmark_id;
 		landmark_markers[i].addTo(map);
 
