@@ -21,6 +21,7 @@ $naked_url_base .= "/art/";
 }
 $map_files_base_split = explode("generate-map-js.php", $map_files_base);
 ?>
+
 // initialize global variables
 var stops_layer_group = L.featureGroup();
 var stops = Array();
@@ -144,16 +145,47 @@ function encapsulate_in_array(variable) {
 	}
 
 
+route_urls = Array();
+
+route_urls[1702] = 'http://rideart.org/routes-and-schedules/hotel-circle-clementine-line/';
+route_urls[1705] = 'http://rideart.org/routes-and-schedules/downtown-packing-district-line/';
+route_urls[1700] = 'http://rideart.org/routes-and-schedules/grand-plaza-line/';
+route_urls[1711] = 'http://rideart.org/routes-and-schedules/toy-story-line/';
+route_urls[1697] = 'http://rideart.org/routes-and-schedules/harbor-blvd-line/';
+route_urls[1709] = 'http://rideart.org/routes-and-schedules/artic-sports-complex-line/';
+route_urls[1716] = 'http://rideart.org/routes-and-schedules/canyon-line/';
+route_urls[1708] = 'http://rideart.org/routes-and-schedules/artic-sports-complex-line/';
+route_urls[1704] = 'http://rideart.org/routes-and-schedules/katella-line/';
+route_urls[1710] = 'http://rideart.org/routes-and-schedules/orange-line/';
+route_urls[1699] = 'http://rideart.org/routes-and-schedules/grand-plaza-line/';
+route_urls[1703] = 'http://rideart.org/routes-and-schedules/hotel-circle-clementine-line/';
+route_urls[1707] = 'http://rideart.org/routes-and-schedules/manchester-ave-line/';
+route_urls[1714] = 'http://rideart.org/routes-and-schedules/canyon-line/';
+route_urls[1712] = 'http://rideart.org/routes-and-schedules/buena-park-line/';
+route_urls[1713] = 'http://rideart.org/routes-and-schedules/mainplace-line/';
+route_urls[1696] = 'http://rideart.org/routes-and-schedules/harbor-blvd-line/';
+route_urls[1698] = 'http://rideart.org/routes-and-schedules/grand-plaza-line/';
+route_urls[1701] = 'http://rideart.org/routes-and-schedules/hotel-circle-clementine-line/';
+route_urls[1706] = 'http://rideart.org/routes-and-schedules/ball-road-line/';
+
 // Load an object with the routes
 function load_routes() {
-
-	var load_data_url = generate_proxy_url(api_base_url+'routes/by-feed/anaheim-new-ca-us/route-id/'+route_ids_list);
-	
-	//console.log(load_data_url);
-	//console.log('just before load_data (load routes)');
+	var load_data_url = generate_proxy_url(api_base_url+'routes/by-feed/anaheim-ca-us/route-id/'+route_ids_list);
 
     routes = load_data(load_data_url);
-	//console.log('routes: '+routes);
+    
+// 	for(var route_i = 0; route_i < routes.length; route_i++) {
+// 		if(!routes[route_i].hasOwnProperty('route_url')) {       
+// 		routes[route_i].route_url = 'http://rideart.org/routes-and-schedules/' + routes[route_i].route_long_name.toLowerCase().replace(/ /g,'-').replace(/\./g,'');	
+// 		}
+// 	}
+
+	for(var route_i = 0; route_i < routes.length; route_i++) {
+		if(!routes[route_i].hasOwnProperty('route_url')) {       
+		routes[route_i].route_url = route_urls[routes[route_i].route_id];
+		}
+	}
+	
 }
 
 function get_index(value, array) {
@@ -213,12 +245,22 @@ function get_routes_for_stop_id(stop_id) {
 	
 	var stops_array_index = get_stops_array_index_from_id(stop_id);
 	var specific_routes = stops[stops_array_index].routes;
+	var routes_array_to_sort = Array();
 	var route_ids_array = Array();
 	
     for (var i = 0, len = specific_routes.length; i < len; i++) {
-       route_ids_array.push(specific_routes[i].route_id);
+       routes_array_to_sort.push(Array(specific_routes[i].route_id, get_route_info_for_id(specific_routes[i].route_id).route_short_name));
     }
 
+     routes_array_to_sort.sort(function(a,b) {
+        return a[0]-b[0]
+    });
+
+	for (var i = 0, len = routes_array_to_sort.length; i < len; i++) {
+       route_ids_array.push(routes_array_to_sort[i][0]);
+    }
+	
+	console.log(route_ids_array);
     return route_ids_array;
 }
 
@@ -228,14 +270,14 @@ return result;
 }
 
 function get_route_info_for_id(route_id_lookup) {
-var result;
-for(var route_i = 0; route_i < routes.length; route_i++) {
-    if( routes[route_i].route_id === route_id_lookup ) {
-        result = routes[route_i];
-        break;
-    }
-}
-return result;
+	var result;
+	for(var route_i = 0; route_i < routes.length; route_i++) {
+		if( routes[route_i].route_id === route_id_lookup ) {
+			result = routes[route_i];
+			break;
+		}
+	}
+	return result;
 }
 
 
@@ -371,7 +413,7 @@ function load_stop_markers() {
     // stops_layer_group = L.layerGroup();
 
 		
-	var load_data_url = generate_proxy_url(api_base_url+'stops/by-feed/anaheim-new-ca-us/route-id/'+route_ids_list);
+	var load_data_url = generate_proxy_url(api_base_url+'stops/by-feed/anaheim-ca-us/route-id/'+route_ids_list);
 
 	//console.log('just before load_data');
 
@@ -523,7 +565,7 @@ function update_stop_info(e) {
 var popup_content = '<h3 class="stop_name">'+e.target.stop_name+'</h3>';
 
 if (e.target.stop_code != '') {
-	popup_content = popup_content+ '<p>text2go code: '+e.target.stop_code+'</p>';
+	popup_content = popup_content+ '<p>text2go code: '+e.target.stop_code+'</p><p>Click a route to see the stop list:</p>';
 }
 
 var route_ids_array = get_routes_for_stop_id(e.target.stop_id);
@@ -537,7 +579,7 @@ for (var i = 0, len = route_ids_array.length; i < len; i++) {
 	
 	var route_info = get_route_info_for_id(route_ids_array[i]);
 	console.log(route_info);
-	popup_content = popup_content + '<i id="icon-xsml-'+route_info.route_short_name+'" class="linked-div" rel="/route-and-schedules/" style="float: left;" ></i>'; // need to add link in the rel.
+	popup_content = popup_content + '<a href="'+route_info.route_url+'"><i id="icon-xsml-'+route_info.route_short_name+'" class="linked-div" rel="/route-and-schedules/" style="float: left;" ></i></a>'; // need to add link in the rel.
 	
 }
 
