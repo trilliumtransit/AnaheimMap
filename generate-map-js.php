@@ -338,7 +338,7 @@ function add_route_alignment(ids) {
 	}
 
 
-update_route_alignment_shadow(ids);
+if(system_map) update_route_alignment_shadow(ids);
 activate_route_alignment(ids);
 	
 }
@@ -595,7 +595,6 @@ function highlight_route_alignment(route_ids) {
 		 if (system_map) {
 		
 			add_route_alignment(route_ids);
-
 			update_route_alignment_shadow(route_ids);
 		}
 		
@@ -667,7 +666,7 @@ if (system_map) {
 	add_tile_layer(1,10);
 }
 else {
-update_route_alignment_shadow(route_ids_array);
+//update_route_alignment_shadow(route_ids_array);
 add_route_alignment(route_ids_array);
 
 }
