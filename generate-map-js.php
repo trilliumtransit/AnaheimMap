@@ -15,6 +15,7 @@ if (isset($_GET['container_id'])) {$container_id = $_GET['container_id'];}
 
 $map_files_base =  "//$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]"; 
 $naked_url_base = "$_SERVER[HTTP_HOST]"; 
+$dragable_icons = "false";
 if (strpos($map_files_base, 'localhost') !== FALSE) { // check if on mamp/apache localhost
 $dragable_icons = "true";
 $naked_url_base .= "/art/";
@@ -32,7 +33,7 @@ var routes = Array();
 var route_feature_group = new L.FeatureGroup();
 var routes_active = Array();
 var route_styles = Array();
-var route_layers = Array();
+var route_layers = [];
 var route_shadows = Array();
 var topPane;
 var topLayer;
@@ -120,7 +121,7 @@ function load_data_async(url, dataType, baseUrl, successResponse) {
     successResponse = successResponse !== null ? successResponse : function(data){
         returned_data = data;
     };
-    //console.log(baseUrl + url);
+    
     $.ajax({
         'global': false,
         'url': baseUrl + url,
@@ -170,7 +171,7 @@ route_urls[1706] = 'http://rideart.org/routes-and-schedules/ball-road-line/';
 
 // Load an object with the routes
 function load_routes() {
-	var load_data_url = generate_proxy_url(api_base_url+'routes/by-feed/anaheim-ca-us/route-id/'+route_ids_list);
+	var load_data_url = generate_proxy_url(api_base_url+'routes/by-feed/anaheim-ca-us');
 
     routes = load_data(load_data_url);
     
@@ -220,7 +221,6 @@ function get_routes_array_index_from_id(id) {
     for (var i = 0, len = routes.length; i < len; i++) {
         if (routes[i].route_id == id) {
             index = i;
-            // console.log(index);
             break;
         }
     }
@@ -233,7 +233,6 @@ function get_stops_array_index_from_id(id) {
     for (var i = 0, len = stops.length; i < len; i++) {
         if (stops[i].stop_id == id) {
             index = i;
-            // console.log(index);
             break;
         }
     }
@@ -260,7 +259,6 @@ function get_routes_for_stop_id(stop_id) {
        route_ids_array.push(routes_array_to_sort[i][0]);
     }
 	
-	console.log(route_ids_array);
     return route_ids_array;
 }
 
@@ -301,7 +299,6 @@ function add_route_alignment(ids) {
 						"color": '#' + routes[index].route_color,
 						"weight": unhighlighted_weight,
 						"opacity": 1,
-						// "dashArray": [10,10],
 						"clickable": true
 					};
 					
@@ -311,8 +308,6 @@ function add_route_alignment(ids) {
 						"color": '#' + routes[index].route_color,
 						"weight": highlighted_weight,
 						"opacity": 1,
-						
-						// "dashArray": [10,10],
 						"clickable": true
 					};
 					
@@ -327,14 +322,30 @@ function add_route_alignment(ids) {
 
 
 	    }
-	        route_layers[id].addTo(map);
-	        
 
 	    if (routes_active.indexOf(parseInt(id)) == -1) {
 	        routes_active.push(parseInt(id));
-	        // console.log('adding route_id '+id+' to routes_active');
 	    }
+	    
+
 	}
+
+
+update_route_alignment_shadow(ids);
+activate_route_alignment(ids);
+	
+}
+
+function activate_route_alignment(ids) {
+	for (var i = 0, len = ids.length; i < len; i++) {
+	var id = ids[i];
+	console.log('route_layers[id].addTo(map)');
+	console.log('activate_route_alignment');
+	console.log(route_layers[id]);
+	route_layers[id].addTo(map);
+	console.log('route_layers['+id+'].addTo(map)');
+	route_layers[id].bringToFront();
+}
 }
 
 function update_route_alignment_shadow(ids) {
@@ -363,7 +374,7 @@ function update_route_alignment_shadow(ids) {
 				"opacity": 1,
 				
 				// "dashArray": [10,10],
-				"clickable": true
+				// "clickable": true
 			}
 			});
 
@@ -401,7 +412,6 @@ function generate_proxy_url(url) {
 
 
 /*pushing items into array each by each and then add markers*/
-// console.log('just before defining load_stop_markers');
 function load_stop_markers() {
 
     // if the map has the stops_layer_group, get rid of it
@@ -415,18 +425,13 @@ function load_stop_markers() {
 		
 	var load_data_url = generate_proxy_url(api_base_url+'stops/by-feed/anaheim-ca-us/route-id/'+route_ids_list);
 
-	//console.log('just before load_data');
-
     //  async approach
     load_data_async(load_data_url, null,'', function(data){
     
-    //console.log(data);
 	
 	stop_icons();
 	
-		//console.log('load_data_was_fired');
         stops = data;
-        //console.log(stops);
         if (stops !== null) {
 
             for (var i = 0; i < stops.length; i++) {
@@ -441,15 +446,12 @@ function load_stop_markers() {
 						stops[i].color = get_route_color_for_id(stops[i].routes[0].route_id);
 						
 						var route_info = get_route_info_for_id(stops[i].routes[0].route_id);
-						console.log("route_short_name:"+route_info.route_short_name+"-");
 						stops[i].route_short_name = route_info.route_short_name;
-						//console.log('stops['+i+'].color: '+stops[i].color);
 					}
                     
-                console.log("icon_id:"+ stops[i].icon_id);
                 var LamMarker = new L.marker([stops[i].geojson.coordinates[1], stops[i].geojson.coordinates[0]], {
                    // icon: StopIcons[stops[i].color]
-                   // draggable: <?php echo $dragable_icons; ?>,
+                   draggable: <?php echo $dragable_icons; ?>,
                    icon: StopIcons[stops[i].route_short_name]
                 }).bindPopup('', {maxWidth: 400});
                 
@@ -462,9 +464,6 @@ function load_stop_markers() {
                 LamMarker.on('popupopen', update_stop_info);
                 LamMarker.on('popupclose', close_popup_update_map);
 				
-				//console.log(LamMarker);
-				
-				//console.log(LamMarker.getLatLng());
 
                 stop_markers.push(LamMarker);
                 stops_layer_group.addLayer(stop_markers[i]);
@@ -503,12 +502,11 @@ function remove_route_alignment(ids) {
 
 function create_landmark_marker(i,width,height,landmark_id,icon_index,landmark_lat,landmark_lon,filename) {
 
-console.log('icon_index: '+icon_index);
 
 var zoom_level_icon = landmark_icon(width,height,icon_index,filename);
 
 		landmark_markers[i] = L.marker([landmark_lat, landmark_lon], {
-		// draggable: <?php echo $dragable_icons; ?>,
+		draggable: <?php echo $dragable_icons; ?>,
 		icon: zoom_level_icon});
 		landmark_markers[i].landmark_id = landmark_id;
 		landmark_markers[i].addTo(map);
@@ -518,7 +516,6 @@ var zoom_level_icon = landmark_icon(width,height,icon_index,filename);
 function landmark_icon(width,height,icon_index,filename) {
 	var current_zoom = map.getZoom();
 	if(typeof current_zoom == 'undefined'){current_zoom = 15;}
-	console.log('current_zoom: '+current_zoom);
 	
 	if (typeof landmark_icons[icon_index].icons == 'undefined') {
 		landmark_icons[icon_index].icons = [];
@@ -528,13 +525,9 @@ function landmark_icon(width,height,icon_index,filename) {
 	
 	landmark_icons[icon_index].icons[current_zoom] = {};
 	
-	console.log('height: '+height);
-	console.log('width: '+width);
 
 	var scaled_width = zoom_icon_scale[current_zoom] * width;
 	var scaled_height = zoom_icon_scale[current_zoom] * height;
-	console.log('scaled_width: '+scaled_width);
-	console.log('scaled_height: '+scaled_height);
 
 	landmark_icons[icon_index].icons[current_zoom] = new L.Icon({ 
 		iconUrl: map_files_base+'map_icons/'+filename,
@@ -544,14 +537,12 @@ function landmark_icon(width,height,icon_index,filename) {
 		
 	}
 
-	console.log(landmark_icons[icon_index].icons[current_zoom]);
 	
 	return landmark_icons[icon_index].icons[current_zoom];
 }
 
 function add_tile_layer(layer_id,z_index) {
 	if (typeof (tile_layer[layer_id]) != "undefined") {
-		//console.log(tile_layer[layer_id]);
 		topLayer = tile_layer[layer_id].addTo(map);
 //		topPane.appendChild(topLayer.getContainer());
 		topLayer.setZIndex(z_index);
@@ -569,16 +560,10 @@ if (e.target.stop_code != '') {
 }
 
 var route_ids_array = get_routes_for_stop_id(e.target.stop_id);
-highlight_route_alignment(route_ids_array);
-
-console.log(routes);
-console.log(route_ids_array);
 
 for (var i = 0, len = route_ids_array.length; i < len; i++) {
-	// console.log(route_ids_array[i]);
 	
 	var route_info = get_route_info_for_id(route_ids_array[i]);
-	console.log(route_info);
 	popup_content = popup_content + '<a href="'+route_info.route_url+'"><i id="icon-xsml-'+route_info.route_short_name+'" class="linked-div" rel="/route-and-schedules/" style="float: left;" ></i></a>'; // need to add link in the rel.
 	
 }
@@ -586,6 +571,9 @@ for (var i = 0, len = route_ids_array.length; i < len; i++) {
 popup_content = popup_content + '<br style="clear: both;" />';
 
 e.target.setPopupContent(popup_content);
+
+if (system_map) {
+highlight_route_alignment(route_ids_array);}
 
 }
 
@@ -596,19 +584,32 @@ unhighlight_route_alignment(route_ids_array);
 
 function highlight_route_alignment(route_ids) {
 		
+		console.log('route_ids');
+		console.log(route_ids);
 		route_ids = encapsulate_in_array(route_ids);
-		console.log('highlight_route_alignment. route_ids: '.route_ids);
+		console.log('route_ids');
+		console.log(route_ids);
 		
-		if (system_map) {
+		// if (system_map) {
+		
 			add_route_alignment(route_ids);
-			update_route_alignment_shadow(route_ids);
-		}
+			console.log('routes_active');
+			console.log(routes_active);
+			
+			// update_route_alignment_shadow(route_ids);
+			
+		// }
 
+		console.log('route_ids.length');
+		console.log(route_ids.length);
+		
 	    for (var i = 0, len = route_ids.length; i < len; i++) {
 			console.log('highlight this alignment: '+route_ids[i]);
 			var route_id = parseInt(route_ids[i]);
 	    	if (routes_active.indexOf(route_id) > -1) {
+	    		console.log('routes_active.indexOf(route_id) > -1');
 				route_layers[route_id].bringToFront();
+				console.log('route_layers[route_id].bringToFront();');
 				route_layers[route_id].setStyle(route_styles[route_id][1]);
 		    }
 
@@ -623,8 +624,11 @@ function unhighlight_route_alignment(route_ids) {
 		update_route_alignment_shadow(route_ids);}
 
 	    for (var i = 0, len = route_ids.length; i < len; i++) {
-	    	var route_id = parseInt(route_ids[i]);
-		    route_layers[route_id].setStyle(route_styles[route_id][0]);
+	    	
+	    	if (routes_active.indexOf(route_id) > -1) {
+				var route_id = parseInt(route_ids[i]);
+				route_layers[route_id].setStyle(route_styles[route_id][0]);
+		    }
 	    }
 
 }
@@ -635,9 +639,7 @@ function change_landmark_sizes() {
     	if (typeof landmark_markers[i] !== 'undefined') {
 			var landmark_id = landmark_markers[i].landmark_id;
 			var icon_index = landmarks[landmark_id].icon_index;
-			console.log ('icon_index: '+icon_index);
 			var height = landmark_icons[icon_index].height;
-			console.log ('height: '+height);
 			var width = landmark_icons[icon_index].width;
 			var filename = landmark_icons[icon_index].filename;
 			landmark_markers[i].setIcon(landmark_icon(width,height,icon_index,filename));
@@ -660,14 +662,6 @@ function toggle_stop_visibility() {
 load_routes();
 load_stop_markers();
 
-if (system_map) {
-	add_tile_layer(0,5);
-	add_tile_layer(1,10);
-}
-else {add_route_alignment(route_ids_array);
-update_route_alignment_shadow(route_ids_array);
-}
-
 $.ajax({
     url: map_files_base+"icons.csv",
     async: false,
@@ -677,6 +671,7 @@ $.ajax({
     dataType: "text"
 });
 
+
 $.ajax({
     url: map_files_base+ "landmarks.csv",
     async: true,
@@ -684,11 +679,9 @@ $.ajax({
         
         var landmarks_array_temp =  $.csv.toObjects(csvd);
         
-        console.log(landmarks_array_temp);
         
         for (var i = 0, len = landmarks_array_temp.length; i < len; i++) {
         
-			console.log(landmarks_array_temp[i].landmark_id);
 		
 			landmarks[landmarks_array_temp[i].landmark_id] = {};
 		
@@ -707,7 +700,6 @@ $.ajax({
 		
 				landmarks[landmarks_array_temp[i].landmark_id].icon_index = icon_index;
 
-				console.log(icon_index);
 
 				var width = landmark_icons[icon_index].width;
 				var height = landmark_icons[icon_index].height;
@@ -715,7 +707,6 @@ $.ajax({
 				var landmark_id = landmarks_array_temp[i].landmark_id;     
 		
 				// var current_zoom = map.getZoom();
-				console.log('current_zoom: '+map.getZoom());
 		
 				create_landmark_marker(i,width,height,landmark_id,icon_index,landmark_lat_temp,landmark_lon_temp,filename);
 		
@@ -733,14 +724,31 @@ $.ajax({
 // executable code
 map.on('load',  function() {
 
+	
+	if (system_map) {
+add_tile_layer(0,5);
+add_tile_layer(1,10);
+}
+else {
+// add_route_alignment(route_ids_array);
+// update_route_alignment_shadow(route_ids_array);
+console.log(routes);
+console.log('highlight_route_alignment(route_ids_array);');
+// highlight_route_alignment(route_ids_array);
+setTimeout(function() {  highlight_route_alignment(route_ids_array); },5);
+
+}
+	
+
 	map.on('zoomend', function() {
-		console.log('zoomend happened.');
 		change_landmark_sizes();
 		toggle_stop_visibility();
 
 	});
 
 });
+
+
 
      	
      	// http://jsfiddle.net/7go98fe4/
