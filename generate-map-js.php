@@ -13,8 +13,9 @@ if (isset($_GET['container_id'])) {$container_id = $_GET['container_id'];}
 
 //
 
-$map_files_base =  "//$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]"; 
+$map_files_base =  "http://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]"; 
 $naked_url_base = "$_SERVER[HTTP_HOST]"; 
+$dragable_icons = "false";
 if (strpos($map_files_base, 'localhost') !== FALSE) { // check if on mamp/apache localhost
 $dragable_icons = "true";
 $naked_url_base .= "/art/";
@@ -52,8 +53,8 @@ var map_files_base = '<?php echo $map_files_base_split[0] ?>';
 var api_base_url = 'http://archive.oregon-gtfs.com/gtfs-api/';
 var route_alignments_tiles = 'trilliumtransit.ca9f8a4a';
 var road_label_tiles = 'trilliumtransit.b1c25bd2';
-tile_layer[0] = new L.tileLayer('http://{s}.tiles.mapbox.com/v3/' + route_alignments_tiles + '/{z}/{x}/{y}.png');
-tile_layer[1] = new L.tileLayer('http://{s}.tiles.mapbox.com/v3/' + road_label_tiles + '/{z}/{x}/{y}.png');
+tile_layer[0] = new L.tileLayer('http://{s}.tiles.mapbox.com/v3/' + route_alignments_tiles + '/{z}/{x}/{y}.png', {detectRetina: true});
+tile_layer[1] = new L.tileLayer('http://{s}.tiles.mapbox.com/v3/' + road_label_tiles + '/{z}/{x}/{y}.png',{detectRetina: true});
 var default_icon_color = '575757';
 
 var ZoomLevelThreshhold = 13;
@@ -72,9 +73,9 @@ zoom_icon_scale[13] = .3;
 zoom_icon_scale[14] = .35;
 zoom_icon_scale[15] = .6;
 zoom_icon_scale[16] = 1;
-zoom_icon_scale[17] = 1;
-zoom_icon_scale[18] = 1;
-zoom_icon_scale[19] = 1;
+zoom_icon_scale[17] = 1.2;
+zoom_icon_scale[18] = 1.2;
+zoom_icon_scale[19] = 1.2;
 
 var unhighlighted_weight = 5;
 var highlighted_weight = 10;
@@ -89,6 +90,13 @@ var map = L.mapbox.map('<?php echo $container_id; ?>', 'trilliumtransit.e8e8e512
 
 // map controls
 map.scrollWheelZoom.disable();
+if (system_map) {
+			 map.fitBounds([
+				[33.797984, -117.924412],
+				[33.813340, -117.909644]
+			]);
+        }
+        
 new L.Control.Zoom({ position: 'bottomright' }).addTo(map);
 
 // FUNCTIONS
@@ -343,10 +351,10 @@ function stop_icons() {
     }
 
 	//StopIcons[default_icon_color] = new StopIcon({iconUrl:map_files_base+"create_image.php?r=13&bw=3&&bc=ffffff&fg="+default_icon_color});
-	StopIcons['-1'] = new StopIcon({iconUrl:"http://<?php echo $naked_url_base; ?>wp-content/themes/art/library/images/route-icons-individual/xsml-multi.png"});	
+	StopIcons['-1'] = new StopIcon({iconUrl:"http://<?php echo $naked_url_base; ?>/wp-content/themes/art/library/images/route-icons-individual/xsml-multi.png"});	
 	for (var i = 0; i < 22; i++) {
 			var route_info = get_route_info_for_id(route_ids_array[i]);
-			StopIcons[""+i] = new StopIcon({iconUrl:"http://<?php echo $naked_url_base; ?>wp-content/themes/art/library/images/route-icons-individual/xsml-"+i+".png"});
+			StopIcons[""+i] = new StopIcon({iconUrl:"http://<?php echo $naked_url_base; ?>/wp-content/themes/art/library/images/route-icons-individual/xsml-"+i+".png"});
 	}
 		
 }
@@ -431,13 +439,8 @@ function load_stop_markers() {
         }
         map.addLayer(stops_layer_group);
         
-        if (system_map) {
-			 map.fitBounds([
-				[33.797984, -117.924412],
-				[33.813340, -117.909644]
-			]);
-        }
-        else {
+        if (!system_map) {
+			 
 	        map.fitBounds(stops_layer_group.getBounds());
 	        }
         
@@ -559,6 +562,7 @@ function highlight_route_alignment(route_ids) {
 			add_route_alignment(route_ids);
 			update_route_alignment_shadow(route_ids);
 		}
+		
 
 	    for (var i = 0, len = route_ids.length; i < len; i++) {
 			console.log('highlight this alignment: '+route_ids[i]);
@@ -569,6 +573,7 @@ function highlight_route_alignment(route_ids) {
 		    }
 
 	    }
+	    
 }
 
 function unhighlight_route_alignment(route_ids) {
@@ -620,8 +625,10 @@ if (system_map) {
 	add_tile_layer(0,5);
 	add_tile_layer(1,10);
 }
-else {add_route_alignment(route_ids_array);
+else {
 update_route_alignment_shadow(route_ids_array);
+add_route_alignment(route_ids_array);
+
 }
 
 $.ajax({
