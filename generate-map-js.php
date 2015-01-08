@@ -481,7 +481,10 @@ function load_stop_markers() {
         
         if (!system_map) {
 			 
-	        map.fitBounds(stops_layer_group.getBounds());
+	       map.fitBounds(stops_layer_group.getBounds(), {animate: false});
+	        // add zoom stuff here.
+	        change_landmark_sizes();
+	          
 	        }
         
     });
