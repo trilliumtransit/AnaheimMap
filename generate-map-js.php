@@ -87,7 +87,7 @@ else {var route_ids_list = route_ids_array.join();}
 
 // mapbox token, basemap
 L.mapbox.accessToken = 'pk.eyJ1IjoidHJpbGxpdW10cmFuc2l0IiwiYSI6ImVUQ2x0blUifQ.2-Z9TGHmyjRzy5GC1J9BTw';
-var map = L.mapbox.map('<?php echo $container_id; ?>', 'trilliumtransit.e8e8e512', { zoomControl: false });
+var map = L.mapbox.map('<?php echo $container_id; ?>', 'trilliumtransit.e8e8e512', { zoomControl: false, zoomAnimation: false });
 
 // map controls
 map.scrollWheelZoom.disable();
@@ -753,11 +753,14 @@ setTimeout(function() {  highlight_route_alignment(route_ids_array); },5);
 }
 	
 
-	map.on('zoomend', function() {
+	
+
+});
+
+map.on('zoomend', function(e) {
+	
 		change_landmark_sizes();
 		toggle_stop_visibility();
-
-	});
 
 });
 
