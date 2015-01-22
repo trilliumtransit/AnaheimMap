@@ -641,7 +641,7 @@ function refresh_landmark_view() {
 	var marker_set = landmark_markers.Attractions;
 	
     for (var i = 0; i < marker_set.length; i++) {
-    	if (typeof landmark_markers[i] !== 'undefined') {
+    	if (typeof marker_set[i] !== 'undefined') {
 			var landmark_id = marker_set[i].landmark_id;
 			var icon_index = landmarks.Attractions[landmark_id].icon_index;
 			var height = landmark_icons[icon_index].height;
@@ -795,5 +795,4 @@ map.on('zoomend', function(e) {
 // x: "248"
 // y: "16"
 // __proto__: Object
-
 
