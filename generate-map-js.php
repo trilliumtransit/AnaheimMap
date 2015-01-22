@@ -662,6 +662,12 @@ function toggle_stop_visibility() {
     }
 }
 
+function add_object_property(property_name,object) {
+	if (!object.hasOwnProperty(property_name)) {
+		object[property_name] = Array();
+	}
+}
+
 // execute this to set up map
 
 load_routes();
