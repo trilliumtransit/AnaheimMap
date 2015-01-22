@@ -505,16 +505,18 @@ function remove_route_alignment(ids) {
 }
 
 
-function create_landmark_marker(i,width,height,landmark_id,icon_index,landmark_lat,landmark_lon,filename) {
+function create_landmark_marker(i,width,height,landmark_id,icon_index,landmark_lat,landmark_lon,filename,category_name) {
 
+add_object_property(category_name,landmark_markers);
 
 var zoom_level_icon = landmark_icon(width,height,icon_index,filename);
 
-		landmark_markers[i] = L.marker([landmark_lat, landmark_lon], {
+
+		landmark_markers[category_name][i] = L.marker([landmark_lat, landmark_lon], {
 		draggable: <?php echo $dragable_icons; ?>,
 		icon: zoom_level_icon});
-		landmark_markers[i].landmark_id = landmark_id;
-		landmark_markers[i].addTo(map);
+		landmark_markers[category_name][i].landmark_id = landmark_id;
+		landmark_markers[category_name][i].addTo(map);
 
 }
 
@@ -634,16 +636,18 @@ function unhighlight_route_alignment(route_ids) {
 
 }
 
-function change_landmark_sizes() {
+function refresh_landmark_view() {
 	
-    for (var i = 0; i < landmark_markers.length; i++) {
+	var marker_set = landmark_markers.Attractions;
+	
+    for (var i = 0; i < marker_set.length; i++) {
     	if (typeof landmark_markers[i] !== 'undefined') {
-			var landmark_id = landmark_markers[i].landmark_id;
-			var icon_index = landmarks[landmark_id].icon_index;
+			var landmark_id = marker_set[i].landmark_id;
+			var icon_index = landmarks.Attractions[landmark_id].icon_index;
 			var height = landmark_icons[icon_index].height;
 			var width = landmark_icons[icon_index].width;
 			var filename = landmark_icons[icon_index].filename;
-			landmark_markers[i].setIcon(landmark_icon(width,height,icon_index,filename));
+			marker_set[i].setIcon(landmark_icon(width,height,icon_index,filename));
     	}
     }
 
@@ -692,26 +696,30 @@ $.ajax({
         
         var landmarks_array_temp =  $.csv.toObjects(csvd);
         
+        console.log(landmarks_array_temp);
         
         for (var i = 0, len = landmarks_array_temp.length; i < len; i++) {
         
+        	var category_name = landmarks_array_temp[i].category_name;
+        	
+        	add_object_property(landmarks_array_temp[i].category_name,landmarks);
 		
-			landmarks[landmarks_array_temp[i].landmark_id] = {};
+			landmarks[category_name][landmarks_array_temp[i].landmark_id] = {};
 		
-			landmarks[landmarks_array_temp[i].landmark_id].landmark_name = landmarks_array_temp[i].landmark_name;
-			landmarks[landmarks_array_temp[i].landmark_id].category_name = landmarks_array_temp[i].category_name;
-			landmarks[landmarks_array_temp[i].landmark_id].landmark_url = landmarks_array_temp[i].landmark_url;
+			landmarks[category_name][landmarks_array_temp[i].landmark_id].landmark_name = landmarks_array_temp[i].landmark_name;
+			landmarks[category_name][landmarks_array_temp[i].landmark_id].category_name = landmarks_array_temp[i].category_name;
+			landmarks[category_name][landmarks_array_temp[i].landmark_id].landmark_url = landmarks_array_temp[i].landmark_url;
 			var landmark_lat_temp = landmarks_array_temp[i].lat;
-			landmarks[landmarks_array_temp[i].landmark_id].lat = landmark_lat_temp;
+			landmarks[category_name][landmarks_array_temp[i].landmark_id].lat = landmark_lat_temp;
 			var landmark_lon_temp = landmarks_array_temp[i].lon;
-			landmarks[landmarks_array_temp[i].landmark_id].lon = landmark_lon_temp;
-			landmarks[landmarks_array_temp[i].landmark_id].icon_id = landmarks_array_temp[i].icon_id;
+			landmarks[category_name][landmarks_array_temp[i].landmark_id].lon = landmark_lon_temp;
+			landmarks[category_name][landmarks_array_temp[i].landmark_id].icon_id = landmarks_array_temp[i].icon_id;
 		
 			var icon_index = get_icon_index_for_icon(landmarks_array_temp[i].icon_id);
 		
 			if (typeof icon_index !== 'undefined') {
 		
-				landmarks[landmarks_array_temp[i].landmark_id].icon_index = icon_index;
+				landmarks[category_name][landmarks_array_temp[i].landmark_id].icon_index = icon_index;
 
 
 				var width = landmark_icons[icon_index].width;
@@ -721,7 +729,7 @@ $.ajax({
 		
 				// var current_zoom = map.getZoom();
 		
-				create_landmark_marker(i,width,height,landmark_id,icon_index,landmark_lat_temp,landmark_lon_temp,filename);
+				create_landmark_marker(i,width,height,landmark_id,icon_index,landmark_lat_temp,landmark_lon_temp,filename,category_name);
 		
         	}
         
@@ -733,6 +741,7 @@ $.ajax({
     dataType: "text"
 		
 });
+
 
 // executable code
 map.on('load',  function() {
@@ -759,7 +768,7 @@ setTimeout(function() {  highlight_route_alignment(route_ids_array); },5);
 
 map.on('zoomend', function(e) {
 	
-		change_landmark_sizes();
+		refresh_landmark_view();
 		toggle_stop_visibility();
 
 });
