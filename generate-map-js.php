@@ -40,11 +40,13 @@ var topLayer;
 var zoom_icon_scale = Array();
 var landmarks = Array();
 var landmark_icons = Array();
+var landmark_categories = Array();
 
 var tile_layer = new Array();
 // tile_layer[1] = new L.tileLayer('http://{s}.tiles.mapbox.com/v3/'+map_id_labels+'/{z}/{x}/{y}.png');
 
 var landmark_markers = Array();
+var landmark_markers_group = L.featureGroup();
 
 // define which routes
 var route_ids_array = [<?php echo $routes ?>];
@@ -296,8 +298,9 @@ function add_route_alignment(ids) {
 	    
 			var index = get_routes_array_index_from_id(id);
 
-			var geojson = routes[index].shared_arcs_geojson || routes[index].geojson;
-
+			var geojson = routes[index].simple_00004_geojson || routes[index].geojson;
+			// var geojson = routes[index].simple_u_geojson;
+			
 					route_styles[id] = [];
 					
 					
@@ -371,8 +374,8 @@ function update_route_alignment_shadow(ids) {
 	    
 			var index = get_routes_array_index_from_id(id);
 
-			var geojson = routes[index].shared_arcs_geojson || routes[index].geojson;
-
+			var geojson = routes[index].simple_00004_geojson || routes[index].geojson;
+			// var geojson = routes[index].simple_u_geojson;
 
 			route_shadows[id] = L.geoJson(geojson, {
 				style: {
@@ -490,7 +493,6 @@ function load_stop_markers() {
     });
 }
 
-
 function remove_route_alignment(ids) {
 	ids = encapsulate_in_array(ids);
 
@@ -505,19 +507,71 @@ function remove_route_alignment(ids) {
 }
 
 
-function create_landmark_marker(i,width,height,landmark_id,icon_index,landmark_lat,landmark_lon,filename,category_name) {
+function create_landmark_marker(i,width,height,landmark_id,icon_index,landmark_lat,landmark_lon,filename,category_name,landmark_name) {
 
-add_object_property(category_name,landmark_markers);
+	if (!isInArray(category_name,landmark_categories)) {
+		landmark_categories.push(category_name);
+	}
+ 
+	add_object_property(category_name,landmark_markers);
 
-var zoom_level_icon = landmark_icon(width,height,icon_index,filename);
+	var zoom_level_icon = landmark_icon(width,height,icon_index,filename);
+
+	landmark_markers[category_name][i] = L.marker([landmark_lat, landmark_lon], {
+	draggable: <?php echo $dragable_icons; ?>,
+	icon: zoom_level_icon,
+	title: landmark_name}).bindPopup(landmark_name, {maxWidth: 400});
+		
+
+landmark_markers[category_name][i].landmark_id = landmark_id;
+landmark_markers[category_name][i].landmark_name = landmark_name;
+		
+}
+
+// LamMarker.on('popupopen', update_stop_info);
+// LamMarker.on('popupclose', close_popup_update_map);
+// 
+// stop_markers.push(LamMarker);
+// stops_layer_group.addLayer(stop_markers[i]);
+// stops_layer_group.addLayer(stop_markers[i]);
 
 
-		landmark_markers[category_name][i] = L.marker([landmark_lat, landmark_lon], {
-		draggable: <?php echo $dragable_icons; ?>,
-		icon: zoom_level_icon});
-		landmark_markers[category_name][i].landmark_id = landmark_id;
-		landmark_markers[category_name][i].addTo(map);
+function update_landmark_info(e) {
 
+console.log('update_landmark_info has fired.');
+console.log(e);
+
+var popup_content = '<h3 class="stop_name">'+e.target.landmark_name+'</h3>';
+
+// if (e.target.stop_code != '') {
+// 	popup_content = popup_content+ '<p>text2go code: '+e.target.stop_code+'</p><p>Click a route to see the stop list:</p>';
+// }
+// 
+// var route_ids_array = get_routes_for_stop_id(e.target.stop_id);
+// 
+// for (var i = 0, len = route_ids_array.length; i < len; i++) {
+// 	
+// 	var route_info = get_route_info_for_id(route_ids_array[i]);
+// 	popup_content = popup_content + '<a href="'+route_info.route_url+'"><i id="icon-xsml-'+route_info.route_short_name+'" class="linked-div" rel="/route-and-schedules/" style="float: left;" ></i></a>'; // need to add link in the rel.
+// 	
+// }
+// 
+// popup_content = popup_content + '<br style="clear: both;" />';
+// 
+e.target.setPopupContent(popup_content);
+// 
+// if (system_map) {
+// highlight_route_alignment(route_ids_array);}
+
+}
+
+function update_stop_info(e) {
+    // console.log(e);
+    var stop_info_url = "stop_info.php?stop_id=" + e.target.stop_id;
+    // console.log(stop_info_url);
+    load_data_async(stop_info_url, 'html', remote_base, function(data){
+        e.target.setPopupContent(data);
+    });
 }
 
 function landmark_icon(width,height,icon_index,filename) {
@@ -637,20 +691,25 @@ function unhighlight_route_alignment(route_ids) {
 }
 
 function refresh_landmark_view() {
+		for (var category_i = 0; category_i < landmark_categories.length; category_i++) {
 	
-	var marker_set = landmark_markers.Attractions;
-	
-    for (var i = 0; i < marker_set.length; i++) {
-    	if (typeof marker_set[i] !== 'undefined') {
-			var landmark_id = marker_set[i].landmark_id;
-			var icon_index = landmarks.Attractions[landmark_id].icon_index;
-			var height = landmark_icons[icon_index].height;
-			var width = landmark_icons[icon_index].width;
-			var filename = landmark_icons[icon_index].filename;
-			marker_set[i].setIcon(landmark_icon(width,height,icon_index,filename));
-    	}
-    }
-
+		var category_name = landmark_categories[category_i]
+		var marker_set = landmark_markers[category_name];
+		console.log(marker_set);
+		
+		for (var i = 0; i < marker_set.length; i++) {
+			if (typeof marker_set[i] !== 'undefined') {
+				var landmark_id = marker_set[i].landmark_id;
+				console.log('landmark_id: '+landmark_id);
+				console.log('landmarks['+category_name+']['+landmark_id+'].icon_index');
+				var icon_index = landmarks[category_name][landmark_id].icon_index;
+				var height = landmark_icons[icon_index].height;
+				var width = landmark_icons[icon_index].width;
+				var filename = landmark_icons[icon_index].filename;
+				marker_set[i].setIcon(landmark_icon(width,height,icon_index,filename));
+			}
+		}
+	}
 }
 
 function toggle_stop_visibility() {
@@ -696,7 +755,7 @@ $.ajax({
 
 
 $.ajax({
-    url: map_files_base+ "landmarks.csv",
+    url: map_files_base+ "landmarks_all.csv",
     async: true,
     success: function (csvd) {
         
@@ -713,6 +772,7 @@ $.ajax({
 			landmarks[category_name][landmarks_array_temp[i].landmark_id] = {};
 		
 			landmarks[category_name][landmarks_array_temp[i].landmark_id].landmark_name = landmarks_array_temp[i].landmark_name;
+			landmark_name = landmarks_array_temp[i].landmark_name;
 			landmarks[category_name][landmarks_array_temp[i].landmark_id].category_name = landmarks_array_temp[i].category_name;
 			landmarks[category_name][landmarks_array_temp[i].landmark_id].landmark_url = landmarks_array_temp[i].landmark_url;
 			var landmark_lat_temp = landmarks_array_temp[i].lat;
@@ -735,13 +795,22 @@ $.ajax({
 		
 				// var current_zoom = map.getZoom();
 		
-				create_landmark_marker(i,width,height,landmark_id,icon_index,landmark_lat_temp,landmark_lon_temp,filename,category_name);
+				create_landmark_marker(i,width,height,landmark_id,icon_index,landmark_lat_temp,landmark_lon_temp,filename,category_name,landmark_name);
+				
+				var LamMarker = landmark_markers[category_name][i];
+				LamMarker.on('popupopen', update_landmark_info);
+				
+				var new_array_length = landmark_markers.push(LamMarker) - 1;
+				landmark_markers_group.addLayer(landmark_markers[new_array_length]);
+
 		
         	}
         
 
 		
 		}
+		
+		map.addLayer(landmark_markers_group);
 		
 		},
     dataType: "text"
