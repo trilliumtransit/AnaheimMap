@@ -302,7 +302,8 @@ otp.modules.planner.PlannerModule =
                 //time : (this.time) ? moment(this.time).add("s", addToStart).format("h:mma") : moment().add("s", addToStart).format("h:mma"),
                 date : (this.date) ? this.date : moment().format("MM-DD-YYYY"),
                 mode: this.mode,
-                maxWalkDistance: this.maxWalkDistance
+                maxWalkDistance: this.maxWalkDistance,
+                walkReluctance: this.walkReluctance,
             };
             if(this.arriveBy !== null) _.extend(queryParams, { arriveBy : this.arriveBy } );
             if(this.preferredRoutes !== null) {

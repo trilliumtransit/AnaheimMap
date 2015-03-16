@@ -91,7 +91,9 @@ otp.widgets.ItinerariesWidget =
         }            
         
         this.itineraries = [] 
-       this.itineraries = this.itineraries.concat( itineraries.sort( 
+        this.itineraries = itineraries;
+        /*
+        this.itineraries = this.itineraries.concat( itineraries.sort( 
           function (a,b) { 
              // sort by walk distance, ascending
              if (a.totalWalk == b.totalWalk) {
@@ -99,6 +101,7 @@ otp.widgets.ItinerariesWidget =
              }
              return (a.totalWalk - b.totalWalk);
             }));
+            */
 
 
         this.clear();
