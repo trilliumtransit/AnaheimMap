@@ -90,7 +90,16 @@ otp.widgets.ItinerariesWidget =
             return;
         }            
         
-        this.itineraries = itineraries;
+        this.itineraries = [] 
+       this.itineraries = this.itineraries.concat( itineraries.sort( 
+          function (a,b) { 
+             // sort by walk distance, ascending
+             if (a.totalWalk == b.totalWalk) {
+                return a.endTime - b.endTime;
+             }
+             return (a.totalWalk - b.totalWalk);
+            }));
+
 
         this.clear();
         this.setTitle(this.itineraries.length+" Itineraries Returned");
@@ -186,6 +195,8 @@ otp.widgets.ItinerariesWidget =
             _.extend(params, { 
                 startTransitStopId :  stopId,
                 time : otp.util.Time.formatItinTime(newEndTime, "h:mma"),
+                // ED : remove times
+                // time : " ",
                 date : otp.util.Time.formatItinTime(newEndTime, "MM-DD-YYYY"),
                 arriveBy : true
             });
@@ -201,6 +212,8 @@ otp.widgets.ItinerariesWidget =
             _.extend(params, {
                 startTransitStopId :  stopId,
                 time : otp.util.Time.formatItinTime(newStartTime, "h:mma"),
+                // ED : remove times
+                // time : " ",
                 date : otp.util.Time.formatItinTime(newStartTime, "MM-DD-YYYY"),
                 arriveBy : false
             });
@@ -273,11 +286,13 @@ otp.widgets.ItinerariesWidget =
         
         var timeStr = otp.util.Time.formatItinTime(itin.getStartTime(), 'h:mma');
         timeStr = timeStr.substring(0, timeStr.length - 1);
-        div.append('<div class="otp-itinsAccord-header-time" style="left: '+(leftPx-32)+'px;">' + timeStr + '</div>');
+        // ED: remove times
+        // div.append('<div class="otp-itinsAccord-header-time" style="left: '+(leftPx-32)+'px;">' + timeStr + '</div>');
         
         var timeStr = otp.util.Time.formatItinTime(itin.getEndTime(), 'h:mma');
         timeStr = timeStr.substring(0, timeStr.length - 1);
-        div.append('<div class="otp-itinsAccord-header-time" style="left: '+(leftPx+widthPx+2)+'px;">' + timeStr + '</div>');
+        // ED: remove times
+        // div.append('<div class="otp-itinsAccord-header-time" style="left: '+(leftPx+widthPx+2)+'px;">' + timeStr + '</div>');
         
         for(var l=0; l<itin.itinData.legs.length; l++) {
             var leg = itin.itinData.legs[l];
@@ -288,7 +303,8 @@ otp.widgets.ItinerariesWidget =
     
             //div.append('<div class="otp-itinsAccord-header-segment" style="width: '+widthPx+'px; left: '+leftPx+'px; background: '+this.getModeColor(leg.mode)+' url(images/mode/'+leg.mode.toLowerCase()+'.png) center no-repeat;"></div>');
             
-            var showRouteLabel = widthPx > 40 && otp.util.Itin.isTransit(leg.mode) && leg.routeShortName && leg.routeShortName.length <= 6;
+            var showRouteLabel = widthPx > 40 && otp.util.Itin.isTransit(leg.mode) 
+                                 && leg.routeShortName && leg.routeShortName.length <= 6;
             var segment = $('<div class="otp-itinsAccord-header-segment" />')
             .css({
                 width: widthPx,
@@ -366,6 +382,11 @@ otp.widgets.ItinerariesWidget =
                     headerHtml += leg.routeLongName;
                 }
 
+                // ED: first attempt to include PDF link to route schedule.
+                if (leg.routeURL) {
+                    headerHtml += '<a href="'+ leg.routeURL +'">' + leg.routeURL + '</a>';
+                }
+
                 if(leg.headsign) {
                     headerHtml +=  " to " + leg.headsign;
                 }
@@ -423,16 +444,19 @@ otp.widgets.ItinerariesWidget =
         }
         
         // add start and end time rows and the main leg accordion display 
-        itinDiv.append("<div class='otp-itinStartRow'><b>Start</b>: "+itin.getStartTimeStr()+"</div>");
+        // itinDiv.append("<div class='otp-itinStartRow'><b>Start</b>: "+itin.getStartTimeStr()+"</div>");
+        // itinDiv.append("<div class='otp-itinStartRow'><b>Start</b>: "+"foo"+"</div>");
         itinDiv.append(itinAccord);
-        itinDiv.append("<div class='otp-itinEndRow'><b>End</b>: "+itin.getEndTimeStr()+"</div>");
+        // itinDiv.append("<div class='otp-itinEndRow'><b>End</b>: "+"bar"+"</div>");
+        // itinDiv.append("<div class='otp-itinEndRow'><b>End</b>: "+itin.getEndTimeStr()+"</div>");
 
         // add trip summary
 
         var tripSummary = $('<div class="otp-itinTripSummary" />')
         .append('<div class="otp-itinTripSummaryHeader">Trip Summary</div>')
-        .append('<div class="otp-itinTripSummaryLabel">Travel</div><div class="otp-itinTripSummaryText">'+itin.getStartTimeStr()+'</div>')
-        .append('<div class="otp-itinTripSummaryLabel">Time</div><div class="otp-itinTripSummaryText">'+itin.getDurationStr()+'</div>');
+        // ED: omit travel time.
+        // .append('<div class="otp-itinTripSummaryLabel">Travel</div><div class="otp-itinTripSummaryText">'+itin.getStartTimeStr()+'</div>')
+        // .append('<div class="otp-itinTripSummaryLabel">Time</div><div class="otp-itinTripSummaryText">'+itin.getDurationStr()+'</div>');
         
         var walkDistance = itin.getModeDistance("WALK");
         if(walkDistance > 0) {
@@ -452,7 +476,8 @@ otp.widgets.ItinerariesWidget =
                 tripSummary.append('<div class="otp-itinTripSummaryLabel">Total Walk</div><div class="otp-itinTripSummaryText">' + 
                     otp.util.Itin.distanceString(itin.itinData.walkDistance) + '</div>')
             }*/
-            tripSummary.append('<div class="otp-itinTripSummaryLabel">Fare</div><div class="otp-itinTripSummaryText">'+itin.getFareStr()+'</div>');
+            // ED: exclude fare
+            // tripSummary.append('<div class="otp-itinTripSummaryLabel">Fare</div><div class="otp-itinTripSummaryText">'+itin.getFareStr()+'</div>');
         }
         
         
@@ -498,9 +523,13 @@ otp.widgets.ItinerariesWidget =
 
             // prevaricate if this is a nonstruct frequency trip
             if( leg.isNonExactFrequency === true ){
+            	// $('<div class="otp-itin-leg-leftcol">every '+(leg.headway/60)+" mins</div>").appendTo(legDiv);
+                // ED : remove times
             	$('<div class="otp-itin-leg-leftcol">every '+(leg.headway/60)+" mins</div>").appendTo(legDiv);
             } else {
-                $('<div class="otp-itin-leg-leftcol">'+otp.util.Time.formatItinTime(leg.startTime, "h:mma")+"</div>").appendTo(legDiv);
+                // $('<div class="otp-itin-leg-leftcol">'+otp.util.Time.formatItinTime(leg.startTime, "h:mma")+"</div>").appendTo(legDiv);
+                // ED : remove times
+                $('<div class="otp-itin-leg-leftcol">' + "</div>").appendTo(legDiv);
             }
 
             var startHtml = '<div class="otp-itin-leg-endpointDesc">' + (leg.interlineWithPreviousLeg ? "<b>Depart</b> " : "<b>Board</b> at ") +leg.from.name;
@@ -602,9 +631,12 @@ otp.widgets.ItinerariesWidget =
             $('<div class="otp-itin-leg-buffer"></div>').appendTo(legDiv);            
 
             if( leg.isNonExactFrequency === true ) {
-            	$('<div class="otp-itin-leg-leftcol">late as '+otp.util.Time.formatItinTime(leg.endTime, "h:mma")+"</div>").appendTo(legDiv);   
+            	// $('<div class="otp-itin-leg-leftcol">late as '+otp.util.Time.formatItinTime(leg.endTime, "h:mma")+"</div>").appendTo(legDiv);   
+                // ED : remove times
+            	$('<div class="otp-itin-leg-leftcol"></div>').appendTo(legDiv);   
             } else {
-            	$('<div class="otp-itin-leg-leftcol">'+otp.util.Time.formatItinTime(leg.endTime, "h:mma")+"</div>").appendTo(legDiv);   
+            	// $('<div class="otp-itin-leg-leftcol">'+otp.util.Time.formatItinTime(leg.endTime, "h:mma")+"</div>").appendTo(legDiv);   
+            	$('<div class="otp-itin-leg-leftcol"></div>').appendTo(legDiv);   
             }
 
             var endAction = (nextLeg && nextLeg.interlineWithPreviousLeg) ? "Stay on board" : "Alight";

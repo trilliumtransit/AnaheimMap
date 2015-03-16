@@ -317,7 +317,8 @@ otp.modules.planner.IconFactory = otp.Class({
         html += '<img src="'+otp.config.resourcePath+'images/mode/'+mode+'.png">';
         if(isOrigin) html += '<img src="'+otp.config.resourcePath+'images/mode/arrow.png" style="margin-left:2px;">';
         html += '</div>';
-        html +=  otp.util.Time.formatItinTime(time, "h:mm");
+        // ED : remove times
+        // html +=  otp.util.Time.formatItinTime(time, "h:mm");
         
         if(quadrant === 'nw') anchor = [32,44];
         if(quadrant === 'ne') anchor = [0,44];
