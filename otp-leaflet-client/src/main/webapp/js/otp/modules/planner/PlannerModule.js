@@ -31,6 +31,9 @@ otp.modules.planner.defaultQueryParams = {
     triangleTimeFactor              : 0.333,
     triangleSlopeFactor             : 0.333,
     triangleSafetyFactor            : 0.334,
+    // ED: walkReluctance = how much worse is walking for an hour than waiting
+    //     for an hour? the default is 2.
+    walkReluctance                  : 10, 
 }
 
 otp.modules.planner.PlannerModule = 
