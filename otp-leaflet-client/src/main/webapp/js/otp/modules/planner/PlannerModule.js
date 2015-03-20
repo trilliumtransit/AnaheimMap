@@ -33,7 +33,11 @@ otp.modules.planner.defaultQueryParams = {
     triangleSafetyFactor            : 0.334,
     // ED: walkReluctance = how much worse is walking for an hour than waiting
     //     for an hour? the default is 2.
-    walkReluctance                  : 10, 
+    // walkReluctance                  : 10, 
+    walkReluctance                  : 40, 
+    // walkSpeed is in meters/second. 1.33m/s ~= 3 miles/hour
+    // 0.4 is approximately 1 mile per hour. these folks are herding kids!
+    walkSpeed : 0.3,
 }
 
 otp.modules.planner.PlannerModule = 
@@ -304,6 +308,7 @@ otp.modules.planner.PlannerModule =
                 mode: this.mode,
                 maxWalkDistance: this.maxWalkDistance,
                 walkReluctance: this.walkReluctance,
+                walkSpeed: this.walkSpeed,
             };
             if(this.arriveBy !== null) _.extend(queryParams, { arriveBy : this.arriveBy } );
             if(this.preferredRoutes !== null) {

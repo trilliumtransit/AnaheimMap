@@ -14,6 +14,33 @@
 
 otp.namespace("otp.widgets");
 
+var api_routes_by_id = [] ;
+var api_routes_callback = function(data, textStatus, jqXHR ) {
+    // alert ("gtfs api returned data, status = " + textStatus);
+    // console.log ("gtfs api returned data = " + data);
+    var i = 0;
+    for (i = 0; i < data.length; ++i) {
+        route = data[i];
+        // console.log("route = " + route);
+        api_routes_by_id[route.route_id] = route;
+    };
+}
+
+// ED fetch routeUrl from GTFS API
+// Load on page load. TODO: add error checking and retries here.
+jQuery.getJSON("http://gtfs-api.ed-groth.com/gtfs-api/routes/by-feed/anaheim-ca-us", "", api_routes_callback );
+
+var api_stops_by_id = [] ;
+jQuery.getJSON("http://gtfs-api.ed-groth.com/gtfs-api/stops/by-feed/anaheim-ca-us",
+               "", 
+               function( data, textStatus, jqXHR) { 
+                   var i = 0;
+                   for (i = 0; i < data.length; ++i) {
+                       stop = data[i];
+                       api_stops_by_id[stop.stop_id] = stop;
+                   }
+               });
+       
 otp.widgets.ItinerariesWidget = 
     otp.Class(otp.widgets.Widget, {
 
@@ -91,8 +118,8 @@ otp.widgets.ItinerariesWidget =
         }            
         
         this.itineraries = [] 
-        this.itineraries = itineraries;
-        /*
+        /* this.itineraries = itineraries; */
+        
         this.itineraries = this.itineraries.concat( itineraries.sort( 
           function (a,b) { 
              // sort by walk distance, ascending
@@ -101,7 +128,6 @@ otp.widgets.ItinerariesWidget =
              }
              return (a.totalWalk - b.totalWalk);
             }));
-            */
 
 
         this.clear();
@@ -385,11 +411,6 @@ otp.widgets.ItinerariesWidget =
                     headerHtml += leg.routeLongName;
                 }
 
-                // ED: first attempt to include PDF link to route schedule.
-                if (leg.routeURL) {
-                    headerHtml += '<a href="'+ leg.routeURL +'">' + leg.routeURL + '</a>';
-                }
-
                 if(leg.headsign) {
                     headerHtml +=  " to " + leg.headsign;
                 }
@@ -397,6 +418,7 @@ otp.widgets.ItinerariesWidget =
                 if(leg.alerts) {
                     headerHtml += '&nbsp;&nbsp;<img src="images/alert.png" style="vertical-align: -20%;" />';
                 }
+
             }
             
             $("<h3>"+headerHtml+"</h3>").appendTo(legDiv).data('leg', leg).hover(function(evt) {
@@ -421,7 +443,7 @@ otp.widgets.ItinerariesWidget =
                 header : 'h3',
                 active: otp.util.Itin.isTransit(leg.mode) ? 0 : false,
                 heightStyle: "content",
-                collapsible: true
+                collapsible: false
             });
         }
         
@@ -535,7 +557,9 @@ otp.widgets.ItinerariesWidget =
                 $('<div class="otp-itin-leg-leftcol">' + "</div>").appendTo(legDiv);
             }
 
-            var startHtml = '<div class="otp-itin-leg-endpointDesc">' + (leg.interlineWithPreviousLeg ? "<b>Depart</b> " : "<b>Board</b> at ") +leg.from.name;
+            var startHtml = '<div class="otp-itin-leg-endpointDesc">' 
+                          + (leg.interlineWithPreviousLeg ? "<b>Depart</b> " : "<b>Board</b> at ") 
+                          + leg.from.name;
             if(otp.config.municoderHostname) {
                 var spanId = this.newMunicoderRequest(leg.from.lat, leg.from.lon);
                 startHtml += '<span id="'+spanId+'"></span>';
@@ -554,7 +578,9 @@ otp.widgets.ItinerariesWidget =
             });
             
 
-            $('<div class="otp-itin-leg-endpointDescSub">Stop #'+leg.from.stopId.id+' [<a href="#">Stop Viewer</a>]</div>')
+            // $('<div class="otp-itin-leg-endpointDescSub">Stop #'+leg.from.stopId.id+' [<a href="#">Stop Viewer</a>]</div>')
+            var stop_code = api_stops_by_id [ leg.from.stopId.id ]. stop_code;
+            $('<div class="otp-itin-leg-endpointDesc">Stop Text2Go Code #' + stop_code + '</div>')
             .appendTo(legDiv)
             .click(function(evt) {
                 if(!this_.module.stopViewerWidget) {
@@ -575,6 +601,15 @@ otp.widgets.ItinerariesWidget =
             var inTransitDiv = $('<div class="otp-itin-leg-elapsedDesc" />').appendTo(legDiv);
 
             $('<span><i>Time in transit: '+otp.util.Time.secsToHrMin(leg.duration)+'</i></span>').appendTo(inTransitDiv);
+
+            // ED: second attempt to include PDF link to route schedule.
+            //if (leg.routeUrl) {
+            // console.log("route_id" + leg.routeId);
+            leg.routeUrl = api_routes_by_id[leg.routeId].route_url;
+            if (leg.routeUrl) {
+                 var routeUrlDiv = $('<div class="otp-itin-leg-routeUrl" />').appendTo(legDiv);
+                 $('<span><i>Route Schedule: <a href="'+ leg.routeUrl +'">' + leg.routeUrl + '</a>').appendTo(routeUrlDiv);
+            }
 
             $('<span>&nbsp;[<a href="#">Trip Viewer</a>]</span>')
             .appendTo(inTransitDiv)
