@@ -14,6 +14,35 @@
 
 otp.namespace("otp.widgets");
 
+
+// <script src="http://momentjs.com/downloads/moment.min.js"></script>
+var bus_span_early_and_late = function (route_id) {
+        var span = Object; // return value
+        span.early = null;
+        span.late = null;
+        var today = new Date();
+        var month = today.getMonth() +1;
+        var date_for_query = today.getFullYear() + '-' + month + '-' + today.getDate();
+        // console.log(date_for_query);
+        var gtfs_api_span_url = 'http://archive.oregon-gtfs.com/gtfs-api/route-span/day-in-la/' 
+                                + date_for_query + '/by-feed/anaheim-ca-us/route-id/' + route_id ;
+        // console.log(gtfs_api_span_url);
+         $.getJSON( gtfs_api_span_url , function( data ) {
+          
+          $.each( data, function( key, val ) {
+            if (key == "early") {
+              // $('.first-bus-today').text("First bus today: "+moment(val.departure_time).format('h:mm a').replace(/^0+/, ''))
+              span.early = moment(val.departure_time).format('h:mm a').replace(/^0+/, '');
+            }
+             if (key == "late") {
+              // $('.last-bus-today').text("Last bus today: "+moment(val.departure_time).format('h:mm a').replace(/^0+/, ''))
+              span.late  = moment(val.departure_time).format('h:mm a').replace(/^0+/, '');
+            }
+          });
+        });
+        return span;
+};
+
 var api_routes_by_id = [] ;
 var api_routes_callback = function(data, textStatus, jqXHR ) {
     // alert ("gtfs api returned data, status = " + textStatus);
@@ -21,6 +50,7 @@ var api_routes_callback = function(data, textStatus, jqXHR ) {
     var i = 0;
     for (i = 0; i < data.length; ++i) {
         route = data[i];
+        route.span = bus_span_early_and_late ( route.route_id );
         // console.log("route = " + route);
         api_routes_by_id[route.route_id] = route;
     };
@@ -40,6 +70,8 @@ jQuery.getJSON("http://gtfs-api.ed-groth.com/gtfs-api/stops/by-feed/anaheim-ca-u
                        api_stops_by_id[stop.stop_id] = stop;
                    }
                });
+
+
        
 otp.widgets.ItinerariesWidget = 
     otp.Class(otp.widgets.Widget, {
@@ -599,17 +631,22 @@ otp.widgets.ItinerariesWidget =
             // show the "time in transit" line
 
             var inTransitDiv = $('<div class="otp-itin-leg-elapsedDesc" />').appendTo(legDiv);
-
             $('<span><i>Time in transit: '+otp.util.Time.secsToHrMin(leg.duration)+'</i></span>').appendTo(inTransitDiv);
 
-            // ED: second attempt to include PDF link to route schedule.
-            //if (leg.routeUrl) {
+            // ED: include PDF link to route schedule.
             // console.log("route_id" + leg.routeId);
             leg.routeUrl = api_routes_by_id[leg.routeId].route_url;
             if (leg.routeUrl) {
                  var routeUrlDiv = $('<div class="otp-itin-leg-routeUrl" />').appendTo(legDiv);
                  $('<span><i>Route Schedule: <a href="'+ leg.routeUrl +'">' + leg.routeUrl + '</a>').appendTo(routeUrlDiv);
             }
+
+            // ED: include route span.
+            // console.log("route_id" + leg.routeId);
+            leg.routeSpan = api_routes_by_id[leg.routeId].span;
+            var routeSpanDiv = $('<div class="otp-itin-leg-routeSpan" />').appendTo(legDiv);
+            $('<span><i>First bus today: ' + leg.routeSpan.early 
+              + '<br /> Last bus today: ' + leg.routeSpan.late + '</i>').appendTo(routeSpanDiv);
 
             $('<span>&nbsp;[<a href="#">Trip Viewer</a>]</span>')
             .appendTo(inTransitDiv)
