@@ -166,7 +166,8 @@
 /* visual tweaks */
 
 .leaflet-container {
-	background: #ddd;
+	/* background: #ddd; */ 
+    background-color: #2068a7;
 	outline: 0;
 	}
 .leaflet-container a {
