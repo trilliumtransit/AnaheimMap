@@ -35,6 +35,7 @@ otp.core.Map = otp.Class({
                 
         //var baseLayers = {};
         var defaultBaseLayer = null;
+        this.extraLayers =  { };
         
         for(var i=0; i<otp.config.baseLayers.length; i++) { //otp.config.baseLayers.length-1; i >= 0; i--) {
             var layerConfig = otp.config.baseLayers[i];
@@ -46,13 +47,26 @@ otp.core.Map = otp.Class({
             var layer = new L.TileLayer(layerConfig.tileUrl, layerProps);
 
 	        this.baseLayers[layerConfig.name] = layer;
-            if(i == 0) defaultBaseLayer = layer;            
+
+            this.extraLayers[layerConfig.name] = [ ];
+            if (layerConfig.extraTileLayers) {
+                for (var j = 0; j < layerConfig.extraTileLayers.length; j++) {
+                    var etl = layerConfig.extraTileLayers[j];
+                    var props = layerProps;
+                    if(etl.attribution) props['attribution'] = etl.attribution;
+                    if(etl.subdomains) props['subdomains'] = etl.subdomains;
+                    if(etl.zIndex) props['zIndex'] = etl.zIndex;
+                    this.extraLayers[layerConfig.name].push(
+                        { layer: new L.TileLayer(etl.tileUrl, props), });
+                }
+            }
+
+            if (i == 0) defaultBaseLayer = layer;            
 	        
 	        if(typeof layerConfig.getTileUrl != 'undefined') {
         	    layer.getTileUrl = otp.config.getTileUrl;
             }
         }
-        
 
         var mapProps = { 
             layers  : [ defaultBaseLayer ],
@@ -154,6 +168,21 @@ otp.core.Map = otp.Class({
                     this.lmap.addLayer(baseLayer, true);
                 else 
                     this.lmap.removeLayer(baseLayer);
+            }
+            for(layerName in this.extraLayers) {
+                var extraLayers = this.extraLayers[layerName];
+                if(layerName == newModule.defaultBaseLayer) {
+                    for (j = 0; j < extraLayers.length; j++) {
+                        this.lmap.addLayer(extraLayers[j].layer, true);
+                    }
+                }
+                else  {
+                    if(layerName == newModule.defaultBaseLayer) {
+                        for (j = 0; j < extraLayers.length; j++) {
+                            this.lmap.removeLayer(extraLayers[j].layer, true);
+                        }
+                    }
+                }
             }
         }
         

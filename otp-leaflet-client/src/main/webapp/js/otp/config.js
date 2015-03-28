@@ -34,6 +34,21 @@ otp.config = {
      
     baseLayers: [
         {
+            name: 'Mapbox Anaheim Basemap',
+            // tileUrl: 'http://{s}.tiles.mapbox.com/v3/'+map_id_labels+'/{z}/{x}/{y}.png',
+            // copied from Anaheim Map. not sure where map_id_labels comes from.
+            tileUrl: 'http://{s}.tiles.mapbox.com/v3/trilliumtransit.e8e8e512/{z}/{x}/{y}.png',
+            extraTileLayers: [
+                { tileUrl: 'http://{s}.tiles.mapbox.com/v3/trilliumtransit.ca9f8a4a/{z}/{x}/{y}.png',
+                  subdomains : ['a','b','c','d'],
+                  zIndex: 5 },
+                { tileUrl: 'http://{s}.tiles.mapbox.com/v3/trilliumtransit.b1c25bd2/{z}/{x}/{y}.png',
+                  subdomains : ['a','b','c','d'],
+                  zIndex: 10 } ], 
+            subdomains : ['a','b','c','d'],
+            attribution : 'Mapbox'
+        },
+        {
             name: 'Mapbox Anaheim Road Names',
             // tileUrl: 'http://{s}.tiles.mapbox.com/v3/'+map_id_labels+'/{z}/{x}/{y}.png',
             // copied from Anaheim Map. not sure where map_id_labels comes from.
@@ -49,7 +64,6 @@ otp.config = {
             subdomains : ['a','b','c','d'],
             attribution : 'Mapbox'
         },
-
         {
             name: 'MapQuest OSM',
             tileUrl: 'http://{s}.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png',
@@ -71,11 +85,16 @@ otp.config = {
      * OTP metadata API call to center and zoom the map. The following
      * properties, when set, override that behavioir.
      */
+      
+   // [33.797984, -117.924412],
+   // [33.813340, -117.909644]
+      
+    initLatLng : new L.LatLng((33.797984 + 33.813340) / 2.0, (-117.924412 + -117.909644 ) / 2.0),
      
     // initLatLng : new L.LatLng(<lat>, <lng>),
-    // initZoom : 14,
-    // minZoom : 10,
-    // maxZoom : 20,
+     initZoom : 14,
+     minZoom : 10,
+     maxZoom : 20,
     
     /* Whether the map should be moved to contain the full itinerary when a result is received. */
     zoomToFitResults    : false,
@@ -113,7 +132,8 @@ otp.config = {
             className : 'otp.modules.multimodal.MultimodalPlannerModule',
             // defaultBaseLayer : 'Mapbox Anaheim Alignments',
             // how can we have more than one base layer in OTP?
-            defaultBaseLayer : 'MapQuest OSM',
+            defaultBaseLayer : 'Mapbox Anaheim Basemap',
+            // defaultBaseLayer : 'MapQuest OSM',
             isDefault: true
         },
         {
