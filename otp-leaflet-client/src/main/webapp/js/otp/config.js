@@ -46,7 +46,7 @@ otp.config = {
                   subdomains : ['a','b','c','d'],
                   zIndex: 10 } ], 
             subdomains : ['a','b','c','d'],
-            attribution : 'Mapbox'
+            attribution : '© Mapbox © OpenStreetMap'
         },
         {
             name: 'Mapbox Anaheim Road Names',

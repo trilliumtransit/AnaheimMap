@@ -49,10 +49,10 @@ otp.core.Map = otp.Class({
 	        this.baseLayers[layerConfig.name] = layer;
 
             this.extraLayers[layerConfig.name] = [ ];
-            if (layerConfig.extraTileLayers) {
+            if (layerConfig.extraTileLayers) { 
                 for (var j = 0; j < layerConfig.extraTileLayers.length; j++) {
                     var etl = layerConfig.extraTileLayers[j];
-                    var props = layerProps;
+                    var props = { };
                     if(etl.attribution) props['attribution'] = etl.attribution;
                     if(etl.subdomains) props['subdomains'] = etl.subdomains;
                     if(etl.zIndex) props['zIndex'] = etl.zIndex;
@@ -133,6 +133,9 @@ otp.core.Map = otp.Class({
         this.contextMenu = new otp.core.MapContextMenu(this);
       
         this.activated = true;        
+
+        // ED HACK. load Icons.
+        LoadAnaheimIcons( this.lmap);
     },
     
     addContextMenuItem : function(text, clickHandler) {
