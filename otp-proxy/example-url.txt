@@ -1,0 +1,1 @@
+http://gtfs-api.ed-groth.com/trip-planner/anaheim-ca-us/plan?fromPlace=33.8046480634388,-117.915358543396&toPlace=33.77272636987434,-117.8671646118164&time=1:29pm&date=03-31-2015
