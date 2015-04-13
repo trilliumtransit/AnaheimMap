@@ -87,9 +87,14 @@ var highlighted_weight = 10;
 if (route_ids_array.length == 1) {route_ids_list = route_ids_array[0];}
 else {var route_ids_list = route_ids_array.join();}
 
+var southWest = L.latLng(33.765528, -118.042018),
+    northEast = L.latLng(33.863041, -117.803086),
+    bounds = L.latLngBounds(southWest, northEast);
+
 // mapbox token, basemap
 L.mapbox.accessToken = 'pk.eyJ1IjoidHJpbGxpdW10cmFuc2l0IiwiYSI6ImVUQ2x0blUifQ.2-Z9TGHmyjRzy5GC1J9BTw';
-var map = L.mapbox.map('<?php echo $container_id; ?>', 'trilliumtransit.e8e8e512', { zoomControl: false, zoomAnimation: false });
+var map = L.mapbox.map('<?php echo $container_id; ?>', 'trilliumtransit.e8e8e512', { zoomControl: false, zoomAnimation: false, maxBounds: bounds, minZoom: 13 });
+
 
 // map controls
 map.scrollWheelZoom.disable();
