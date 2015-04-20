@@ -43,7 +43,6 @@ var landmark_icons = Array();
 var landmark_categories = Array();
 
 var tile_layer = new Array();
-// tile_layer[1] = new L.tileLayer('http://{s}.tiles.mapbox.com/v3/'+map_id_labels+'/{z}/{x}/{y}.png');
 
 var landmark_markers = Array();
 var landmark_markers_group = L.featureGroup();
@@ -55,9 +54,12 @@ var system_map = <?php echo $system_map ?>;
 var map_files_base = '<?php echo $map_files_base_split[0] ?>';
 var api_base_url = 'http://archive.oregon-gtfs.com/gtfs-api/';
 var route_alignments_tiles = 'trilliumtransit.ca9f8a4a';
-var road_label_tiles = 'trilliumtransit.b1c25bd2';
-tile_layer[0] = new L.tileLayer('http://{s}.tiles.mapbox.com/v3/' + route_alignments_tiles + '/{z}/{x}/{y}.png', {detectRetina: true});
-tile_layer[1] = new L.tileLayer('http://{s}.tiles.mapbox.com/v3/' + road_label_tiles + '/{z}/{x}/{y}.png',{detectRetina: true});
+var road_label_tiles = 'trilliumtransit.acea92f4';
+
+var accessToken = 'pk.eyJ1IjoidHJpbGxpdW10cmFuc2l0IiwiYSI6ImVUQ2x0blUifQ.2-Z9TGHmyjRzy5GC1J9BTw';
+
+tile_layer[0] = new L.tileLayer('http://{s}.tiles.mapbox.com/v4/' + route_alignments_tiles + '/{z}/{x}/{y}.png?access_token=' + accessToken, {detectRetina: true});
+tile_layer[1] = new L.tileLayer('http://{s}.tiles.mapbox.com/v4/' + road_label_tiles + '/{z}/{x}/{y}.png?access_token=' + accessToken,{detectRetina: true});
 var default_icon_color = '575757';
 
 var ZoomLevelThreshhold = 13;
@@ -92,8 +94,8 @@ var southWest = L.latLng(33.765528, -118.042018),
     bounds = L.latLngBounds(southWest, northEast);
 
 // mapbox token, basemap
-L.mapbox.accessToken = 'pk.eyJ1IjoidHJpbGxpdW10cmFuc2l0IiwiYSI6ImVUQ2x0blUifQ.2-Z9TGHmyjRzy5GC1J9BTw';
-var map = L.mapbox.map('<?php echo $container_id; ?>', 'trilliumtransit.e8e8e512', { zoomControl: false, zoomAnimation: false, maxBounds: bounds, minZoom: 13 });
+L.mapbox.accessToken = accessToken;
+var map = L.mapbox.map('<?php echo $container_id; ?>', 'trilliumtransit.5434d913', { zoomControl: false, zoomAnimation: false, maxBounds: bounds, minZoom: 13 });
 
 
 // map controls
@@ -745,7 +747,6 @@ load_stop_markers();
 
 if (system_map) {
 	add_tile_layer(0,5);
-	add_tile_layer(1,10);
 }
 else {
 console.log("before add_route_alignment(route_ids_array)");
@@ -756,6 +757,8 @@ console.log("add_route_alignment(route_ids_array)");
 console.log("add_route_alignment("+route_ids_array+")");
 
 }
+
+add_tile_layer(1,10);
 
 
 $.ajax({
