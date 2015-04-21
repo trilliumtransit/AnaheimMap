@@ -485,6 +485,9 @@ function load_stop_markers() {
                 LamMarker.stop_code = stops[i].stop_code;
 
                 LamMarker.on('popupopen', update_stop_info);
+                LamMarker.on('click', function() {
+					_gaq.push(['_trackEvent', 'Map','Stop click',e.target.stop_name+' (ID '+e.target.stop_id +')', false]);
+					});
                 LamMarker.on('popupclose', close_popup_update_map);
 				
 
@@ -550,10 +553,13 @@ landmark_markers[category_name][i].landmark_name = landmark_name;
 
 function update_landmark_info(e) {
 
-console.log('update_landmark_info has fired.');
-console.log(e);
+	console.log('update_landmark_info has fired.');
+	console.log(e);
+	
+	LamMarker.on('click', function() {
+		_gaq.push(['_trackEvent', 'Map','Landmark click',e.target.landmark_name, false]);
 
-var popup_content = '<h3 class="stop_name">'+e.target.landmark_name+'</h3>';
+	var popup_content = '<h3 class="stop_name">'+e.target.landmark_name+'</h3>';
 
 // if (e.target.stop_code != '') {
 // 	popup_content = popup_content+ '<p>text2go code: '+e.target.stop_code+'</p><p>Click a route to see the stop list:</p>';
@@ -867,13 +873,15 @@ map.on('zoomend', function(e) {
 
 });
 
+// adding events for Google Analytics here
+
+map.on('zoomend', function() {
+	_gaq.push(['_trackEvent', 'Map','zoomend','Zoom level '+map.getZoom, false]);
+});
 
 
-     	
-     	// http://jsfiddle.net/7go98fe4/
+// http://jsfiddle.net/7go98fe4/
      	   
- 
-
 
 // Object
 // height: "184"
