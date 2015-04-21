@@ -3,6 +3,8 @@
 <head>
 
 <script src='https://api.tiles.mapbox.com/mapbox.js/v2.1.4/mapbox.js'></script>
+<script src="//cdn.maptiks.com/maptiks-leaflet.min.js"></script>
+<script>maptiks.trackcode='699de837-cc69-42d0-b9a5-d8526e262965';</script>
 <link href='https://api.tiles.mapbox.com/mapbox.js/v2.1.4/mapbox.css' rel='stylesheet' />
 <link href='http://rideart.org/wp-content/themes/art/library/css/route-icons.css' rel='stylesheet' />
 <link href='map_layout.css' rel='stylesheet' />
