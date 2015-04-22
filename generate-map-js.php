@@ -485,9 +485,6 @@ function load_stop_markers() {
                 LamMarker.stop_code = stops[i].stop_code;
 
                 LamMarker.on('popupopen', update_stop_info);
-                LamMarker.on('click', function() {
-					_gaq.push(['_trackEvent', 'Map','Stop click',e.target.stop_name+' (ID '+e.target.stop_id +')', false]);
-					});
                 LamMarker.on('popupclose', close_popup_update_map);
 				
 
@@ -556,8 +553,7 @@ function update_landmark_info(e) {
 	console.log('update_landmark_info has fired.');
 	console.log(e);
 	
-	LamMarker.on('click', function() {
-		_gaq.push(['_trackEvent', 'Map','Landmark click',e.target.landmark_name, false]);
+	ga('_trackEvent', 'Map','Stop click',e.target.stop_name+' (ID '+e.target.stop_id +')', false);
 
 	var popup_content = '<h3 class="stop_name">'+e.target.landmark_name+'</h3>';
 
@@ -590,6 +586,9 @@ function update_stop_info(e) {
     load_data_async(stop_info_url, 'html', remote_base, function(data){
         e.target.setPopupContent(data);
     });
+
+	ga('_trackEvent', 'Map','Stop click',e.target.stop_name+' (ID '+e.target.stop_id +')', false);
+
 }
 
 function landmark_icon(width,height,icon_index,filename) {
@@ -876,7 +875,7 @@ map.on('zoomend', function(e) {
 // adding events for Google Analytics here
 
 map.on('zoomend', function() {
-	_gaq.push(['_trackEvent', 'Map','zoomend','Zoom level '+map.getZoom, false]);
+	ga('_trackEvent', 'Map','zoomend','Zoom level '+map.getZoom, false);
 });
 
 
