@@ -7,6 +7,7 @@ if(function_exists('imagepng')){
 }
 
 if (isset($_GET['system_map'])) {$system_map = $_GET['system_map'];}
+if (isset($_GET['is_mobile'])) {$system_map = $_GET['is_mobile'];}
 if (isset($_GET['routes'])) {$routes = $_GET['routes'];}
 if (isset($_GET['container_id'])) {$container_id = $_GET['container_id'];}
  
@@ -41,7 +42,6 @@ var zoom_icon_scale = Array();
 var landmarks = Array();
 var landmark_icons = Array();
 var landmark_categories = Array();
-
 var tile_layer = new Array();
 
 var landmark_markers = Array();

@@ -17,6 +17,9 @@
 
 <body style="background-color:#2068A7">
 <div id="interactive-map-holder-wrap" style="width:100%;height:100%;position: relative;">
+ <div id="planner-wrapper" >
+	<?php //include 'planner.php'; ?> 
+</div><!-- end #planner-wrapper -->
 <div id="interactive-map-holder" style="width:100%;height:100%;background-color:#2068A7;  ">
 
 </div>
