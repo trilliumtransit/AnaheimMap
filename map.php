@@ -3,14 +3,23 @@
 <head>
 
 <script src='https://api.tiles.mapbox.com/mapbox.js/v2.1.4/mapbox.js'></script>
-<script src="//cdn.maptiks.com/maptiks-leaflet.min.js"></script>
-<script>maptiks.trackcode='699de837-cc69-42d0-b9a5-d8526e262965';</script>
 <link href='https://api.tiles.mapbox.com/mapbox.js/v2.1.4/mapbox.css' rel='stylesheet' />
 <link href='http://rideart.org/wp-content/themes/art/library/css/route-icons.css' rel='stylesheet' />
 <link href='map_layout.css' rel='stylesheet' />
 <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
 <script src="jquery.csv-0.71.min.js"></script>
 <script src="layout.js"></script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-19485598-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
 
 
 </head>
