@@ -1,0 +1,14 @@
+feed_name,landmark_id,landmark_name,category_name,landmark_url,icon_id,lat,lon,major
+anaheim-new-ca-us,3, Anaheim Convention Center,Attractions,,anaheim_convention_center,33.799796,-117.920064,1
+anaheim-new-ca-us,4,Angel Stadium of Anaheim,Attractions,,angel_stadium,33.799298,-117.883872,1
+anaheim-new-ca-us,7, City Hall,Attractions,,anaheim_city_hall,33.834503,-117.912898,1
+anaheim-new-ca-us,21, Honda Center,Attractions,,honda_center,33.807331,-117.876535,1
+anaheim-new-ca-us,41,Anaheim GardenWalk Dining & Entertainment District ,Attractions,,gardenwalk,33.806436,-117.911792,1
+anaheim-new-ca-us,60,Disneyland Resort,Attractions,,disneyland,33.809761,-117.91897,1
+anaheim-new-ca-us,78,Outlets at Orange ,Attractions,,outlets_at_the_orange,33.782408,-117.893917,1
+anaheim-new-ca-us,96,Westfield MainPlace Mall,Attractions,,westfield_mainplace,33.775235,-117.86914,1
+anaheim-new-ca-us,98,Anaheim Packing District,Restaurants,,anaheim_packing_district,33.831566,-117.911955,1
+anaheim-new-ca-us,99,ARTIC,Attractions,,artic,33.803667,-117.877553,1
+anaheim-new-ca-us,100,Center Street Promenade,Attractions,,center_street_promenade,33.833778,-117.916034,1
+anaheim-new-ca-us,101,Disney California Adventure,Attractions,,disney_california_adventure,33.805876,-117.91949,1
+anaheim-new-ca-us,102,Downtown Disney District,Attractions,,downtown_disney_district,33.809023,-117.923382,1
