@@ -44,7 +44,16 @@ box-shadow:         0px 3px 17px 0px rgba(50, 50, 50, 0.75);
 
 }
 
-
+	hr {
+	clear: both;
+	display: block;
+	float: left;
+	width: 100%;
+	margin-top: 5px;
+	margin-bottom: 10px;
+	border-bottom: 0;
+	border-top: 1px solid #ccc;
+	}
 	ul {
 		padding: 0;
 		margin: 0;
@@ -197,7 +206,7 @@ box-shadow:         0px 3px 17px 0px rgba(50, 50, 50, 0.75);
 				top: 30px;
 				left: -50px;
 				z-index: 3;
-				min-height: 180px;
+				
 				
 			-webkit-box-shadow: 0px 3px 17px 0px rgba(50, 50, 50, 0.75);
 -moz-box-shadow:    0px 3px 17px 0px rgba(50, 50, 50, 0.75);
@@ -207,12 +216,12 @@ box-shadow:         0px 3px 17px 0px rgba(50, 50, 50, 0.75);
 			
 	
 			.place-col-1 {
-				width: 39%;
-				padding-left: 1%;
+				width: 45%;
+				margin-left: 7%;
 				
 			}
 			.place-col-2 {
-				width: 50%;
+				width: 45%;
 			}
 	
 			.place-col-1,.place-col-2 {
@@ -309,6 +318,17 @@ box-shadow:         0px 3px 17px 0px rgba(50, 50, 50, 0.75);
 	
 	#to-header {
 	clear: left;
+	}
+	
+	div#mySliderTabs {
+		color: black;
+		a:link{
+			color: black;
+		}
+	}
+	
+	.ui-slider-tabs-content-container {
+		border: 0;
 	}
 	
 }

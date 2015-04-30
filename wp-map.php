@@ -8,18 +8,20 @@ Template Name: Standalone map
 <head>
 
 <script src='https://api.tiles.mapbox.com/mapbox.js/v2.1.4/mapbox.js'></script>
-<script src="//cdn.maptiks.com/maptiks-leaflet.min.js"></script>
-<script>maptiks.trackcode='699de837-cc69-42d0-b9a5-d8526e262965';</script>
 <link href='https://api.tiles.mapbox.com/mapbox.js/v2.1.4/mapbox.css' rel='stylesheet' />
 <link href='http://rideart.org/wp-content/themes/art/library/css/route-icons.css' rel='stylesheet' />
 <link href='<?php echo get_template_directory_uri(); ?>/library/css/style.css' rel='stylesheet' />
 <link rel="stylesheet" type="text/css" href="<?php echo get_template_directory_uri(); ?>/library/fonts/MyFontsWebfontsKit.css"> 
 <link href='<?php echo get_template_directory_uri(); ?>/AnaheimMap/library/css/map_layout.css' rel='stylesheet' />
+<link href='<?php echo get_template_directory_uri(); ?>/library/css/planner.css' rel='stylesheet' />
 <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+ <script src="<?php echo get_template_directory_uri(); ?>/library/js/jssor.slider.min.js"></script>
 <script src="<?php echo get_template_directory_uri(); ?>/AnaheimMap/jquery.csv-0.71.min.js"></script>
 <script src="<?php echo get_template_directory_uri(); ?>/library/js/art.js"></script>
 <script src="<?php echo get_template_directory_uri(); ?>/AnaheimMap/library/js/layout.js"></script>
 <script src="<?php echo get_template_directory_uri(); ?>/AnaheimMap/library/js/planner.js"></script>
+<script src="<?php echo get_template_directory_uri(); ?>/AnaheimMap/library/js/sliderTabs-1.1/jquery.sliderTabs.js"></script>
+<link href='<?php echo get_template_directory_uri(); ?>/AnaheimMap/library/js/sliderTabs-1.1/styles/jquery.sliderTabs.css' rel='stylesheet' />
 
 
 </head>

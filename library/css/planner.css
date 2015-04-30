@@ -174,3 +174,10 @@
     clear: left; }
   #planner #to-header {
     clear: left; }
+  #planner .jssor-bullet {
+    width: 10px;
+    height: 10px;
+    background: black; }
+
+.hidden {
+  display: none; }

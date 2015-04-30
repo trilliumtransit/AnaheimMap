@@ -107,7 +107,7 @@ if (system_map) {
 			]);
         }
         
-new L.Control.Zoom({ position: 'bottomright' }).addTo(map);
+new L.Control.Zoom({ position: 'topright' }).addTo(map);
 
 // FUNCTIONS
 
