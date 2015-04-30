@@ -24,7 +24,8 @@ $(document).ready(function(){
 		$(this).siblings().removeClass('selected');
 		//$(this).parent().parent().parent().parent().parent().parent().parent().find('.loc-input').attr('value', ($(this).text()).replace(/(\r\n|\n|\r|\t)/gm,"") + ", Anaheim, CA" );
 		$(this).parent().parent().siblings().find('.selected').removeClass('selected');
-		$(this).parent().parent().parent().siblings().find('.selected').removeClass('selected');
+		$(this).closest('.tab').siblings().find('.selected').removeClass('selected');
+		$(this).closest('.single-slide').siblings().find('.selected').removeClass('selected');
 		$(this).parent().parent().parent().parent().siblings().find('.selected').removeClass('selected');
 	});
 	
@@ -69,30 +70,39 @@ $(document).ready(function(){
 
 	//Planner Data, trip stuff
 
-	 var jqxhr = $.getJSON( "http://gtfs-api.ed-groth.com/trip-planner/anaheim-ca-us/plan?fromPlace=33.8046480634388,-117.915358543396&toPlace=33.77272636987434,-117.8671646118164&time=1:29pm&date=03-31-2015", function() {
-  		console.log( "success" );
-		})
-  .done(function(data) {
-  console.log(data);
-    console.log( "second success" );
-  })
-  .fail(function() { 
-    console.log( "error" );
-  })
-  .always(function() {
-    console.log( "complete" );
-  });
+	
 
 	$('#main-planner-form').submit(function(event) {
-		// get lat long values from inputs
 		
 		// trigger show the results panel
 		
 		event.preventDefault();
 		togglePlanner();
+		// get lat long values from inputs
+		$from = $('div#from-items-container').find('.menu-item.selected');
+		var fromSelectedInfo = $from.attr('rel').split(';');
+		//console.log(fromSelectedInfo);
+		var fromLat = fromSelectedInfo[1];
+		var fromLon = fromSelectedInfo[2];
+		$to = $('div#to-items-container').find('.menu-item.selected');
+		var toSelectedInfo = $to.attr('rel').split(';');
+		var toLat = toSelectedInfo[1];
+		var toLon = toSelectedInfo[2];
+		$('#planner-results-title').html($from.text()+' <span>to</span> '+$to.text());
+		//var itineraries = getItinerary([fromLat,fromLon],[toLat,toLon]));
+		var itineraries = getItinerary([33.8046480634388,-117.915358543396],[33.82422318995612,-117.90390014648436]);
+		var plannerHTML = "";
+		
+		itineraries.forEach(function(itinerary) {
+			itinerary.forEach(function(leg) {
+				console.log('leg');
+				console.log(leg);
+			
+			});
+		}); 
 	});
 	
-	$('#return-to-input-link').click(togglePlanner);
+	$('#return-to-input-link,.x-box').click(togglePlanner); 
 
 
 	function togglePlanner() {

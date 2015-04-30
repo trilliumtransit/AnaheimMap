@@ -18,7 +18,7 @@ $map_files_base =  "http://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
 $naked_url_base = "$_SERVER[HTTP_HOST]"; 
 $dragable_icons = "false";
 if (strpos($map_files_base, 'localhost') !== FALSE) { // check if on mamp/apache localhost
-$dragable_icons = "true";
+//$dragable_icons = "true";
 $naked_url_base .= "/art/";
 }
 $map_files_base_split = explode("generate-map-js.php", $map_files_base);
