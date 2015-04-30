@@ -45,7 +45,8 @@ var landmark_categories = Array();
 var tile_layer = new Array();
 
 var landmark_markers = Array();
-var landmark_markers_group = L.featureGroup();
+var major_landmark_markers_group = L.featureGroup();
+var minor_landmark_markers_group = L.featureGroup();
 
 // define which routes
 var route_ids_array = [<?php echo $routes ?>];
@@ -62,7 +63,8 @@ tile_layer[0] = new L.tileLayer('http://{s}.tiles.mapbox.com/v4/' + route_alignm
 tile_layer[1] = new L.tileLayer('http://{s}.tiles.mapbox.com/v4/' + road_label_tiles + '/{z}/{x}/{y}.png?access_token=' + accessToken,{detectRetina: true});
 var default_icon_color = '575757';
 
-var ZoomLevelThreshhold = 13;
+var ZoomLevelThreshhold = 15;
+var minor_landmarks_zoom_threshhold = 16;
 
 // define the StopIcon
 var StopIcon = L.Icon.extend({
@@ -475,6 +477,8 @@ function load_stop_markers() {
                 var LamMarker = new L.marker([stops[i].geojson.coordinates[1], stops[i].geojson.coordinates[0]], {
                    // icon: StopIcons[stops[i].color]
                    draggable: <?php echo $dragable_icons; ?>,
+                   title: stops[i].stop_name,
+                   zIndexOffset: 200,
                    icon: StopIcons[stops[i].route_short_name]
                 }).bindPopup('', {maxWidth: 400});
                 
@@ -532,7 +536,9 @@ function create_landmark_marker(i,width,height,landmark_id,icon_index,landmark_l
 	landmark_markers[category_name][i] = L.marker([landmark_lat, landmark_lon], {
 	draggable: <?php echo $dragable_icons; ?>,
 	icon: zoom_level_icon,
-	title: landmark_name}).bindPopup(landmark_name, {maxWidth: 400});
+	title: landmark_name,
+	zIndexOffset: 100
+	}).bindPopup(landmark_name, {maxWidth: 400});
 		
 
 landmark_markers[category_name][i].landmark_id = landmark_id;
@@ -548,13 +554,78 @@ landmark_markers[category_name][i].landmark_name = landmark_name;
 // stops_layer_group.addLayer(stop_markers[i]);
 
 
-function update_landmark_info(e) {
+	// this is to find the nearest stop
+	// http://archive.oregon-gtfs.com/gtfs-api/stops/by-feed/anaheim-ca-us/nearest-to-lat-lon/33.803533/-117.913191
 
-console.log('update_landmark_info has fired.');
-console.log(e);
+	// My thoughts
+	// We need a way to limit the number of returned stops
+	// Thoughts about how to make loading route details more efficient? -- right now the Javascript goes and loads this elsewhere, and has little choice but to load all the routes
+	
+// this is to load the stops -- borrowed from the load_stops function -- pruning now
 
-var popup_content = '<h3 class="stop_name">'+e.target.landmark_name+'</h3>';
+function find_nearest_stop (lat,lon) {
+	console.log('find_nearest_stop has run');
 
+	var load_data_url = generate_proxy_url(api_base_url+'stops/by-feed/anaheim-ca-us/nearest-to-lat-lon/'+lat+'/'+lon);
+
+    //  async approach
+    
+    var nearest_stops = load_data(load_data_url, 'json');
+
+	if (nearest_stops !== null) {
+		for (var i = 0; i < 1; i++) {
+			// come back to this to consider how to show multiple routes
+			if (nearest_stops[i].routes.length > 1) {
+				nearest_stops[i].color ='575757';
+				nearest_stops[i].route_short_name = '';
+				var route_info = '';
+			}
+			else {
+				nearest_stops[i].color = get_route_color_for_id(stops[i].routes[0].route_id);
+				
+				var route_info = get_route_info_for_id(stops[i].routes[0].route_id);
+				nearest_stops[i].route_short_name = route_info.route_short_name;
+				}			
+			}
+			var stop_name = nearest_stops[i].stop_name;
+			var stop_code = nearest_stops[i].stop_code;
+			var route_color = nearest_stops[i].color;
+		}
+    
+//     load_data_async(load_data_url, null,'', function(data){
+// 	console.log('load_data_aysnc has run for stops.../nearest-to-lat-lon/');
+// 	stops = data;
+// 	console.log(stops);
+// 	if (stops !== null) {
+// 		for (var i = 0; i < 1; i++) {
+// 			if (stops[i].routes.length > 1) {
+// 				stops[i].color ='575757';
+// 				stops[i].route_short_name = '-1';
+// 				var route_info = null;
+// 			}
+// 			else {
+// 				stops[i].color = get_route_color_for_id(stops[i].routes[0].route_id);
+// 				
+// 				var route_info = get_route_info_for_id(stops[i].routes[0].route_id);
+// 				stops[i].route_short_name = route_info.route_short_name;
+// 				}			
+// 			}
+// 			var stop_name = stops[i].stop_name;
+// 			var stop_code = stops[i].stop_code;
+// 			var route_color = stops[i].color;
+// 		}
+// 	    });
+	    
+	    
+	// var stop_info_to_return = new Array(stop_name,stop_code,route_color,route_info);
+	return new Array(stop_name,stop_code,route_color,route_info);
+}
+
+// below is what is used to show the route bubbles in the stop information popup
+// function update_stop_info(e) {
+// 
+// var popup_content = '<h3 class="stop_name">'+e.target.stop_name+'</h3>';
+// 
 // if (e.target.stop_code != '') {
 // 	popup_content = popup_content+ '<p>text2go code: '+e.target.stop_code+'</p><p>Click a route to see the stop list:</p>';
 // }
@@ -562,29 +633,42 @@ var popup_content = '<h3 class="stop_name">'+e.target.landmark_name+'</h3>';
 // var route_ids_array = get_routes_for_stop_id(e.target.stop_id);
 // 
 // for (var i = 0, len = route_ids_array.length; i < len; i++) {
-// 	
+// 
 // 	var route_info = get_route_info_for_id(route_ids_array[i]);
 // 	popup_content = popup_content + '<a href="'+route_info.route_url+'"><i id="icon-xsml-'+route_info.route_short_name+'" class="linked-div" rel="/route-and-schedules/" style="float: left;" ></i></a>'; // need to add link in the rel.
-// 	
-// }
 // 
-// popup_content = popup_content + '<br style="clear: both;" />';
-// 
+//}
+
+
+	
+
+
+function update_landmark_info(e) {
+
+	console.log('update_landmark_info has fired.');
+	console.log(e);
+
+// > landmark_markers[1].getLatLng();
+// < Object
+// lat: 33.799298
+// lng: -117.883872
+// __proto__: Object
+
+	// var nearest_stop = find_nearest_stop(e.target.getLatLng().lat,e.target.getLatLng().lng);
+	
+	var popup_content = '<h3 class="stop_name">'+e.target.landmark_name+'</h3>';
+	
+	// <p>Nearest ART stop: ' + nearest_stop[0] + '<br/>Served by: '+nearest_stop[3].route_short_name+'</p>';
+
+
+
+// final action - set popup content
 e.target.setPopupContent(popup_content);
-// 
-// if (system_map) {
-// highlight_route_alignment(route_ids_array);}
 
+ga('send', 'event', 'map', 'click landmark', e.target.landmark_name);
+	
 }
 
-function update_stop_info(e) {
-    // console.log(e);
-    var stop_info_url = "stop_info.php?stop_id=" + e.target.stop_id;
-    // console.log(stop_info_url);
-    load_data_async(stop_info_url, 'html', remote_base, function(data){
-        e.target.setPopupContent(data);
-    });
-}
 
 function landmark_icon(width,height,icon_index,filename) {
 	var current_zoom = map.getZoom();
@@ -632,12 +716,18 @@ if (e.target.stop_code != '') {
 	popup_content = popup_content+ '<p>text2go code: '+e.target.stop_code+'</p><p>Click a route to see the stop list:</p>';
 }
 
+
+
 var route_ids_array = get_routes_for_stop_id(e.target.stop_id);
 
 for (var i = 0, len = route_ids_array.length; i < len; i++) {
 	
 	var route_info = get_route_info_for_id(route_ids_array[i]);
-	popup_content = popup_content + '<a href="'+route_info.route_url+'"><i id="icon-xsml-'+route_info.route_short_name+'" class="linked-div" rel="/route-and-schedules/" style="float: left;" ></i></a>'; // need to add link in the rel.
+//	popup_content = popup_content + '<a href="'+route_info.route_url+'"><i id="icon-xsml-'+route_info.route_short_name+'" class="linked-div" rel="/route-and-schedules/" style="float: left;" ></i></a>'; // need to add link in the rel.
+
+// <i id="icon-sml-14" class="route-icon route-icon-sml"> </i>
+
+	popup_content = popup_content + '<a href="'+route_info.route_url+'"><i id="icon-sml-'+route_info.route_short_name+'" class="route-icon route-icon-sml linked-div" rel="/route-and-schedules/" style="float: left;" ></i></a>'; // need to add link in the rel.
 	
 }
 
@@ -647,6 +737,8 @@ e.target.setPopupContent(popup_content);
 
 if (system_map) {
 highlight_route_alignment(route_ids_array);}
+
+ga('send', 'event', 'map', 'click stop', e.target.stop_name+' (ID '+e.target.stop_id +')');
 
 }
 
@@ -701,7 +793,6 @@ function unhighlight_route_alignment(route_ids) {
 	    }
 
 }
-
 function refresh_landmark_view() {
 		for (var category_i = 0; category_i < landmark_categories.length; category_i++) {
 	
@@ -733,6 +824,16 @@ function toggle_stop_visibility() {
     }
 }
 
+function toggle_minor_landmark_visibility() {
+    if (map.getZoom() < minor_landmarks_zoom_threshhold && map.hasLayer(minor_landmark_markers_group)) {
+        map.removeLayer(minor_landmark_markers_group);
+    }
+    if (map.getZoom() >= minor_landmarks_zoom_threshhold && map.hasLayer(minor_landmark_markers_group) == false) {
+        add_landmarks_markers('minor');
+//      map.addLayer(minor_landmark_markers_group);
+    }
+}
+
 function add_object_property(property_name,object) {
 	if (!object.hasOwnProperty(property_name)) {
 		object[property_name] = Array();
@@ -761,6 +862,7 @@ console.log("add_route_alignment("+route_ids_array+")");
 add_tile_layer(1,10);
 
 
+// set up landmark_icons
 $.ajax({
     url: map_files_base+"icons.csv",
     async: false,
@@ -771,70 +873,93 @@ $.ajax({
 });
 
 
-console.log("ajax URL: "+map_files_base+"icons.csv;");
+function load_landmarks_markers(significance_designation) {
 
-$.ajax({
-    url: map_files_base+ "landmarks.csv",
-    async: true,
-    success: function (csvd) {
-        
-        var landmarks_array_temp =  $.csv.toObjects(csvd);
-        
-        console.log(landmarks_array_temp);
-        
-        for (var i = 0, len = landmarks_array_temp.length; i < len; i++) {
-        
-        	var category_name = landmarks_array_temp[i].category_name;
-        	
-        	add_object_property(landmarks_array_temp[i].category_name,landmarks);
-		
-			landmarks[category_name][landmarks_array_temp[i].landmark_id] = {};
-		
-			landmarks[category_name][landmarks_array_temp[i].landmark_id].landmark_name = landmarks_array_temp[i].landmark_name;
-			landmark_name = landmarks_array_temp[i].landmark_name;
-			landmarks[category_name][landmarks_array_temp[i].landmark_id].category_name = landmarks_array_temp[i].category_name;
-			landmarks[category_name][landmarks_array_temp[i].landmark_id].landmark_url = landmarks_array_temp[i].landmark_url;
-			var landmark_lat_temp = landmarks_array_temp[i].lat;
-			landmarks[category_name][landmarks_array_temp[i].landmark_id].lat = landmark_lat_temp;
-			var landmark_lon_temp = landmarks_array_temp[i].lon;
-			landmarks[category_name][landmarks_array_temp[i].landmark_id].lon = landmark_lon_temp;
-			landmarks[category_name][landmarks_array_temp[i].landmark_id].icon_id = landmarks_array_temp[i].icon_id;
-		
-			var icon_index = get_icon_index_for_icon(landmarks_array_temp[i].icon_id);
-		
-			if (typeof icon_index !== 'undefined') {
-		
-				landmarks[category_name][landmarks_array_temp[i].landmark_id].icon_index = icon_index;
-
-
-				var width = landmark_icons[icon_index].width;
-				var height = landmark_icons[icon_index].height;
-				var filename = landmark_icons[icon_index].filename;
-				var landmark_id = landmarks_array_temp[i].landmark_id;     
-		
-				// var current_zoom = map.getZoom();
-		
-				create_landmark_marker(i,width,height,landmark_id,icon_index,landmark_lat_temp,landmark_lon_temp,filename,category_name,landmark_name);
-				
-				var LamMarker = landmark_markers[category_name][i];
-				LamMarker.on('popupopen', update_landmark_info);
-				
-				var new_array_length = landmark_markers.push(LamMarker) - 1;
-				landmark_markers_group.addLayer(landmark_markers[new_array_length]);
-
-		
-        	}
-        
-
-		
+	if (significance_designation == 'major') {
+		var landmark_markers_group = major_landmark_markers_group;
 		}
+	if (significance_designation == 'minor') {
+		var landmark_markers_group = minor_landmark_markers_group; 
+		}
+
+	if (landmark_markers_group.getLayers().length == 0) {
+
+		$.ajax({
+			url: map_files_base+ "landmarks_"+significance_designation+".csv",
+			async: true,
+			success: function (csvd) {
+				
+				var landmarks_array_temp =  $.csv.toObjects(csvd);
 		
-		map.addLayer(landmark_markers_group);
+				console.log(landmarks_array_temp);
 		
-		},
-    dataType: "text"
+				for (var i = 0, len = landmarks_array_temp.length; i < len; i++) {
 		
-});
+					var category_name = landmarks_array_temp[i].category_name;
+			
+					add_object_property(landmarks_array_temp[i].category_name,landmarks);
+		
+					landmarks[category_name][landmarks_array_temp[i].landmark_id] = {};
+		
+					landmarks[category_name][landmarks_array_temp[i].landmark_id].landmark_name = landmarks_array_temp[i].landmark_name;
+					landmark_name = landmarks_array_temp[i].landmark_name;
+					landmarks[category_name][landmarks_array_temp[i].landmark_id].category_name = landmarks_array_temp[i].category_name;
+					landmarks[category_name][landmarks_array_temp[i].landmark_id].landmark_url = landmarks_array_temp[i].landmark_url;
+					var landmark_lat_temp = landmarks_array_temp[i].lat;
+					landmarks[category_name][landmarks_array_temp[i].landmark_id].lat = landmark_lat_temp;
+					var landmark_lon_temp = landmarks_array_temp[i].lon;
+					landmarks[category_name][landmarks_array_temp[i].landmark_id].lon = landmark_lon_temp;
+					landmarks[category_name][landmarks_array_temp[i].landmark_id].major = landmarks_array_temp[i].major;
+					landmarks[category_name][landmarks_array_temp[i].landmark_id].icon_id = landmarks_array_temp[i].icon_id;
+		
+					var icon_index = get_icon_index_for_icon(landmarks_array_temp[i].icon_id);
+		
+					if (typeof icon_index !== 'undefined') {
+		
+						landmarks[category_name][landmarks_array_temp[i].landmark_id].icon_index = icon_index;
+
+
+						var width = landmark_icons[icon_index].width;
+						var height = landmark_icons[icon_index].height;
+						var filename = landmark_icons[icon_index].filename;
+						var landmark_id = landmarks_array_temp[i].landmark_id;     
+		
+						// var current_zoom = map.getZoom();
+		
+						create_landmark_marker(i,width,height,landmark_id,icon_index,landmark_lat_temp,landmark_lon_temp,filename,category_name,landmark_name);
+				
+						var LamMarker = landmark_markers[category_name][i];
+						LamMarker.on('popupopen', update_landmark_info);
+				
+						var new_array_length = landmark_markers.push(LamMarker) - 1;
+						landmark_markers_group.addLayer(landmark_markers[new_array_length]);
+
+						}
+		
+					}
+				
+				},
+			dataType: "text"
+		
+		});
+	}
+}
+
+function add_landmarks_markers(significance_designation) {
+	load_landmarks_markers(significance_designation);
+	
+	if (significance_designation == 'major') {
+	var landmark_markers_group = major_landmark_markers_group;
+	}
+if (significance_designation == 'minor') {
+	var landmark_markers_group = minor_landmark_markers_group; 
+	}
+	
+	map.addLayer(landmark_markers_group);
+	}
+
+
+// load_landmarks_markers('minor');
 
 
 // executable code
@@ -854,26 +979,30 @@ console.log('highlight_route_alignment(route_ids_array);');
 setTimeout(function() {  highlight_route_alignment(route_ids_array); },5);
 
 }
-	
 
-	
 
 });
+
+add_landmarks_markers('major');
 
 map.on('zoomend', function(e) {
 	
 		refresh_landmark_view();
 		toggle_stop_visibility();
+		toggle_minor_landmark_visibility();
 
 });
 
 
+// adding events for Google Analytics here
 
-     	
-     	// http://jsfiddle.net/7go98fe4/
+map.on('zoomend', function() {
+	ga('send', 'event', 'map', 'zoomend', 'Zoom level '+map.getZoom());
+});
+
+
+// http://jsfiddle.net/7go98fe4/
      	   
- 
-
 
 // Object
 // height: "184"
@@ -884,3 +1013,189 @@ map.on('zoomend', function(e) {
 // y: "16"
 // __proto__: Object
 
+var planner_url = 'http://gtfs-api.ed-groth.com/trip-planner/anaheim-ca-us/plan-then-merge-by-route-sequence';
+var default_plan_time = '1%3A29pm';
+var planner_response;
+
+
+  // decodePolyLine from otp-leaflet-client/src/main/webapp/js/otp/util/Geo.js
+  /* This program is free software: you can redistribute it and/or
+     modify it under the terms of the GNU Lesser General Public License
+     as published by the Free Software Foundation, either version 3 of
+     the License, or (at your option) any later version.
+     
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU General Public License for more details.
+     
+     You should have received a copy of the GNU General Public License
+     along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+   */
+	var decodePolyline = function(polyline) {
+		
+		  var currentPosition = 0;
+
+		  var currentLat = 0;
+		  var currentLng = 0;
+	
+		  var dataLength  = polyline.length;
+		  
+		  var polylineLatLngs = new Array();
+		  
+		  while (currentPosition < dataLength) {
+			  
+			  var shift = 0;
+			  var result = 0;
+			  
+			  var byte;
+			  
+			  do {
+				  byte = polyline.charCodeAt(currentPosition++) - 63;
+				  result |= (byte & 0x1f) << shift;
+				  shift += 5;
+			  } while (byte >= 0x20);
+			  
+			  var deltaLat = ((result & 1) ? ~(result >> 1) : (result >> 1));
+			  currentLat += deltaLat;
+	
+			  shift = 0;
+			  result = 0;
+			
+			  do {
+				  byte = polyline.charCodeAt(currentPosition++) - 63;
+				  result |= (byte & 0x1f) << shift;
+				  shift += 5;
+			  } while (byte >= 0x20);
+			  
+			  var deltLng = ((result & 1) ? ~(result >> 1) : (result >> 1));
+			  
+			  currentLng += deltLng;
+	
+			  polylineLatLngs.push(new L.LatLng(currentLat * 0.00001, currentLng * 0.00001));
+		  }	
+		  
+		  return polylineLatLngs;
+	};
+  
+
+var itineraries_for_display = new Array();
+
+function getItinerary(start_coords,end_coords) {
+
+	var date = new Date();
+	console.log(date);
+	var month = date.getMonth()+1;
+	var current_date_formatted = month + '-' + date.getDate() + '-' + date.getFullYear();
+
+	var query_url = planner_url + '?fromPlace=' + start_coords[0] + '%2C' + start_coords[1] + '&toPlace=' + end_coords[0] + '%2C' + end_coords[1] + '&time='+default_plan_time+'&date='+current_date_formatted;
+	console.log('query_url: '+query_url);
+
+	planner_response = load_data(query_url);
+
+	console.log('planner_response: '+planner_response);
+
+	var start_location = planner_response.from;
+	var end_location = planner_response.to;
+	
+	var leg_counter;
+	var itinerary;
+	
+	for(var itinerary_i = 0; itinerary_i < planner_response.itineraries.length; itinerary_i++) {
+		
+		console.log('itinerary_i: '+itinerary_i);
+	
+		itinerary = planner_response.itineraries[itinerary_i];
+
+		console.log('itinerary (planner response)');
+		console.log(itinerary);
+
+		leg_counter = 0;
+		itineraries_for_display[itinerary_i] = new Array();
+
+
+		for(var leg_i = 0; leg_i < itinerary.legs.length; leg_i++) {
+			
+			var current_leg = itinerary.legs[leg_i];
+			
+			console.log('current_leg')
+			console.log(current_leg);
+			console.log(current_leg.mode);
+					
+			if (current_leg.mode == 'BUS') {
+
+				// route information
+				var route_info_object = {shape: decodePolyline(current_leg.legGeometry.points),
+				route_short_name: current_leg.route, // route_short_name
+				route_long_name: current_leg.routeLongName,
+				route_color: current_leg.routeColor,
+				route_url: current_leg.routeUrl,
+				first_bus: current_leg.routeSpan.early.departure_time, // in UTC format -- come back to this
+				last_bus: current_leg.routeSpan.late.departure_time // in UTC format -- come back to this
+					};
+					
+//				itineraries_for_display[itinerary_i][leg_counter].route_info = route_info_object;
+				
+//				console.log(itineraries_for_display[itinerary_i][leg_counter].route_info);
+				
+				// start stop
+				var start_stop_object = {name: current_leg.from.name,
+					stop_code: current_leg.from.stopCode,
+					stop_id: current_leg.from.stopId.id,
+					lat: current_leg.from.lat,
+					lon: current_leg.from.lon
+					};
+
+//				itineraries_for_display[itinerary_i][leg_counter].start_stop = start_stop_object;
+
+				var end_stop_object = {name: current_leg.to.name,
+					stop_code: current_leg.to.stopCode,
+					stop_id: current_leg.to.stopId.id,
+					lat: current_leg.to.lat,
+					lon: current_leg.to.lon
+					};
+					
+//				itineraries_for_display[itinerary_i][leg_counter].end_stop = end_stop_object;
+				
+				var leg_to_add = {
+					route_info: route_info_object,
+					start_stop_object: start_stop_object,
+					end_stop_object: end_stop_object
+				};
+				
+				itineraries_for_display[itinerary_i][leg_counter] = leg_to_add;
+					
+				}
+			}
+			
+		}
+	
+
+	
+
+//	What do I want in itinerary objects?
+//  mode = "walk" or "transit" <-- for now do not show any walking
+//  transit details
+	// start stop -- stop object: name, stop_id, stop_code
+	// end stop -- stop object: name, stop_id, stop_code
+	// polyline
+	// route info: short name, long name, color, first bus, last bus, route_url
+
+return itineraries_for_display;
+
+}
+
+
+// 	start_stop.stop_id = planner_response.from.
+// 	start_stop.stop_code
+// 	start_stop.stop_name
+// 	start_stop.lat
+// 	start_stop.lon = 
+// 	var end_stop;
+
+// function to show itinerary results
+// itineraries[0...2].legs[0...2].mode;
+
+// mode can be 'WALK' or 'BUS'
+
+// http://gtfs-api.ed-groth.com/trip-planner/anaheim-ca-us/plan-then-merge-by-route-sequence?fromPlace=33.8046480634388%2C-117.915358543396&toPlace=33.82422318995612%2C-117.90390014648436&time=1%3A29pm&date=03-31-2015
