@@ -1013,3 +1013,189 @@ map.on('zoomend', function() {
 // y: "16"
 // __proto__: Object
 
+var planner_url = 'http://gtfs-api.ed-groth.com/trip-planner/anaheim-ca-us/plan-then-merge-by-route-sequence';
+var default_plan_time = '1%3A29pm';
+var planner_response;
+
+
+  // decodePolyLine from otp-leaflet-client/src/main/webapp/js/otp/util/Geo.js
+  /* This program is free software: you can redistribute it and/or
+     modify it under the terms of the GNU Lesser General Public License
+     as published by the Free Software Foundation, either version 3 of
+     the License, or (at your option) any later version.
+     
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU General Public License for more details.
+     
+     You should have received a copy of the GNU General Public License
+     along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+   */
+	var decodePolyline = function(polyline) {
+		
+		  var currentPosition = 0;
+
+		  var currentLat = 0;
+		  var currentLng = 0;
+	
+		  var dataLength  = polyline.length;
+		  
+		  var polylineLatLngs = new Array();
+		  
+		  while (currentPosition < dataLength) {
+			  
+			  var shift = 0;
+			  var result = 0;
+			  
+			  var byte;
+			  
+			  do {
+				  byte = polyline.charCodeAt(currentPosition++) - 63;
+				  result |= (byte & 0x1f) << shift;
+				  shift += 5;
+			  } while (byte >= 0x20);
+			  
+			  var deltaLat = ((result & 1) ? ~(result >> 1) : (result >> 1));
+			  currentLat += deltaLat;
+	
+			  shift = 0;
+			  result = 0;
+			
+			  do {
+				  byte = polyline.charCodeAt(currentPosition++) - 63;
+				  result |= (byte & 0x1f) << shift;
+				  shift += 5;
+			  } while (byte >= 0x20);
+			  
+			  var deltLng = ((result & 1) ? ~(result >> 1) : (result >> 1));
+			  
+			  currentLng += deltLng;
+	
+			  polylineLatLngs.push(new L.LatLng(currentLat * 0.00001, currentLng * 0.00001));
+		  }	
+		  
+		  return polylineLatLngs;
+	};
+  
+
+var itineraries_for_display = new Array();
+
+function getItinerary(start_coords,end_coords) {
+
+	var date = new Date();
+	console.log(date);
+	var month = date.getMonth()+1;
+	var current_date_formatted = month + '-' + date.getDate() + '-' + date.getFullYear();
+
+	var query_url = planner_url + '?fromPlace=' + start_coords[0] + '%2C' + start_coords[1] + '&toPlace=' + end_coords[0] + '%2C' + end_coords[1] + '&time='+default_plan_time+'&date='+current_date_formatted;
+	console.log('query_url: '+query_url);
+
+	planner_response = load_data(query_url);
+
+	console.log('planner_response: '+planner_response);
+
+	var start_location = planner_response.from;
+	var end_location = planner_response.to;
+	
+	var leg_counter;
+	var itinerary;
+	
+	for(var itinerary_i = 0; itinerary_i < planner_response.itineraries.length; itinerary_i++) {
+		
+		console.log('itinerary_i: '+itinerary_i);
+	
+		itinerary = planner_response.itineraries[itinerary_i];
+
+		console.log('itinerary (planner response)');
+		console.log(itinerary);
+
+		leg_counter = 0;
+		itineraries_for_display[itinerary_i] = new Array();
+
+
+		for(var leg_i = 0; leg_i < itinerary.legs.length; leg_i++) {
+			
+			var current_leg = itinerary.legs[leg_i];
+			
+			console.log('current_leg')
+			console.log(current_leg);
+			console.log(current_leg.mode);
+					
+			if (current_leg.mode == 'BUS') {
+
+				// route information
+				var route_info_object = {shape: decodePolyline(current_leg.legGeometry.points),
+				route_short_name: current_leg.route, // route_short_name
+				route_long_name: current_leg.routeLongName,
+				route_color: current_leg.routeColor,
+				route_url: current_leg.routeUrl,
+				first_bus: current_leg.routeSpan.early.departure_time, // in UTC format -- come back to this
+				last_bus: current_leg.routeSpan.late.departure_time // in UTC format -- come back to this
+					};
+					
+//				itineraries_for_display[itinerary_i][leg_counter].route_info = route_info_object;
+				
+//				console.log(itineraries_for_display[itinerary_i][leg_counter].route_info);
+				
+				// start stop
+				var start_stop_object = {name: current_leg.from.name,
+					stop_code: current_leg.from.stopCode,
+					stop_id: current_leg.from.stopId.id,
+					lat: current_leg.from.lat,
+					lon: current_leg.from.lon
+					};
+
+//				itineraries_for_display[itinerary_i][leg_counter].start_stop = start_stop_object;
+
+				var end_stop_object = {name: current_leg.to.name,
+					stop_code: current_leg.to.stopCode,
+					stop_id: current_leg.to.stopId.id,
+					lat: current_leg.to.lat,
+					lon: current_leg.to.lon
+					};
+					
+//				itineraries_for_display[itinerary_i][leg_counter].end_stop = end_stop_object;
+				
+				var leg_to_add = {
+					route_info: route_info_object,
+					start_stop_object: start_stop_object,
+					end_stop_object: end_stop_object
+				};
+				
+				itineraries_for_display[itinerary_i][leg_counter] = leg_to_add;
+					
+				}
+			}
+			
+		}
+	
+
+	
+
+//	What do I want in itinerary objects?
+//  mode = "walk" or "transit" <-- for now do not show any walking
+//  transit details
+	// start stop -- stop object: name, stop_id, stop_code
+	// end stop -- stop object: name, stop_id, stop_code
+	// polyline
+	// route info: short name, long name, color, first bus, last bus, route_url
+
+return itineraries_for_display;
+
+}
+
+
+// 	start_stop.stop_id = planner_response.from.
+// 	start_stop.stop_code
+// 	start_stop.stop_name
+// 	start_stop.lat
+// 	start_stop.lon = 
+// 	var end_stop;
+
+// function to show itinerary results
+// itineraries[0...2].legs[0...2].mode;
+
+// mode can be 'WALK' or 'BUS'
+
+// http://gtfs-api.ed-groth.com/trip-planner/anaheim-ca-us/plan-then-merge-by-route-sequence?fromPlace=33.8046480634388%2C-117.915358543396&toPlace=33.82422318995612%2C-117.90390014648436&time=1%3A29pm&date=03-31-2015
