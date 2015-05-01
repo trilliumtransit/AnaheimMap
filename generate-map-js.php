@@ -687,13 +687,12 @@ function landmark_icon(width,height,icon_index,filename) {
 	var scaled_height = zoom_icon_scale[current_zoom] * height;
 
 	landmark_icons[icon_index].icons[current_zoom] = new L.Icon({ 
-		iconUrl: map_files_base+'map_icons/'+filename,
+		iconUrl: map_files_base+'landmark_icons/'+filename,
 		iconSize: [scaled_width, scaled_height],
 		iconAnchor: [scaled_width/2, scaled_height/2]
 		});
 		
 	}
-
 	
 	return landmark_icons[icon_index].icons[current_zoom];
 }
@@ -816,19 +815,19 @@ function refresh_landmark_view() {
 }
 
 function toggle_stop_visibility() {
-    if (map.getZoom() < ZoomLevelThreshhold && map.hasLayer(stops_layer_group)) {
+    if ( (map.getZoom() < ZoomLevelThreshhold && map.hasLayer(stops_layer_group)) || itinerary_up == true) {
         map.removeLayer(stops_layer_group);
     }
-    if (map.getZoom() >= ZoomLevelThreshhold && map.hasLayer(stops_layer_group) == false) {
+    if ( (map.getZoom() >= ZoomLevelThreshhold && map.hasLayer(stops_layer_group) == false) && !itinerary_up ) {
         load_stop_markers();
     }
 }
 
 function toggle_minor_landmark_visibility() {
-    if (map.getZoom() < minor_landmarks_zoom_threshhold && map.hasLayer(minor_landmark_markers_group)) {
+    if ((map.getZoom() < minor_landmarks_zoom_threshhold && map.hasLayer(minor_landmark_markers_group)) || itinerary_up == true) {
         map.removeLayer(minor_landmark_markers_group);
     }
-    if (map.getZoom() >= minor_landmarks_zoom_threshhold && map.hasLayer(minor_landmark_markers_group) == false) {
+    if ((map.getZoom() >= minor_landmarks_zoom_threshhold && map.hasLayer(minor_landmark_markers_group) == false) && !itinerary_up) {
         add_landmarks_markers('minor');
 //      map.addLayer(minor_landmark_markers_group);
     }
@@ -1201,18 +1200,73 @@ return itineraries_for_display;
 
 }
 
-
+var itinerary_up = 0;
 var showing_itinerary;
 var displayed_itinerary = new Array();
-var start_bus_marker;
-var end_bus_marker;
-var tripplan_polyline_options = {color: '#B01B15'};
+var start_icon = new L.Icon({ 
+		iconUrl: map_files_base+'map_ui_images/marker-flag-start-shadowed.png',
+		iconSize: [48,49],
+		iconAnchor: [48,49]
+		});
+var end_icon = new L.Icon({ 
+		iconUrl: map_files_base+'map_ui_images/marker-flag-end-shadowed.png',
+		iconSize: [48,49],
+		iconAnchor: [48,49]
+		});
+var tripplan_polyline_options = {color: '#B01B15', weight: 8, opacity: 1};
 var tripplan_polylines = new Array();
+var tripplan_markers = new Array();
+var start_marker;
+var end_marker;
 
 function map_itinerary(itinerary) {
 
+if (map.hasLayer(start_marker)) {map.removeLayer(start_marker);}
+if (map.hasLayer(end_marker)) {map.removeLayer(end_marker);}
+
 // clear the showing_itinerary_object
 showing_itinerary = itinerary;
+
+remove_tripplan();
+
+// set to true because an itinerary is being shown
+itinerary_up = true;
+
+toggle_stop_visibility();
+
+
+	for(var leg_i = 0; leg_i < itinerary.length; leg_i++) {
+	
+		if (leg_i == 0) {start_marker = L.marker([itinerary[leg_i].start_stop_object.lat, itinerary[leg_i].start_stop_object.lon], {icon: start_icon});
+				start_marker.addTo(map);}
+				
+		if (leg_i == itinerary.length-1) {end_marker = L.marker([itinerary[leg_i].end_stop_object.lat, itinerary[leg_i].end_stop_object.lon], {icon: end_icon});
+				end_marker.addTo(map);}
+		
+		tripplan_markers[leg_i] = new L.marker( [ itinerary[leg_i].start_stop_object.lat , itinerary[leg_i].start_stop_object.lon], {
+                   zIndexOffset: 400,
+                   icon: StopIcons[itinerary[leg_i].route_info.route_short_name]
+                });
+
+		tripplan_markers[leg_i].addTo(map);
+
+		var line_points = itinerary[leg_i].route_info.shape;		
+		tripplan_polylines[leg_i] = L.polyline(line_points, tripplan_polyline_options).addTo(map);
+		
+	}
+
+	
+}
+
+function remove_tripplan() {
+
+if (map.hasLayer(start_marker)) {map.removeLayer(start_marker);}
+if (map.hasLayer(end_marker)) {map.removeLayer(end_marker);}
+
+// set to true because an itinerary is being shown
+itinerary_up = false;
+
+// I could consolidate the two below things into one function.
 
 // removeLayer(polylines);
 for(var i = 0; i < tripplan_polylines.length; i++) {
@@ -1222,18 +1276,18 @@ for(var i = 0; i < tripplan_polylines.length; i++) {
 // reset the tripplan_polylines array
 tripplan_polylines = [];
 
-// hide stops
 
-// 
-	for(var leg_i = 0; leg_i < itinerary.length; leg_i++) {
-
-		var line_points = itinerary[leg_i].route_info.shape;		
-		polyline[tripplan_polylines] = L.polyline(line_points, tripplan_polyline_options).addTo(map);
-		
-	}
-
-	
+for(var i = 0; i < tripplan_markers.length; i++) {
+	map.removeLayer(tripplan_markers[i]);
 }
+
+tripplan_markers = [];
+
+}
+
+
+// 			var route_info = get_route_info_for_id(route_ids_array[i]);
+//			StopIcons[""+i] = new StopIcon({iconUrl:"http://<?php echo $naked_url_base; ?>/wp-content/themes/art/library/images/route-icons-individual/xsml-"+i+".png"});
 
 
 
