@@ -529,11 +529,9 @@ function create_landmark_marker(i,width,height,landmark_id,icon_index,landmark_l
 		landmark_categories.push(category_name);
 	}
  
-	add_object_property(category_name,landmark_markers);
-
 	var zoom_level_icon = landmark_icon(width,height,icon_index,filename);
 
-	landmark_markers[category_name][i] = L.marker([landmark_lat, landmark_lon], {
+	landmark_markers[i] = L.marker([landmark_lat, landmark_lon], {
 	draggable: <?php echo $dragable_icons; ?>,
 	icon: zoom_level_icon,
 	title: landmark_name,
@@ -541,8 +539,9 @@ function create_landmark_marker(i,width,height,landmark_id,icon_index,landmark_l
 	}).bindPopup(landmark_name, {maxWidth: 400});
 		
 
-landmark_markers[category_name][i].landmark_id = landmark_id;
-landmark_markers[category_name][i].landmark_name = landmark_name;
+landmark_markers[i].landmark_id = landmark_id;
+landmark_markers[i].landmark_name = landmark_name;
+landmark_markers[i].category_name = category_name;
 		
 }
 
@@ -793,26 +792,21 @@ function unhighlight_route_alignment(route_ids) {
 
 }
 function refresh_landmark_view() {
-		for (var category_i = 0; category_i < landmark_categories.length; category_i++) {
+	var marker_set = landmark_markers;
 	
-		var category_name = landmark_categories[category_i]
-		var marker_set = landmark_markers[category_name];
-		console.log(marker_set);
-		
-		for (var i = 0; i < marker_set.length; i++) {
-			if (typeof marker_set[i] !== 'undefined') {
-				var landmark_id = marker_set[i].landmark_id;
-				console.log('landmark_id: '+landmark_id);
-				console.log('landmarks['+category_name+']['+landmark_id+'].icon_index');
-				var icon_index = landmarks[category_name][landmark_id].icon_index;
-				var height = landmark_icons[icon_index].height;
-				var width = landmark_icons[icon_index].width;
-				var filename = landmark_icons[icon_index].filename;
-				marker_set[i].setIcon(landmark_icon(width,height,icon_index,filename));
-			}
+	for (var i = 0; i < marker_set.length; i++) {
+		if (typeof marker_set[i] !== 'undefined') {
+			var landmark_id = marker_set[i].landmark_id;
+
+			var icon_index = landmarks[landmark_id].icon_index;
+			var height = landmark_icons[icon_index].height;
+			var width = landmark_icons[icon_index].width;
+			var filename = landmark_icons[icon_index].filename;
+			marker_set[i].setIcon(landmark_icon(width,height,icon_index,filename));
 		}
 	}
 }
+
 
 function toggle_stop_visibility() {
     if ( (map.getZoom() < ZoomLevelThreshhold && map.hasLayer(stops_layer_group)) || itinerary_up == true) {
@@ -893,41 +887,38 @@ function load_landmarks_markers(significance_designation) {
 				console.log(landmarks_array_temp);
 		
 				for (var i = 0, len = landmarks_array_temp.length; i < len; i++) {
+							
+					landmarks[landmarks_array_temp[i].landmark_id] = {};
 		
-					var category_name = landmarks_array_temp[i].category_name;
-			
-					add_object_property(landmarks_array_temp[i].category_name,landmarks);
-		
-					landmarks[category_name][landmarks_array_temp[i].landmark_id] = {};
-		
-					landmarks[category_name][landmarks_array_temp[i].landmark_id].landmark_name = landmarks_array_temp[i].landmark_name;
+					landmarks[landmarks_array_temp[i].landmark_id].landmark_name = landmarks_array_temp[i].landmark_name;
 					landmark_name = landmarks_array_temp[i].landmark_name;
-					landmarks[category_name][landmarks_array_temp[i].landmark_id].category_name = landmarks_array_temp[i].category_name;
-					landmarks[category_name][landmarks_array_temp[i].landmark_id].landmark_url = landmarks_array_temp[i].landmark_url;
+					landmarks[landmarks_array_temp[i].landmark_id].category_name = landmarks_array_temp[i].category_name;
+					landmarks[landmarks_array_temp[i].landmark_id].landmark_url = landmarks_array_temp[i].landmark_url;
 					var landmark_lat_temp = landmarks_array_temp[i].lat;
-					landmarks[category_name][landmarks_array_temp[i].landmark_id].lat = landmark_lat_temp;
+					landmarks[landmarks_array_temp[i].landmark_id].lat = landmark_lat_temp;
 					var landmark_lon_temp = landmarks_array_temp[i].lon;
-					landmarks[category_name][landmarks_array_temp[i].landmark_id].lon = landmark_lon_temp;
-					landmarks[category_name][landmarks_array_temp[i].landmark_id].major = landmarks_array_temp[i].major;
-					landmarks[category_name][landmarks_array_temp[i].landmark_id].icon_id = landmarks_array_temp[i].icon_id;
+					landmarks[landmarks_array_temp[i].landmark_id].lon = landmark_lon_temp;
+					landmarks[landmarks_array_temp[i].landmark_id].major = landmarks_array_temp[i].major;
+					landmarks[landmarks_array_temp[i].landmark_id].category_name = landmarks_array_temp[i].category_name;
+					landmarks[landmarks_array_temp[i].landmark_id].icon_id = landmarks_array_temp[i].icon_id;
 		
 					var icon_index = get_icon_index_for_icon(landmarks_array_temp[i].icon_id);
 		
 					if (typeof icon_index !== 'undefined') {
 		
-						landmarks[category_name][landmarks_array_temp[i].landmark_id].icon_index = icon_index;
+						landmarks[landmarks_array_temp[i].landmark_id].icon_index = icon_index;
 
 
 						var width = landmark_icons[icon_index].width;
 						var height = landmark_icons[icon_index].height;
 						var filename = landmark_icons[icon_index].filename;
-						var landmark_id = landmarks_array_temp[i].landmark_id;     
+						var landmark_id = landmarks_array_temp[i].landmark_id;
 		
 						// var current_zoom = map.getZoom();
 		
-						create_landmark_marker(i,width,height,landmark_id,icon_index,landmark_lat_temp,landmark_lon_temp,filename,category_name,landmark_name);
+						create_landmark_marker(i,width,height,landmark_id,icon_index,landmark_lat_temp,landmark_lon_temp,filename,landmarks_array_temp[i].category_name,landmark_name);
 				
-						var LamMarker = landmark_markers[category_name][i];
+						var LamMarker = landmark_markers[i];
 						LamMarker.on('popupopen', update_landmark_info);
 				
 						var new_array_length = landmark_markers.push(LamMarker) - 1;
