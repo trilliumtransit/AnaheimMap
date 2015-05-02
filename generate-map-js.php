@@ -1213,13 +1213,14 @@ var end_icon = new L.Icon({
 		iconSize: [48,49],
 		iconAnchor: [48,49]
 		});
-var tripplan_polyline_options = {color: '#B01B15', weight: 8, opacity: 1};
 var tripplan_polylines = new Array();
 var tripplan_markers = new Array();
 var start_marker;
 var end_marker;
 
 function map_itinerary(itinerary) {
+
+map.removeLayer(tile_layer[0]);
 
 if (map.hasLayer(start_marker)) {map.removeLayer(start_marker);}
 if (map.hasLayer(end_marker)) {map.removeLayer(end_marker);}
@@ -1234,13 +1235,14 @@ itinerary_up = true;
 
 toggle_stop_visibility();
 
+var line_offset = 0;
 
 	for(var leg_i = 0; leg_i < itinerary.length; leg_i++) {
 	
-		if (leg_i == 0) {start_marker = L.marker([itinerary[leg_i].start_stop_object.lat, itinerary[leg_i].start_stop_object.lon], {icon: start_icon});
+		if (leg_i == 0) {start_marker = L.marker([itinerary[leg_i].start_stop_object.lat, itinerary[leg_i].start_stop_object.lon], {icon: start_icon,zIndexOffset: 399});
 				start_marker.addTo(map);}
 				
-		if (leg_i == itinerary.length-1) {end_marker = L.marker([itinerary[leg_i].end_stop_object.lat, itinerary[leg_i].end_stop_object.lon], {icon: end_icon});
+		if (leg_i == itinerary.length-1) {end_marker = L.marker([itinerary[leg_i].end_stop_object.lat, itinerary[leg_i].end_stop_object.lon], {icon: end_icon,zIndexOffset: 399});
 				end_marker.addTo(map);}
 		
 		tripplan_markers[leg_i] = new L.marker( [ itinerary[leg_i].start_stop_object.lat , itinerary[leg_i].start_stop_object.lon], {
@@ -1251,7 +1253,9 @@ toggle_stop_visibility();
 		tripplan_markers[leg_i].addTo(map);
 
 		var line_points = itinerary[leg_i].route_info.shape;		
-		tripplan_polylines[leg_i] = L.polyline(line_points, tripplan_polyline_options).addTo(map);
+		tripplan_polylines[leg_i] = L.polyline(line_points, {offset: line_offset, color: '#'+itinerary[leg_i].route_info.route_color, weight: 8, opacity: 1}).addTo(map);
+		
+		line_offset = line_offset + 5;
 		
 	}
 
@@ -1263,8 +1267,7 @@ function remove_tripplan() {
 if (map.hasLayer(start_marker)) {map.removeLayer(start_marker);}
 if (map.hasLayer(end_marker)) {map.removeLayer(end_marker);}
 
-// set to true because an itinerary is being shown
-itinerary_up = false;
+
 
 // I could consolidate the two below things into one function.
 
@@ -1285,22 +1288,13 @@ tripplan_markers = [];
 
 }
 
+function exit_tripplan_mode() {
+	itinerary_up = false;
+	add_tile_layer(0,5);
+	toggle_stop_visibility();
+	toggle_minor_landmark_visibility();
+}
 
-// 			var route_info = get_route_info_for_id(route_ids_array[i]);
-//			StopIcons[""+i] = new StopIcon({iconUrl:"http://<?php echo $naked_url_base; ?>/wp-content/themes/art/library/images/route-icons-individual/xsml-"+i+".png"});
 
-
-
-// 	start_stop.stop_id = planner_response.from.
-// 	start_stop.stop_code
-// 	start_stop.stop_name
-// 	start_stop.lat
-// 	start_stop.lon = 
-// 	var end_stop;
-
-// function to show itinerary results
-// itineraries[0...2].legs[0...2].mode;
-
-// mode can be 'WALK' or 'BUS'
 
 // http://gtfs-api.ed-groth.com/trip-planner/anaheim-ca-us/plan-then-merge-by-route-sequence?fromPlace=33.8046480634388%2C-117.915358543396&toPlace=33.82422318995612%2C-117.90390014648436&time=1%3A29pm&date=03-31-2015
