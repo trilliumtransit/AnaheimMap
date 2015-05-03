@@ -531,7 +531,7 @@ function create_landmark_marker(i,width,height,landmark_id,icon_index,landmark_l
  
 	var zoom_level_icon = landmark_icon(width,height,icon_index,filename);
 
-	landmark_markers[i] = L.marker([landmark_lat, landmark_lon], {
+	landmark_markers[landmark_id] = L.marker([landmark_lat, landmark_lon], {
 	draggable: <?php echo $dragable_icons; ?>,
 	icon: zoom_level_icon,
 	title: landmark_name,
@@ -539,9 +539,9 @@ function create_landmark_marker(i,width,height,landmark_id,icon_index,landmark_l
 	}).bindPopup(landmark_name, {maxWidth: 400});
 		
 
-landmark_markers[i].landmark_id = landmark_id;
-landmark_markers[i].landmark_name = landmark_name;
-landmark_markers[i].category_name = category_name;
+landmark_markers[landmark_id].landmark_id = landmark_id;
+landmark_markers[landmark_id].landmark_name = landmark_name;
+landmark_markers[landmark_id].category_name = category_name;
 		
 }
 
@@ -918,12 +918,15 @@ function load_landmarks_markers(significance_designation) {
 		
 						create_landmark_marker(i,width,height,landmark_id,icon_index,landmark_lat_temp,landmark_lon_temp,filename,landmarks_array_temp[i].category_name,landmark_name);
 				
-						var LamMarker = landmark_markers[i];
+						var LamMarker = landmark_markers[landmark_id];
 						LamMarker.on('popupopen', update_landmark_info);
-				
-						var new_array_length = landmark_markers.push(LamMarker) - 1;
-						landmark_markers_group.addLayer(landmark_markers[new_array_length]);
-
+						
+						// landmark_markers[landmark_id] = LamMarker;
+						landmark_markers_group.addLayer(landmark_markers[landmark_id]);
+						
+						//var new_array_length = landmark_markers.push(LamMarker) - 1;
+						//landmark_markers_group.addLayer(landmark_markers[new_array_length]);
+						
 						}
 		
 					}
@@ -936,7 +939,6 @@ function load_landmarks_markers(significance_designation) {
 }
 
 function add_landmarks_markers(significance_designation) {
-	load_landmarks_markers(significance_designation);
 	
 	if (significance_designation == 'major') {
 	var landmark_markers_group = major_landmark_markers_group;
@@ -972,6 +974,9 @@ setTimeout(function() {  highlight_route_alignment(route_ids_array); },5);
 
 
 });
+
+load_landmarks_markers('major');
+load_landmarks_markers('minor');
 
 add_landmarks_markers('major');
 
@@ -1071,8 +1076,27 @@ var planner_response;
 
 var itineraries_for_display;
 
-function getItinerary(start_coords,end_coords) {
 
+function getItinerary(start,end) {
+	
+	if (typeof start[0] == "undefined") {
+		var start_coords = new Array(landmarks[start].lat,landmarks[start].lon);
+		var start_landmark_id = start;
+		}
+	else {
+		var start_coords = new Array(start[0],start[1]);
+		var start_landmark_id = null;
+		}
+		
+	if (typeof end[0] == "undefined") {
+		var end_coords = new Array(landmarks[end].lat,landmarks[end].lon);
+		var end_landmark_id = end;
+		}
+	else {
+		var end_coords = new Array(end[0],end[1]);
+		var end_landmark_id = null;
+		}
+	
 	var date = new Date();
 	console.log(date);
 	var month = date.getMonth()+1;
@@ -1091,7 +1115,7 @@ function getItinerary(start_coords,end_coords) {
 	var leg_counter;
 	var itinerary;
 	var itinerary_with_bus_counter = 0;	
-	var itineraries_for_display = [];
+	var itineraries = [];
 
 	
 	for(var itinerary_i = 0; itinerary_i < planner_response.itineraries.length; itinerary_i++) {
@@ -1133,9 +1157,9 @@ function getItinerary(start_coords,end_coords) {
 						last_bus: current_leg.routeSpan.late.departure_time // in UTC format -- come back to this
 							};
 				
-		//				itineraries_for_display[itinerary_i][leg_counter].route_info = route_info_object;
+		//				itineraries[itinerary_i][leg_counter].route_info = route_info_object;
 			
-		//				console.log(itineraries_for_display[itinerary_i][leg_counter].route_info);
+		//				console.log(itineraries[itinerary_i][leg_counter].route_info);
 			
 						// start stop
 						var start_stop_object = {name: current_leg.from.name,
@@ -1145,7 +1169,7 @@ function getItinerary(start_coords,end_coords) {
 							lon: current_leg.from.lon
 							};
 
-		//				itineraries_for_display[itinerary_i][leg_counter].start_stop = start_stop_object;
+		//				itineraries[itinerary_i][leg_counter].start_stop = start_stop_object;
 
 						var end_stop_object = {name: current_leg.to.name,
 							stop_code: current_leg.to.stopCode,
@@ -1154,7 +1178,7 @@ function getItinerary(start_coords,end_coords) {
 							lon: current_leg.to.lon
 							};
 				
-		//				itineraries_for_display[itinerary_i][leg_counter].end_stop = end_stop_object;
+		//				itineraries[itinerary_i][leg_counter].end_stop = end_stop_object;
 			
 						var leg_to_add = {
 							route_info: route_info_object,
@@ -1162,13 +1186,13 @@ function getItinerary(start_coords,end_coords) {
 							end_stop_object: end_stop_object
 						};
 			
-						console.log('itineraries_for_display['+itinerary_with_bus_counter+']['+leg_counter+']');
+						console.log('itineraries['+itinerary_with_bus_counter+']['+leg_counter+']');
 						
-						if (typeof itineraries_for_display[itinerary_with_bus_counter] == 'undefined') {
-							itineraries_for_display[itinerary_with_bus_counter] = new Array();
+						if (typeof itineraries[itinerary_with_bus_counter] == 'undefined') {
+							itineraries[itinerary_with_bus_counter] = new Array();
 						}
 						
-						itineraries_for_display[itinerary_with_bus_counter][leg_counter] = leg_to_add;
+						itineraries[itinerary_with_bus_counter][leg_counter] = leg_to_add;
 							leg_counter++;
 						}
 					}
@@ -1187,7 +1211,15 @@ function getItinerary(start_coords,end_coords) {
 	// polyline
 	// route info: short name, long name, color, first bus, last bus, route_url
 
-return itineraries_for_display;
+var return_object = {
+	start_landmark_id: start_landmark_id,
+	end_landmark_id: end_landmark_id,
+	itineraries: itineraries
+};
+
+console.log(return_object);
+
+itineraries_for_display = return_object;
 
 }
 
@@ -1208,8 +1240,12 @@ var tripplan_polylines = new Array();
 var tripplan_markers = new Array();
 var start_marker;
 var end_marker;
+var start_landmark_marker;
+var end_landmark_marker;
 
-function map_itinerary(itinerary) {
+function map_itinerary(itinerary_i) {
+
+var itinerary = itineraries_for_display.itineraries[itinerary_i];
 
 map.removeLayer(tile_layer[0]);
 
@@ -1228,12 +1264,20 @@ toggle_stop_visibility();
 
 var line_offset = 0;
 
+		if (itineraries_for_display.start_landmark_id != null) {
+				start_landmark_marker = landmark_markers[itineraries_for_display.start_landmark_id];
+				start_landmark_marker.addTo(map);}
+				
+		if (itineraries_for_display.end_landmark_id != null) {
+				end_landmark_marker = landmark_markers[itineraries_for_display.end_landmark_id];
+				end_landmark_marker.addTo(map);}
+
 	for(var leg_i = 0; leg_i < itinerary.length; leg_i++) {
 	
-		if (leg_i == 0) {start_marker = L.marker([itinerary[leg_i].start_stop_object.lat, itinerary[leg_i].start_stop_object.lon], {icon: start_icon,zIndexOffset: 399});
+		if (leg_i == 0) {start_marker = L.marker([itinerary[leg_i].start_stop_object.lat, itinerary[leg_i].start_stop_object.lon], {icon: start_icon,zIndexOffset: 388});
 				start_marker.addTo(map);}
 				
-		if (leg_i == itinerary.length-1) {end_marker = L.marker([itinerary[leg_i].end_stop_object.lat, itinerary[leg_i].end_stop_object.lon], {icon: end_icon,zIndexOffset: 399});
+		if (leg_i == itinerary.length-1) {end_marker = L.marker([itinerary[leg_i].end_stop_object.lat, itinerary[leg_i].end_stop_object.lon], {icon: end_icon,zIndexOffset: 388});
 				end_marker.addTo(map);}
 		
 		tripplan_markers[leg_i] = new L.marker( [ itinerary[leg_i].start_stop_object.lat , itinerary[leg_i].start_stop_object.lon], {
@@ -1255,6 +1299,8 @@ var line_offset = 0;
 
 function remove_tripplan() {
 
+if (map.hasLayer(start_landmark_marker)) {map.removeLayer(start_landmark_marker);}
+if (map.hasLayer(end_landmark_marker)) {map.removeLayer(end_landmark_marker);}
 if (map.hasLayer(start_marker)) {map.removeLayer(start_marker);}
 if (map.hasLayer(end_marker)) {map.removeLayer(end_marker);}
 
