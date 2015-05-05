@@ -956,7 +956,7 @@ map.on('zoomend', function(e) {
 // adding events for Google Analytics here
 
 map.on('zoomend', function() {
-	ga('send', 'event', 'map', 'zoomend', 'Zoom level '+map.getZoom());
+	ga('send', 'event', 'map', 'zoomend', 'Zoom level', map.getZoom());
 });
 
 
@@ -1049,10 +1049,12 @@ function getItinerary(start,end) {
 	if (typeof start[0] == "undefined") {
 		var start_coords = new Array(landmarks[start].lat,landmarks[start].lon);
 		var start_landmark_id = start;
+		ga('send', 'event', 'map', 'Plan trip - landmarks', 'From: '+landmarks[start].landmark_name + 'To: '+landmarks[end].landmark_name);
 		}
 	else {
 		var start_coords = new Array(start[0],start[1]);
 		var start_landmark_id = null;
+		ga('send', 'event', 'map', 'Plan trip - lat/lon', 'From: '+start[0]+','+start[1]+' To: '+end[0]+','+end[1]);
 		}
 		
 	if (typeof end[0] == "undefined") {
