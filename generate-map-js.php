@@ -1225,7 +1225,6 @@ itineraries_for_display = return_object;
 
 var itinerary_up = 0;
 var showing_itinerary;
-var displayed_itinerary = new Array();
 var start_icon = new L.Icon({ 
 		iconUrl: map_files_base+'map_ui_images/marker-flag-start-shadowed.png',
 		iconSize: [48,49],
