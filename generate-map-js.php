@@ -164,47 +164,11 @@ function encapsulate_in_array(variable) {
 	}
 
 
-route_urls = Array();
-
-route_urls[1702] = 'http://rideart.org/routes-and-schedules/hotel-circle-clementine-line/';
-route_urls[1705] = 'http://rideart.org/routes-and-schedules/downtown-packing-district-line/';
-route_urls[1700] = 'http://rideart.org/routes-and-schedules/grand-plaza-line/';
-route_urls[1711] = 'http://rideart.org/routes-and-schedules/toy-story-line/';
-route_urls[1697] = 'http://rideart.org/routes-and-schedules/harbor-blvd-line/';
-route_urls[1709] = 'http://rideart.org/routes-and-schedules/artic-sports-complex-line/';
-route_urls[1716] = 'http://rideart.org/routes-and-schedules/canyon-line/';
-route_urls[1708] = 'http://rideart.org/routes-and-schedules/artic-sports-complex-line/';
-route_urls[1704] = 'http://rideart.org/routes-and-schedules/katella-line/';
-route_urls[1710] = 'http://rideart.org/routes-and-schedules/orange-line/';
-route_urls[1699] = 'http://rideart.org/routes-and-schedules/grand-plaza-line/';
-route_urls[1703] = 'http://rideart.org/routes-and-schedules/hotel-circle-clementine-line/';
-route_urls[1707] = 'http://rideart.org/routes-and-schedules/manchester-ave-line/';
-route_urls[1714] = 'http://rideart.org/routes-and-schedules/canyon-line/';
-route_urls[1712] = 'http://rideart.org/routes-and-schedules/buena-park-line/';
-route_urls[1713] = 'http://rideart.org/routes-and-schedules/mainplace-line/';
-route_urls[1696] = 'http://rideart.org/routes-and-schedules/harbor-blvd-line/';
-route_urls[1698] = 'http://rideart.org/routes-and-schedules/grand-plaza-line/';
-route_urls[1701] = 'http://rideart.org/routes-and-schedules/hotel-circle-clementine-line/';
-route_urls[1706] = 'http://rideart.org/routes-and-schedules/ball-road-line/';
-
 // Load an object with the routes
 function load_routes() {
 	var load_data_url = generate_proxy_url(api_base_url+'routes/by-feed/anaheim-ca-us');
 
     routes = load_data(load_data_url);
-    
-// 	for(var route_i = 0; route_i < routes.length; route_i++) {
-// 		if(!routes[route_i].hasOwnProperty('route_url')) {       
-// 		routes[route_i].route_url = 'http://rideart.org/routes-and-schedules/' + routes[route_i].route_long_name.toLowerCase().replace(/ /g,'-').replace(/\./g,'');	
-// 		}
-// 	}
-
-	for(var route_i = 0; route_i < routes.length; route_i++) {
-		if(!routes[route_i].hasOwnProperty('route_url')) {       
-		routes[route_i].route_url = route_urls[routes[route_i].route_id];
-		}
-	}
-	
 }
 
 function get_index(value, array) {
@@ -1076,7 +1040,6 @@ var planner_response;
 
 var itineraries_for_display;
 
-
 function getItinerary(start,end) {
 	
 	if (typeof start[0] == "undefined") {
@@ -1146,7 +1109,6 @@ function getItinerary(start,end) {
 				
 					if (current_leg.mode == 'BUS') {
 			
-
 						// route information
 						var route_info_object = {shape: decodePolyline(current_leg.legGeometry.points),
 						route_short_name: current_leg.route, // route_short_name
