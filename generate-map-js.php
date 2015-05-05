@@ -1152,6 +1152,7 @@ function getItinerary(start,end) {
 						route_short_name: current_leg.route, // route_short_name
 						route_long_name: current_leg.routeLongName,
 						route_color: current_leg.routeColor,
+						frequency: current_leg.routeHumanFrequency,
 						route_url: current_leg.routeUrl,
 						first_bus: current_leg.routeSpan.early.departure_time, // in UTC format -- come back to this
 						last_bus: current_leg.routeSpan.late.departure_time // in UTC format -- come back to this
