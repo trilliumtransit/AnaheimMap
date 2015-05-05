@@ -1040,6 +1040,10 @@ var planner_response;
 
 var itineraries_for_display;
 
+function isNumeric(n) {
+  return !isNaN(parseFloat(n)) && isFinite(n);
+}
+
 function getItinerary(start,end) {
 	
 	if (typeof start[0] == "undefined") {
@@ -1108,13 +1112,15 @@ function getItinerary(start,end) {
 					console.log(current_leg.mode);
 				
 					if (current_leg.mode == 'BUS') {
+					
+						if (isNumeric(current_leg.routeHumanFrequency)) {var display_frequency = 'Every '+current_leg.routeHumanFrequency+' minutes';} else {var display_frequency = current_leg.routeHumanFrequency;}
 			
 						// route information
 						var route_info_object = {shape: decodePolyline(current_leg.legGeometry.points),
 						route_short_name: current_leg.route, // route_short_name
 						route_long_name: current_leg.routeLongName,
 						route_color: current_leg.routeColor,
-						frequency: current_leg.routeHumanFrequency,
+						frequency: display_frequency,
 						route_url: current_leg.routeUrl,
 						first_bus: current_leg.routeSpan.early.departure_time, // in UTC format -- come back to this
 						last_bus: current_leg.routeSpan.late.departure_time // in UTC format -- come back to this
