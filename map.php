@@ -2,8 +2,9 @@
 
 <head>
 
-<script src='https://api.tiles.mapbox.com/mapbox.js/v2.1.4/mapbox.js'></script>
-<link href='https://api.tiles.mapbox.com/mapbox.js/v2.1.4/mapbox.css' rel='stylesheet' />
+<script src='https://api.tiles.mapbox.com/mapbox.js/v2.1.9/mapbox.js'></script>
+<link href='https://api.tiles.mapbox.com/mapbox.js/v2.1.9/mapbox.css' rel='stylesheet' />
+<script src='http://rideart.org/wp-content/themes/art/AnaheimMap/library/js/leaflet.polylineoffset.js'></script>
 <link href='http://rideart.org/wp-content/themes/art/library/css/route-icons.css' rel='stylesheet' />
 <link href='map_layout.css' rel='stylesheet' />
 <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>

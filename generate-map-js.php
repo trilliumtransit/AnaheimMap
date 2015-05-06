@@ -164,47 +164,11 @@ function encapsulate_in_array(variable) {
 	}
 
 
-route_urls = Array();
-
-route_urls[1702] = 'http://rideart.org/routes-and-schedules/hotel-circle-clementine-line/';
-route_urls[1705] = 'http://rideart.org/routes-and-schedules/downtown-packing-district-line/';
-route_urls[1700] = 'http://rideart.org/routes-and-schedules/grand-plaza-line/';
-route_urls[1711] = 'http://rideart.org/routes-and-schedules/toy-story-line/';
-route_urls[1697] = 'http://rideart.org/routes-and-schedules/harbor-blvd-line/';
-route_urls[1709] = 'http://rideart.org/routes-and-schedules/artic-sports-complex-line/';
-route_urls[1716] = 'http://rideart.org/routes-and-schedules/canyon-line/';
-route_urls[1708] = 'http://rideart.org/routes-and-schedules/artic-sports-complex-line/';
-route_urls[1704] = 'http://rideart.org/routes-and-schedules/katella-line/';
-route_urls[1710] = 'http://rideart.org/routes-and-schedules/orange-line/';
-route_urls[1699] = 'http://rideart.org/routes-and-schedules/grand-plaza-line/';
-route_urls[1703] = 'http://rideart.org/routes-and-schedules/hotel-circle-clementine-line/';
-route_urls[1707] = 'http://rideart.org/routes-and-schedules/manchester-ave-line/';
-route_urls[1714] = 'http://rideart.org/routes-and-schedules/canyon-line/';
-route_urls[1712] = 'http://rideart.org/routes-and-schedules/buena-park-line/';
-route_urls[1713] = 'http://rideart.org/routes-and-schedules/mainplace-line/';
-route_urls[1696] = 'http://rideart.org/routes-and-schedules/harbor-blvd-line/';
-route_urls[1698] = 'http://rideart.org/routes-and-schedules/grand-plaza-line/';
-route_urls[1701] = 'http://rideart.org/routes-and-schedules/hotel-circle-clementine-line/';
-route_urls[1706] = 'http://rideart.org/routes-and-schedules/ball-road-line/';
-
 // Load an object with the routes
 function load_routes() {
 	var load_data_url = generate_proxy_url(api_base_url+'routes/by-feed/anaheim-ca-us');
 
     routes = load_data(load_data_url);
-    
-// 	for(var route_i = 0; route_i < routes.length; route_i++) {
-// 		if(!routes[route_i].hasOwnProperty('route_url')) {       
-// 		routes[route_i].route_url = 'http://rideart.org/routes-and-schedules/' + routes[route_i].route_long_name.toLowerCase().replace(/ /g,'-').replace(/\./g,'');	
-// 		}
-// 	}
-
-	for(var route_i = 0; route_i < routes.length; route_i++) {
-		if(!routes[route_i].hasOwnProperty('route_url')) {       
-		routes[route_i].route_url = route_urls[routes[route_i].route_id];
-		}
-	}
-	
 }
 
 function get_index(value, array) {
@@ -529,11 +493,9 @@ function create_landmark_marker(i,width,height,landmark_id,icon_index,landmark_l
 		landmark_categories.push(category_name);
 	}
  
-	add_object_property(category_name,landmark_markers);
-
 	var zoom_level_icon = landmark_icon(width,height,icon_index,filename);
 
-	landmark_markers[category_name][i] = L.marker([landmark_lat, landmark_lon], {
+	landmark_markers[landmark_id] = L.marker([landmark_lat, landmark_lon], {
 	draggable: <?php echo $dragable_icons; ?>,
 	icon: zoom_level_icon,
 	title: landmark_name,
@@ -541,8 +503,9 @@ function create_landmark_marker(i,width,height,landmark_id,icon_index,landmark_l
 	}).bindPopup(landmark_name, {maxWidth: 400});
 		
 
-landmark_markers[category_name][i].landmark_id = landmark_id;
-landmark_markers[category_name][i].landmark_name = landmark_name;
+landmark_markers[landmark_id].landmark_id = landmark_id;
+landmark_markers[landmark_id].landmark_name = landmark_name;
+landmark_markers[landmark_id].category_name = category_name;
 		
 }
 
@@ -687,13 +650,12 @@ function landmark_icon(width,height,icon_index,filename) {
 	var scaled_height = zoom_icon_scale[current_zoom] * height;
 
 	landmark_icons[icon_index].icons[current_zoom] = new L.Icon({ 
-		iconUrl: map_files_base+'map_icons/'+filename,
+		iconUrl: map_files_base+'landmark_icons/'+filename,
 		iconSize: [scaled_width, scaled_height],
 		iconAnchor: [scaled_width/2, scaled_height/2]
 		});
 		
 	}
-
 	
 	return landmark_icons[icon_index].icons[current_zoom];
 }
@@ -794,41 +756,36 @@ function unhighlight_route_alignment(route_ids) {
 
 }
 function refresh_landmark_view() {
-		for (var category_i = 0; category_i < landmark_categories.length; category_i++) {
+	var marker_set = landmark_markers;
 	
-		var category_name = landmark_categories[category_i]
-		var marker_set = landmark_markers[category_name];
-		console.log(marker_set);
-		
-		for (var i = 0; i < marker_set.length; i++) {
-			if (typeof marker_set[i] !== 'undefined') {
-				var landmark_id = marker_set[i].landmark_id;
-				console.log('landmark_id: '+landmark_id);
-				console.log('landmarks['+category_name+']['+landmark_id+'].icon_index');
-				var icon_index = landmarks[category_name][landmark_id].icon_index;
-				var height = landmark_icons[icon_index].height;
-				var width = landmark_icons[icon_index].width;
-				var filename = landmark_icons[icon_index].filename;
-				marker_set[i].setIcon(landmark_icon(width,height,icon_index,filename));
-			}
+	for (var i = 0; i < marker_set.length; i++) {
+		if (typeof marker_set[i] !== 'undefined') {
+			var landmark_id = marker_set[i].landmark_id;
+
+			var icon_index = landmarks[landmark_id].icon_index;
+			var height = landmark_icons[icon_index].height;
+			var width = landmark_icons[icon_index].width;
+			var filename = landmark_icons[icon_index].filename;
+			marker_set[i].setIcon(landmark_icon(width,height,icon_index,filename));
 		}
 	}
 }
 
+
 function toggle_stop_visibility() {
-    if (map.getZoom() < ZoomLevelThreshhold && map.hasLayer(stops_layer_group)) {
+    if ( (map.getZoom() < ZoomLevelThreshhold && map.hasLayer(stops_layer_group)) || itinerary_up == true) {
         map.removeLayer(stops_layer_group);
     }
-    if (map.getZoom() >= ZoomLevelThreshhold && map.hasLayer(stops_layer_group) == false) {
+    if ( (map.getZoom() >= ZoomLevelThreshhold && map.hasLayer(stops_layer_group) == false) && !itinerary_up ) {
         load_stop_markers();
     }
 }
 
 function toggle_minor_landmark_visibility() {
-    if (map.getZoom() < minor_landmarks_zoom_threshhold && map.hasLayer(minor_landmark_markers_group)) {
+    if ((map.getZoom() < minor_landmarks_zoom_threshhold && map.hasLayer(minor_landmark_markers_group)) || itinerary_up == true) {
         map.removeLayer(minor_landmark_markers_group);
     }
-    if (map.getZoom() >= minor_landmarks_zoom_threshhold && map.hasLayer(minor_landmark_markers_group) == false) {
+    if ((map.getZoom() >= minor_landmarks_zoom_threshhold && map.hasLayer(minor_landmark_markers_group) == false) && !itinerary_up) {
         add_landmarks_markers('minor');
 //      map.addLayer(minor_landmark_markers_group);
     }
@@ -894,46 +851,46 @@ function load_landmarks_markers(significance_designation) {
 				console.log(landmarks_array_temp);
 		
 				for (var i = 0, len = landmarks_array_temp.length; i < len; i++) {
+							
+					landmarks[landmarks_array_temp[i].landmark_id] = {};
 		
-					var category_name = landmarks_array_temp[i].category_name;
-			
-					add_object_property(landmarks_array_temp[i].category_name,landmarks);
-		
-					landmarks[category_name][landmarks_array_temp[i].landmark_id] = {};
-		
-					landmarks[category_name][landmarks_array_temp[i].landmark_id].landmark_name = landmarks_array_temp[i].landmark_name;
+					landmarks[landmarks_array_temp[i].landmark_id].landmark_name = landmarks_array_temp[i].landmark_name;
 					landmark_name = landmarks_array_temp[i].landmark_name;
-					landmarks[category_name][landmarks_array_temp[i].landmark_id].category_name = landmarks_array_temp[i].category_name;
-					landmarks[category_name][landmarks_array_temp[i].landmark_id].landmark_url = landmarks_array_temp[i].landmark_url;
+					landmarks[landmarks_array_temp[i].landmark_id].category_name = landmarks_array_temp[i].category_name;
+					landmarks[landmarks_array_temp[i].landmark_id].landmark_url = landmarks_array_temp[i].landmark_url;
 					var landmark_lat_temp = landmarks_array_temp[i].lat;
-					landmarks[category_name][landmarks_array_temp[i].landmark_id].lat = landmark_lat_temp;
+					landmarks[landmarks_array_temp[i].landmark_id].lat = landmark_lat_temp;
 					var landmark_lon_temp = landmarks_array_temp[i].lon;
-					landmarks[category_name][landmarks_array_temp[i].landmark_id].lon = landmark_lon_temp;
-					landmarks[category_name][landmarks_array_temp[i].landmark_id].major = landmarks_array_temp[i].major;
-					landmarks[category_name][landmarks_array_temp[i].landmark_id].icon_id = landmarks_array_temp[i].icon_id;
+					landmarks[landmarks_array_temp[i].landmark_id].lon = landmark_lon_temp;
+					landmarks[landmarks_array_temp[i].landmark_id].major = landmarks_array_temp[i].major;
+					landmarks[landmarks_array_temp[i].landmark_id].category_name = landmarks_array_temp[i].category_name;
+					landmarks[landmarks_array_temp[i].landmark_id].icon_id = landmarks_array_temp[i].icon_id;
 		
 					var icon_index = get_icon_index_for_icon(landmarks_array_temp[i].icon_id);
 		
 					if (typeof icon_index !== 'undefined') {
 		
-						landmarks[category_name][landmarks_array_temp[i].landmark_id].icon_index = icon_index;
+						landmarks[landmarks_array_temp[i].landmark_id].icon_index = icon_index;
 
 
 						var width = landmark_icons[icon_index].width;
 						var height = landmark_icons[icon_index].height;
 						var filename = landmark_icons[icon_index].filename;
-						var landmark_id = landmarks_array_temp[i].landmark_id;     
+						var landmark_id = landmarks_array_temp[i].landmark_id;
 		
 						// var current_zoom = map.getZoom();
 		
-						create_landmark_marker(i,width,height,landmark_id,icon_index,landmark_lat_temp,landmark_lon_temp,filename,category_name,landmark_name);
+						create_landmark_marker(i,width,height,landmark_id,icon_index,landmark_lat_temp,landmark_lon_temp,filename,landmarks_array_temp[i].category_name,landmark_name);
 				
-						var LamMarker = landmark_markers[category_name][i];
+						var LamMarker = landmark_markers[landmark_id];
 						LamMarker.on('popupopen', update_landmark_info);
-				
-						var new_array_length = landmark_markers.push(LamMarker) - 1;
-						landmark_markers_group.addLayer(landmark_markers[new_array_length]);
-
+						
+						// landmark_markers[landmark_id] = LamMarker;
+						landmark_markers_group.addLayer(landmark_markers[landmark_id]);
+						
+						//var new_array_length = landmark_markers.push(LamMarker) - 1;
+						//landmark_markers_group.addLayer(landmark_markers[new_array_length]);
+						
 						}
 		
 					}
@@ -946,7 +903,6 @@ function load_landmarks_markers(significance_designation) {
 }
 
 function add_landmarks_markers(significance_designation) {
-	load_landmarks_markers(significance_designation);
 	
 	if (significance_designation == 'major') {
 	var landmark_markers_group = major_landmark_markers_group;
@@ -983,6 +939,9 @@ setTimeout(function() {  highlight_route_alignment(route_ids_array); },5);
 
 });
 
+load_landmarks_markers('major');
+load_landmarks_markers('minor');
+
 add_landmarks_markers('major');
 
 map.on('zoomend', function(e) {
@@ -997,7 +956,7 @@ map.on('zoomend', function(e) {
 // adding events for Google Analytics here
 
 map.on('zoomend', function() {
-	ga('send', 'event', 'map', 'zoomend', 'Zoom level '+map.getZoom());
+	ga('send', 'event', 'map', 'zoomend', 'Zoom level', map.getZoom());
 });
 
 
@@ -1081,8 +1040,32 @@ var planner_response;
 
 var itineraries_for_display;
 
-function getItinerary(start_coords,end_coords) {
+function isNumeric(n) {
+  return !isNaN(parseFloat(n)) && isFinite(n);
+}
 
+function getItinerary(start,end) {
+	
+	if (typeof start[0] == "undefined") {
+		var start_coords = new Array(landmarks[start].lat,landmarks[start].lon);
+		var start_landmark_id = start;
+		ga('send', 'event', 'map', 'Plan trip - landmarks', 'From: '+landmarks[start].landmark_name + 'To: '+landmarks[end].landmark_name);
+		}
+	else {
+		var start_coords = new Array(start[0],start[1]);
+		var start_landmark_id = null;
+		ga('send', 'event', 'map', 'Plan trip - lat/lon', 'From: '+start[0]+','+start[1]+' To: '+end[0]+','+end[1]);
+		}
+		
+	if (typeof end[0] == "undefined") {
+		var end_coords = new Array(landmarks[end].lat,landmarks[end].lon);
+		var end_landmark_id = end;
+		}
+	else {
+		var end_coords = new Array(end[0],end[1]);
+		var end_landmark_id = null;
+		}
+	
 	var date = new Date();
 	console.log(date);
 	var month = date.getMonth()+1;
@@ -1101,7 +1084,7 @@ function getItinerary(start_coords,end_coords) {
 	var leg_counter;
 	var itinerary;
 	var itinerary_with_bus_counter = 0;	
-	var itineraries_for_display = [];
+	var itineraries = [];
 
 	
 	for(var itinerary_i = 0; itinerary_i < planner_response.itineraries.length; itinerary_i++) {
@@ -1131,21 +1114,23 @@ function getItinerary(start_coords,end_coords) {
 					console.log(current_leg.mode);
 				
 					if (current_leg.mode == 'BUS') {
+					
+						if (isNumeric(current_leg.routeHumanFrequency)) {var display_frequency = 'Every '+current_leg.routeHumanFrequency+' minutes';} else {var display_frequency = current_leg.routeHumanFrequency;}
 			
-
 						// route information
 						var route_info_object = {shape: decodePolyline(current_leg.legGeometry.points),
 						route_short_name: current_leg.route, // route_short_name
 						route_long_name: current_leg.routeLongName,
 						route_color: current_leg.routeColor,
+						frequency: display_frequency,
 						route_url: current_leg.routeUrl,
 						first_bus: current_leg.routeSpan.early.departure_time, // in UTC format -- come back to this
 						last_bus: current_leg.routeSpan.late.departure_time // in UTC format -- come back to this
 							};
 				
-		//				itineraries_for_display[itinerary_i][leg_counter].route_info = route_info_object;
+		//				itineraries[itinerary_i][leg_counter].route_info = route_info_object;
 			
-		//				console.log(itineraries_for_display[itinerary_i][leg_counter].route_info);
+		//				console.log(itineraries[itinerary_i][leg_counter].route_info);
 			
 						// start stop
 						var start_stop_object = {name: current_leg.from.name,
@@ -1155,7 +1140,7 @@ function getItinerary(start_coords,end_coords) {
 							lon: current_leg.from.lon
 							};
 
-		//				itineraries_for_display[itinerary_i][leg_counter].start_stop = start_stop_object;
+		//				itineraries[itinerary_i][leg_counter].start_stop = start_stop_object;
 
 						var end_stop_object = {name: current_leg.to.name,
 							stop_code: current_leg.to.stopCode,
@@ -1164,7 +1149,7 @@ function getItinerary(start_coords,end_coords) {
 							lon: current_leg.to.lon
 							};
 				
-		//				itineraries_for_display[itinerary_i][leg_counter].end_stop = end_stop_object;
+		//				itineraries[itinerary_i][leg_counter].end_stop = end_stop_object;
 			
 						var leg_to_add = {
 							route_info: route_info_object,
@@ -1172,13 +1157,13 @@ function getItinerary(start_coords,end_coords) {
 							end_stop_object: end_stop_object
 						};
 			
-						console.log('itineraries_for_display['+itinerary_with_bus_counter+']['+leg_counter+']');
+						console.log('itineraries['+itinerary_with_bus_counter+']['+leg_counter+']');
 						
-						if (typeof itineraries_for_display[itinerary_with_bus_counter] == 'undefined') {
-							itineraries_for_display[itinerary_with_bus_counter] = new Array();
+						if (typeof itineraries[itinerary_with_bus_counter] == 'undefined') {
+							itineraries[itinerary_with_bus_counter] = new Array();
 						}
 						
-						itineraries_for_display[itinerary_with_bus_counter][leg_counter] = leg_to_add;
+						itineraries[itinerary_with_bus_counter][leg_counter] = leg_to_add;
 							leg_counter++;
 						}
 					}
@@ -1197,22 +1182,101 @@ function getItinerary(start_coords,end_coords) {
 	// polyline
 	// route info: short name, long name, color, first bus, last bus, route_url
 
-return itineraries_for_display;
+var return_object = {
+	start_landmark_id: start_landmark_id,
+	end_landmark_id: end_landmark_id,
+	itineraries: itineraries
+};
+
+console.log(return_object);
+
+itineraries_for_display = return_object;
 
 }
 
-
+var itinerary_up = 0;
 var showing_itinerary;
-var displayed_itinerary = new Array();
-var start_bus_marker;
-var end_bus_marker;
-var tripplan_polyline_options = {color: '#B01B15'};
+var start_icon = new L.Icon({ 
+		iconUrl: map_files_base+'map_ui_images/marker-flag-start-shadowed.png',
+		iconSize: [48,49],
+		iconAnchor: [48,49]
+		});
+var end_icon = new L.Icon({ 
+		iconUrl: map_files_base+'map_ui_images/marker-flag-end-shadowed.png',
+		iconSize: [48,49],
+		iconAnchor: [48,49]
+		});
 var tripplan_polylines = new Array();
+var tripplan_markers = new Array();
+var start_marker;
+var end_marker;
+var start_landmark_marker;
+var end_landmark_marker;
 
-function map_itinerary(itinerary) {
+function map_itinerary(itinerary_i) {
+
+var itinerary = itineraries_for_display.itineraries[itinerary_i];
+
+map.removeLayer(tile_layer[0]);
+
+if (map.hasLayer(start_marker)) {map.removeLayer(start_marker);}
+if (map.hasLayer(end_marker)) {map.removeLayer(end_marker);}
 
 // clear the showing_itinerary_object
 showing_itinerary = itinerary;
+
+remove_tripplan();
+
+// set to true because an itinerary is being shown
+itinerary_up = true;
+
+toggle_stop_visibility();
+
+var line_offset = 0;
+
+		if (itineraries_for_display.start_landmark_id != null) {
+				start_landmark_marker = landmark_markers[itineraries_for_display.start_landmark_id];
+				start_landmark_marker.addTo(map);}
+				
+		if (itineraries_for_display.end_landmark_id != null) {
+				end_landmark_marker = landmark_markers[itineraries_for_display.end_landmark_id];
+				end_landmark_marker.addTo(map);}
+
+	for(var leg_i = 0; leg_i < itinerary.length; leg_i++) {
+	
+		if (leg_i == 0) {start_marker = L.marker([itinerary[leg_i].start_stop_object.lat, itinerary[leg_i].start_stop_object.lon], {icon: start_icon,zIndexOffset: 388});
+				start_marker.addTo(map);}
+				
+		if (leg_i == itinerary.length-1) {end_marker = L.marker([itinerary[leg_i].end_stop_object.lat, itinerary[leg_i].end_stop_object.lon], {icon: end_icon,zIndexOffset: 388});
+				end_marker.addTo(map);}
+		
+		tripplan_markers[leg_i] = new L.marker( [ itinerary[leg_i].start_stop_object.lat , itinerary[leg_i].start_stop_object.lon], {
+                   zIndexOffset: 400,
+                   icon: StopIcons[itinerary[leg_i].route_info.route_short_name]
+                });
+
+		tripplan_markers[leg_i].addTo(map);
+
+		var line_points = itinerary[leg_i].route_info.shape;		
+		tripplan_polylines[leg_i] = L.polyline(line_points, {offset: line_offset, color: '#'+itinerary[leg_i].route_info.route_color, weight: 8, opacity: 1}).addTo(map);
+		
+		line_offset = line_offset + 5;
+		
+	}
+
+	
+}
+
+function remove_tripplan() {
+
+if (map.hasLayer(start_landmark_marker)) {map.removeLayer(start_landmark_marker);}
+if (map.hasLayer(end_landmark_marker)) {map.removeLayer(end_landmark_marker);}
+if (map.hasLayer(start_marker)) {map.removeLayer(start_marker);}
+if (map.hasLayer(end_marker)) {map.removeLayer(end_marker);}
+
+
+
+// I could consolidate the two below things into one function.
 
 // removeLayer(polylines);
 for(var i = 0; i < tripplan_polylines.length; i++) {
@@ -1222,31 +1286,22 @@ for(var i = 0; i < tripplan_polylines.length; i++) {
 // reset the tripplan_polylines array
 tripplan_polylines = [];
 
-// hide stops
 
-// 
-	for(var leg_i = 0; leg_i < itinerary.length; leg_i++) {
+for(var i = 0; i < tripplan_markers.length; i++) {
+	map.removeLayer(tripplan_markers[i]);
+}
 
-		var line_points = itinerary[leg_i].route_info.shape;		
-		polyline[tripplan_polylines] = L.polyline(line_points, tripplan_polyline_options).addTo(map);
-		
-	}
+tripplan_markers = [];
 
-	
+}
+
+function exit_tripplan_mode() {
+	itinerary_up = false;
+	add_tile_layer(0,5);
+	toggle_stop_visibility();
+	toggle_minor_landmark_visibility();
 }
 
 
-
-// 	start_stop.stop_id = planner_response.from.
-// 	start_stop.stop_code
-// 	start_stop.stop_name
-// 	start_stop.lat
-// 	start_stop.lon = 
-// 	var end_stop;
-
-// function to show itinerary results
-// itineraries[0...2].legs[0...2].mode;
-
-// mode can be 'WALK' or 'BUS'
 
 // http://gtfs-api.ed-groth.com/trip-planner/anaheim-ca-us/plan-then-merge-by-route-sequence?fromPlace=33.8046480634388%2C-117.915358543396&toPlace=33.82422318995612%2C-117.90390014648436&time=1%3A29pm&date=03-31-2015
