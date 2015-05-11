@@ -1,5 +1,5 @@
 <?php
-
+header( 'application/javascript' );
 if(function_exists('imagepng')){
   echo  "//imagepng() -Exists-";
 }else{
@@ -43,6 +43,8 @@ var landmarks = Array();
 var landmark_icons = Array();
 var landmark_categories = Array();
 var tile_layer = new Array();
+var itineraryGroup = L.featureGroup();
+var planner_itineraries_shown = new Array();
 
 var landmark_markers = Array();
 var major_landmark_markers_group = L.featureGroup();
@@ -54,13 +56,12 @@ var system_map = <?php echo $system_map ?>;
 // define other variables
 var map_files_base = '<?php echo $map_files_base_split[0] ?>';
 var api_base_url = 'http://archive.oregon-gtfs.com/gtfs-api/';
+var base_map_tiles = 'trilliumtransit.5434d913';
 var route_alignments_tiles = 'trilliumtransit.ca9f8a4a';
 var road_label_tiles = 'trilliumtransit.acea92f4';
 
 var accessToken = 'pk.eyJ1IjoidHJpbGxpdW10cmFuc2l0IiwiYSI6ImVUQ2x0blUifQ.2-Z9TGHmyjRzy5GC1J9BTw';
 
-tile_layer[0] = new L.tileLayer('http://{s}.tiles.mapbox.com/v4/' + route_alignments_tiles + '/{z}/{x}/{y}.png?access_token=' + accessToken, {detectRetina: true});
-tile_layer[1] = new L.tileLayer('http://{s}.tiles.mapbox.com/v4/' + road_label_tiles + '/{z}/{x}/{y}.png?access_token=' + accessToken,{detectRetina: true});
 var default_icon_color = '575757';
 
 var ZoomLevelThreshhold = 15;
@@ -96,22 +97,42 @@ var southWest = L.latLng(33.765528, -118.042018),
     bounds = L.latLngBounds(southWest, northEast);
 
 // mapbox token, basemap
-L.mapbox.accessToken = accessToken;
-var map = L.mapbox.map('<?php echo $container_id; ?>', 'trilliumtransit.5434d913', { zoomControl: false, zoomAnimation: false, maxBounds: bounds, minZoom: 13 });
+//L.mapbox.accessToken = accessToken;
+var map = L.map('<?php echo $container_id; ?>', 'trilliumtransit.5434d913', { zoomControl: false, zoomAnimation: false, maxBounds: bounds, minZoom: 13 });
 
+// makes a map sandwich
+//var topPane = L.DomUtil.create('div', 'leaflet-top-pane', map.getPanes().mapPane);
+tile_layer[0] = new L.tileLayer('http://{s}.tiles.mapbox.com/v4/' + base_map_tiles + '/{z}/{x}/{y}.png?access_token=' + accessToken, {detectRetina: true,'zIndex': 10});
+tile_layer[1] = new L.tileLayer('http://{s}.tiles.mapbox.com/v4/' + route_alignments_tiles + '/{z}/{x}/{y}.png?access_token=' + accessToken, {detectRetina: true,'zIndex': 500});
+tile_layer[2] = new L.tileLayer('http://{s}.tiles.mapbox.com/v4/' + road_label_tiles + '/{z}/{x}/{y}.png?access_token=' + accessToken,
+		{detectRetina: true,'clickable': 'false', 'zIndex': 1000, pane: 'overlayPane'}).addTo(map);
+//topPane.appendChild(tile_layer[2].getContainer())
+
+
+var imageUrl = 'http://<?php echo $naked_url_base; ?>wp-content/themes/art/library/images/map_blue_coverfade.png',
+    imageBounds = [[33.63405913759068, -117.62203216552736], [33.97126744667272, -118.22628021240236]];
+
+var overlay = L.imageOverlay(imageUrl, imageBounds).addTo(map);
+//overlay.setOpacity(.5);
+//alert(topPane);
+//topPane.appendChild(tile_layer[1].getContainer());
 
 // map controls
 map.scrollWheelZoom.disable();
 if (system_map) {
 			 map.fitBounds([
-				[33.797984, -117.924412],
-				[33.813340, -117.909644]
+				[33.76659033487751, -118.00518035888673],
+				[33.85288250307444, -117.86304473876955]
 			]);
         }
         
-new L.Control.Zoom({ position: 'topright' }).addTo(map);
+//new L.Control.Zoom({ position: 'topright' }).addTo(map);
 
 // FUNCTIONS
+
+map.on('click', function(e) {
+   console.log("Lat, Lon : " + e.latlng.lat + ", " + e.latlng.lng)
+});
 
 // load data
 function load_data(url, dataType) {
@@ -628,7 +649,7 @@ function update_landmark_info(e) {
 // final action - set popup content
 e.target.setPopupContent(popup_content);
 
-ga('send', 'event', 'map', 'click landmark', e.target.landmark_name);
+//ga('send', 'event', 'map', 'click landmark', e.target.landmark_name);
 	
 }
 
@@ -700,7 +721,7 @@ e.target.setPopupContent(popup_content);
 if (system_map) {
 highlight_route_alignment(route_ids_array);}
 
-ga('send', 'event', 'map', 'click stop', e.target.stop_name+' (ID '+e.target.stop_id +')');
+//ga('send', 'event', 'map', 'click stop', e.target.stop_name+' (ID '+e.target.stop_id +')');
 
 }
 
@@ -800,11 +821,14 @@ function add_object_property(property_name,object) {
 // execute this to set up map
 
 load_routes();
-load_stop_markers();
+//load_stop_markers();
 
+
+add_tile_layer(0,5);
 
 if (system_map) {
-	add_tile_layer(0,5);
+	
+	//add_tile_layer(1,10);
 }
 else {
 console.log("before add_route_alignment(route_ids_array)");
@@ -816,7 +840,8 @@ console.log("add_route_alignment("+route_ids_array+")");
 
 }
 
-add_tile_layer(1,10);
+
+//add_tile_layer(2,15);
 
 
 // set up landmark_icons
@@ -923,18 +948,18 @@ map.on('load',  function() {
 
 	
 	if (system_map) {
-add_tile_layer(0,5);
-add_tile_layer(1,10);
-}
-else {
-// add_route_alignment(route_ids_array);
-// update_route_alignment_shadow(route_ids_array);
-console.log(routes);
-console.log('highlight_route_alignment(route_ids_array);');
-// highlight_route_alignment(route_ids_array);
-setTimeout(function() {  highlight_route_alignment(route_ids_array); },5);
+		add_tile_layer(0,5);
+		add_tile_layer(1,15);
+	}
+	else {
+		// add_route_alignment(route_ids_array);
+		// update_route_alignment_shadow(route_ids_array);
+		console.log(routes);
+		console.log('highlight_route_alignment(route_ids_array);');
+		// highlight_route_alignment(route_ids_array);
+		setTimeout(function() {  highlight_route_alignment(route_ids_array); },5);
 
-}
+	}
 
 
 });
@@ -944,8 +969,10 @@ load_landmarks_markers('minor');
 
 add_landmarks_markers('major');
 
+
 map.on('zoomend', function(e) {
-	
+
+		
 		refresh_landmark_view();
 		toggle_stop_visibility();
 		toggle_minor_landmark_visibility();
@@ -956,7 +983,7 @@ map.on('zoomend', function(e) {
 // adding events for Google Analytics here
 
 map.on('zoomend', function() {
-	ga('send', 'event', 'map', 'zoomend', 'Zoom level', map.getZoom());
+	//ga('send', 'event', 'map', 'zoomend', 'Zoom level', map.getZoom());
 });
 
 
@@ -1044,17 +1071,19 @@ function isNumeric(n) {
   return !isNaN(parseFloat(n)) && isFinite(n);
 }
 
-function getItinerary(start,end) {
+
+
+function getItinerary(start,end) { // must pass data to allow for ajax success funtions
 	
 	if (typeof start[0] == "undefined") {
 		var start_coords = new Array(landmarks[start].lat,landmarks[start].lon);
 		var start_landmark_id = start;
-		ga('send', 'event', 'map', 'Plan trip - landmarks', 'From: '+landmarks[start].landmark_name + 'To: '+landmarks[end].landmark_name);
+		//ga('send', 'event', 'map', 'Plan trip - landmarks', 'From: '+landmarks[start].landmark_name + 'To: '+landmarks[end].landmark_name);
 		}
 	else {
 		var start_coords = new Array(start[0],start[1]);
 		var start_landmark_id = null;
-		ga('send', 'event', 'map', 'Plan trip - lat/lon', 'From: '+start[0]+','+start[1]+' To: '+end[0]+','+end[1]);
+		//ga('send', 'event', 'map', 'Plan trip - lat/lon', 'From: '+start[0]+','+start[1]+' To: '+end[0]+','+end[1]);
 		}
 		
 	if (typeof end[0] == "undefined") {
@@ -1215,33 +1244,35 @@ var end_landmark_marker;
 
 function map_itinerary(itinerary_i) {
 
-var itinerary = itineraries_for_display.itineraries[itinerary_i];
+	var itinerary = itineraries_for_display.itineraries[itinerary_i];
 
-map.removeLayer(tile_layer[0]);
+	map.removeLayer(tile_layer[1]);
 
-if (map.hasLayer(start_marker)) {map.removeLayer(start_marker);}
-if (map.hasLayer(end_marker)) {map.removeLayer(end_marker);}
+	if (map.hasLayer(start_marker)) {map.removeLayer(start_marker);}
+	if (map.hasLayer(end_marker)) {map.removeLayer(end_marker);}
 
-// clear the showing_itinerary_object
-showing_itinerary = itinerary;
+	// clear the showing_itinerary_object
+	showing_itinerary = itinerary;
 
-remove_tripplan();
+	remove_tripplan();
 
-// set to true because an itinerary is being shown
-itinerary_up = true;
+	// set to true because an itinerary is being shown
+	itinerary_up = true;
 
-toggle_stop_visibility();
+	toggle_stop_visibility();
 
-var line_offset = 0;
+	var line_offset = 0;
 
-		if (itineraries_for_display.start_landmark_id != null) {
-				start_landmark_marker = landmark_markers[itineraries_for_display.start_landmark_id];
-				start_landmark_marker.addTo(map);}
-				
-		if (itineraries_for_display.end_landmark_id != null) {
-				end_landmark_marker = landmark_markers[itineraries_for_display.end_landmark_id];
-				end_landmark_marker.addTo(map);}
+	if (itineraries_for_display.start_landmark_id != null) {
+			start_landmark_marker = landmark_markers[itineraries_for_display.start_landmark_id];
+			start_landmark_marker.addTo(map);}
+			
+	if (itineraries_for_display.end_landmark_id != null) {
+			end_landmark_marker = landmark_markers[itineraries_for_display.end_landmark_id];
+			end_landmark_marker.addTo(map);}
 
+	
+	
 	for(var leg_i = 0; leg_i < itinerary.length; leg_i++) {
 	
 		if (leg_i == 0) {start_marker = L.marker([itinerary[leg_i].start_stop_object.lat, itinerary[leg_i].start_stop_object.lon], {icon: start_icon,zIndexOffset: 388});
@@ -1257,14 +1288,32 @@ var line_offset = 0;
 
 		tripplan_markers[leg_i].addTo(map);
 
-		var line_points = itinerary[leg_i].route_info.shape;		
-		tripplan_polylines[leg_i] = L.polyline(line_points, {offset: line_offset, color: '#'+itinerary[leg_i].route_info.route_color, weight: 8, opacity: 1}).addTo(map);
+		var line_points = itinerary[leg_i].route_info.shape;	
+		//var offset = offsetPoints(line_points,.0001*offset,0);
+		var outline = L.polyline(line_points, {offset: (line_offset-2), color: '#fff', weight: 12, opacity: 1});
+		tripplan_polylines.push(outline);
+		itineraryGroup.addLayer(outline);// outline
+		var legPolyLine = L.polyline(line_points, {offset: line_offset, color: '#'+itinerary[leg_i].route_info.route_color, weight: 8, opacity: 1});
+		tripplan_polylines.push(legPolyLine);
+		itineraryGroup.addLayer(legPolyLine);
 		
-		line_offset = line_offset + 5;
+		line_offset ++;
 		
 	}
+	
+	itineraryGroup.addTo(map);
+	map.fitBounds(itineraryGroup.getBounds());
 
 	
+}
+
+
+function offsetPoints( points,  _xOffset,  _yOffset ) {
+	var newPoints = Array();
+	for(var i = 0; i<points.length; i++) {
+		newPoints.push( L.latLng(points[i].lat + _xOffset, points[i].lng + _yOffset));
+	}
+	return newPoints;
 }
 
 function remove_tripplan() {
@@ -1279,9 +1328,8 @@ if (map.hasLayer(end_marker)) {map.removeLayer(end_marker);}
 // I could consolidate the two below things into one function.
 
 // removeLayer(polylines);
-for(var i = 0; i < tripplan_polylines.length; i++) {
-	map.removeLayer(tripplan_polylines[i]);
-}
+itineraryGroup.clearLayers();
+map.removeLayer(itineraryGroup);
 
 // reset the tripplan_polylines array
 tripplan_polylines = [];
@@ -1298,6 +1346,7 @@ tripplan_markers = [];
 function exit_tripplan_mode() {
 	itinerary_up = false;
 	add_tile_layer(0,5);
+	add_tile_layer(1,10);
 	toggle_stop_visibility();
 	toggle_minor_landmark_visibility();
 }

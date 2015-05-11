@@ -41,7 +41,7 @@ $link .= "/wp-content/themes/art/AnaheimMap/";
 <div id="interactive-map-holder-wrap" style="width:100%;height:100%;position: relative;">
 
 <div id="mobile-map">
-sdf
+
 </div>
 <div id="interactive-map-holder" style="width:100%;height:100%;background-color:#2068A7;  ">
 

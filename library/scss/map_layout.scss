@@ -1,3 +1,7 @@
+#interactive-map-holder {
+		//background:url(../images/home-map-bg.jpg);
+}
+
 .leaflet-popup-content-wrapper {
 	border-radius: 0;
 	-webkit-box-shadow: 0px 4px 11px 0px rgba(0, 0, 0, 0.75) !important; 
@@ -11,7 +15,7 @@ box-shadow:         0px 4px 11px 0px rgba(0, 0, 0, 0.75) !important;
 #planner-wrapper {
 	z-index: 200;
 	position: relative;
-	font-size: 1.2em;
+	font-size: 1.2em;  
 }  
 
 #planner-wrap {
@@ -19,10 +23,8 @@ box-shadow:         0px 4px 11px 0px rgba(0, 0, 0, 0.75) !important;
 }
 
 #planner {
-	width: 25%;
-	max-width: 339px;
-	min-width: 280px;
-	position: absolute;
+	
+	position: relative;
 	left: 3%;
 	top: 113px;
 	font-size: .8em;

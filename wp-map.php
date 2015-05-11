@@ -7,8 +7,14 @@ Template Name: Standalone map
 
 <head>
 
-<script src='https://api.tiles.mapbox.com/mapbox.js/v2.1.4/mapbox.js'></script>
-<link href='https://api.tiles.mapbox.com/mapbox.js/v2.1.4/mapbox.css' rel='stylesheet' />
+<!--// this stuff needs to be updated on main site header-->
+<link rel="stylesheet" type="text/css" href="<?php echo get_template_directory_uri(); ?>/library/js/libs/leaflet-master/leaflet.css" />
+<script type="text/javascript" src="<?php echo get_template_directory_uri(); ?>/library/js/libs/leaflet-master/leaflet.js"></script>
+
+<!--<script src='https://api.tiles.mapbox.com/mapbox.js/v2.1.9/mapbox.standalone.js'></script>
+<link href='https://api.tiles.mapbox.com/mapbox.js/v2.1.9/mapbox.css' rel='stylesheet' />
+///////-->
+
 <link href='http://rideart.org/wp-content/themes/art/library/css/route-icons.css' rel='stylesheet' />
 <link href='<?php echo get_template_directory_uri(); ?>/library/css/style.css' rel='stylesheet' />
 <link rel="stylesheet" type="text/css" href="<?php echo get_template_directory_uri(); ?>/library/fonts/MyFontsWebfontsKit.css"> 
@@ -26,16 +32,17 @@ Template Name: Standalone map
 
 </head>
 
-<body style="background-color:#2068A7">
+<body >
 <div id="interactive-map-holder-wrap" style="width:100%;height:100%;position: relative;">
  <div id="planner-wrap" >
 	<?php get_template_part( 'planner'); ?>  
 </div><!-- end #planner-wrapper -->
-<div id="interactive-map-holder" style="width:100%;height:100%;background-color:#2068A7;  ">
+<img id="draggingDisabled" src="<?php echo get_template_directory_uri(); ?>/library/images/home-map-bg.jpg" style="width: 100%; height: 100%; z-index: 0; position: absolute; top: 0; pointer-events: none;" /> 
+
+<div id="interactive-map-holder" style="width:100%;height:100%;  ">
 
 </div>
- <img id="draggingDisabled" src="<?php echo get_template_directory_uri(); ?>/AnaheimMap/images/map-gradient-overlay-copy.png" style="width: 100%; height: 100%; z-index: 509; position: absolute; top: 0; pointer-events: none;" /> 
-</div>
+ </div>
 
 <?php 
 $link =  "//$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]"; 
@@ -44,7 +51,7 @@ if (strpos($link, 'localhost') !== FALSE) { // check if on mamp/apache localhost
 }
 $link = str_replace("map.php","", $link);
 ?>
-<script src="<?php echo get_template_directory_uri(); ?>/AnaheimMap/generate-map-js.php?routes=1696,1697,1698,1699,1700,1701,1702,1703,1704,1705,1706,1707,1708,1709,1710,1711,1712,1713,1714,1716&system_map=true&container_id=interactive-map-holder"></script>
+<script src="<?php echo get_template_directory_uri(); ?>/AnaheimMap/generate-map-js.php?routes=1696,1697,1698,1699,1700,1701,1702,1703,1704,1705,1706,1707,1708,1709,1710,1711,1712,1713,1714,1716&system_map=true&container_id=interactive-map-holder&analytics=false"></script>
 
 
 </body>

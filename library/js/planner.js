@@ -1,9 +1,8 @@
-$(document).ready(function(){
-
-	$('.tab-holder').click(function() {
-	
-		$(this).parent().toggleClass('active');
-		$(this).parent().siblings().removeClass('active');
+function updatePlannerPanels($targ) {
+	$targ.parent().toggleClass('active');
+		$targ.parent().siblings().removeClass('active');
+		
+	//	$items_container = $(
 		
 		$('.items-container').each(function(ind, itemscontainer) {
 			if($(itemscontainer).find('.active').length  < 1) {
@@ -13,8 +12,39 @@ $(document).ready(function(){
 			}
 		});
 		
+		// calculate height stuff to keep all ui visible
+		$item_container = $targ.closest('.items-container');
+		if($item_container.hasClass('open')) {
+			$item_container.height($targ.siblings('.place-pannel').height() + 45);
+		}
+		else {
+			$item_container.height(40);
+		}
 		
+}
+
+$(document).ready(function(){
+
+	//check if url has locations provided
+	var hash = window.location.hash;
+	var urlTo = getParameterByName('to');
+	var urlFrom = getParameterByName('from');
 	
+	if((urlTo != '') && (urlFrom != '')) {
+		//select 
+		console.log("auto poplulate planner");
+		$('#from-items-container #attraction-id-'+urlFrom).addClass('selected');
+		console.log('text:'+$('#from-items-container #attraction-id-'+urlFrom).text());
+		$('#to-items-container #attraction-id-'+urlTo).addClass('selected');
+		processPlannerInput()
+	};
+
+	updatePlannerPanels($(this));
+
+	$('.tab-holder').click(function() {
+	
+		updatePlannerPanels($(this));
+			
 	});
 	
 	
@@ -27,6 +57,13 @@ $(document).ready(function(){
 		$(this).closest('.tab').siblings().find('.selected').removeClass('selected');
 		$(this).closest('.single-slide').siblings().find('.selected').removeClass('selected');
 		$(this).parent().parent().parent().parent().siblings().find('.selected').removeClass('selected');
+		
+		// update the preview field
+		$(this).closest('.items-container').prev('.planner-selection-preview').text($(this).text()).addClass('active');
+		if($(this).closest('.items-container').find('.selected').length < 1) {
+			$(this).closest('.items-container').prev('.planner-selection-preview').text('').removeClass('active');
+		}
+		
 	});
 	
 	
@@ -77,39 +114,95 @@ $(document).ready(function(){
 		// trigger show the results panel
 		
 		event.preventDefault();
+		
+		processPlannerInput();
+		
+		
+	});
+	
+	$('#return-to-input-link').click(togglePlanner); 
+	$('.x-box').click(function() {
+		togglePlanner();
+		clearPlanner();
+	});
+
+
+	
+
+
+
+});
+
+function togglePlanner() {
+		$('#input-panel').toggleClass('hidden');
+		$('#output-panel').toggleClass('hidden');
+		remove_tripplan();
+		exit_tripplan_mode();
+	}
+
+function clearPlanner() {
+	$('#planner .selected').removeClass('selected');
+	$('.planner-selection-preview').text('').removeClass('active');
+}
+
+function processPlannerInput() {
+
+// confirm that to/from have values
+	if(($('#planner .selected').length < 2)) {
+		alert('Please select both starting and ending locations');
+	} else {
+	
 		togglePlanner();
 		// get lat long values from inputs
 		$from = $('div#from-items-container').find('.menu-item.selected');
 		var fromSelectedInfo = $from.attr('rel').split(';');
 		//console.log(fromSelectedInfo);
-		var fromLat = fromSelectedInfo[1];
-		var fromLon = fromSelectedInfo[2];
+		var fromLat = fromSelectedInfo[2];
+		var fromLon = fromSelectedInfo[3];
 		$to = $('div#to-items-container').find('.menu-item.selected');
 		var toSelectedInfo = $to.attr('rel').split(';');
-		var toLat = toSelectedInfo[1];
-		var toLon = toSelectedInfo[2];
+		var toLat = toSelectedInfo[2];
+		var toLon = toSelectedInfo[3];
 		$('#planner-results-title').html($from.text()+' <span>to</span> '+$to.text());
-		//var itineraries = getItinerary([fromLat,fromLon],[toLat,toLon]));
-		var itineraries = getItinerary([33.8046480634388,-117.915358543396],[33.82422318995612,-117.90390014648436]);
+		getItinerary([fromLat,fromLon],[toLat,toLon]);
+		//console.log(itineraries);
+		//var itineraries = getItinerary([33.8046480634388,-117.915358543396],[33.82422318995612,-117.90390014648436]);
 		var plannerHTML = "";
+		$('.planner-results-option').remove();
 		
-		itineraries.forEach(function(itinerary) {
-			itinerary.forEach(function(leg) {
-				console.log('leg');
-				console.log(leg);
+		for(var i = 0; i<itineraries_for_display['itineraries'].length; i++) {
+
+			var itenerary = itineraries_for_display['itineraries'][i];
+			if(i==0){
+				plannerHTML += '<div id="planner-results-option-'+(i+1)+'" class="planner-results-option">';
+				plannerHTML += '<h3 class="option-title">Option '+(i+1)+'</h3>';
+				for(var j = 0; j< itenerary.length; j++) {
+					var leg = itenerary[j]
+					console.log('leg');
+					plannerHTML += '<ul class="leg">';
+					plannerHTML += "<li><i></i>Walk to "+leg.start_stop_object.name+".</li>";
+					plannerHTML += "<li><i></i>Take bus "+leg.route_info.route_short_name+".</li>";
+					plannerHTML += "<li><i></i>Get off at "+leg.end_stop_object.name+".</li>";
+					console.log(leg);
+					plannerHTML += '</ul><br style="clear: both;" />';
+		
+				};
+				plannerHTML += '</div> <!-- end #planner-results-option -->';
+			}
 			
-			});
-		}); 
-	});
+		}; 
 	
-	$('#return-to-input-link,.x-box').click(togglePlanner); 
-
-
-	function togglePlanner() {
-		$('#input-panel').toggleClass('hidden');
-		$('#output-panel').toggleClass('hidden');
+		$('#output-panel #inner-planner').append(plannerHTML);
+	
 	}
+	
+	map_itinerary(0);
+		
+}
 
-
-
-});
+function getParameterByName(name) {
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+        results = regex.exec(location.search);
+    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+}

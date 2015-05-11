@@ -16,10 +16,7 @@
   left: 5%; }
 
 #planner {
-  width: 25%;
-  max-width: 339px;
-  min-width: 280px;
-  position: absolute;
+  position: relative;
   left: 3%;
   top: 113px;
   font-size: .8em;
