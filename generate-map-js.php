@@ -1132,13 +1132,12 @@ function getItinerary(start,end) { // must pass data to allow for ajax success f
 			if (itinerary.legs[leg_i].mode == 'BUS') {has_bus = 1;}
 			}
 		
-		if (has_bus == 1) {	
 		
 			for(var leg_i = 0; leg_i < itinerary.legs.length; leg_i++) {
 		
 					var current_leg = itinerary.legs[leg_i];
 		
-					console.log('current_leg')
+					console.log('current_leg');
 					console.log(current_leg);
 					console.log(current_leg.mode);
 				
@@ -1147,7 +1146,8 @@ function getItinerary(start,end) { // must pass data to allow for ajax success f
 						if (isNumeric(current_leg.routeHumanFrequency)) {var display_frequency = 'Every '+current_leg.routeHumanFrequency+' minutes';} else {var display_frequency = current_leg.routeHumanFrequency;}
 			
 						// route information
-						var route_info_object = {shape: decodePolyline(current_leg.legGeometry.points),
+						var route_info_object = {mode: 'BUS',
+						shape: decodePolyline(current_leg.legGeometry.points),
 						route_short_name: current_leg.route, // route_short_name
 						route_long_name: current_leg.routeLongName,
 						route_color: current_leg.routeColor,
@@ -1195,9 +1195,56 @@ function getItinerary(start,end) { // must pass data to allow for ajax success f
 						itineraries[itinerary_with_bus_counter][leg_counter] = leg_to_add;
 							leg_counter++;
 						}
+						
+					if (current_leg.mode == 'WALK' && itinerary.legs.length == 1 && planner_response.itineraries.length == 1) {
+					
+					
+			
+						// route information
+						var route_info_object = {shape: decodePolyline(current_leg.legGeometry.points),
+						mode: 'WALK'
+							};
+				
+		//				itineraries[itinerary_i][leg_counter].route_info = route_info_object;
+			
+		//				console.log(itineraries[itinerary_i][leg_counter].route_info);
+			
+						// start stop
+						var start_stop_object = {name: current_leg.from.name,
+							lat: current_leg.from.lat,
+							lon: current_leg.from.lon
+							};
+
+		//				itineraries[itinerary_i][leg_counter].start_stop = start_stop_object;
+
+						var end_stop_object = {name: current_leg.to.name,
+							lat: current_leg.to.lat,
+							lon: current_leg.to.lon
+							};
+				
+		//				itineraries[itinerary_i][leg_counter].end_stop = end_stop_object;
+			
+						var leg_to_add = {
+							route_info: route_info_object,
+							start_stop_object: start_stop_object,
+							end_stop_object: end_stop_object
+						};
+			
+						console.log('itineraries['+itinerary_with_bus_counter+']['+leg_counter+']');
+						
+						if (typeof itineraries[itinerary_with_bus_counter] == 'undefined') {
+							itineraries[itinerary_with_bus_counter] = new Array();
+						}
+						
+						itineraries[itinerary_with_bus_counter][leg_counter] = leg_to_add;
+							leg_counter++;
+						
+					
+					}
+
 					}
 				itinerary_with_bus_counter++;
-			}
+			
 		}
 	
 
