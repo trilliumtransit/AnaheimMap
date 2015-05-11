@@ -1328,19 +1328,26 @@ function map_itinerary(itinerary_i) {
 		if (leg_i == itinerary.length-1) {end_marker = L.marker([itinerary[leg_i].end_stop_object.lat, itinerary[leg_i].end_stop_object.lon], {icon: end_icon,zIndexOffset: 388});
 				end_marker.addTo(map);}
 		
-		tripplan_markers[leg_i] = new L.marker( [ itinerary[leg_i].start_stop_object.lat , itinerary[leg_i].start_stop_object.lon], {
-                   zIndexOffset: 400,
-                   icon: StopIcons[itinerary[leg_i].route_info.route_short_name]
-                });
+		if (itinerary[leg_i].route_info.mode == 'BUS') {
+		
+					tripplan_markers[leg_i] = new L.marker( [ itinerary[leg_i].start_stop_object.lat , itinerary[leg_i].start_stop_object.lon], {
+							   zIndexOffset: 400,
+							   icon: StopIcons[itinerary[leg_i].route_info.route_short_name]
+							});
 
-		tripplan_markers[leg_i].addTo(map);
+					tripplan_markers[leg_i].addTo(map);
+		
+				}
+
+		if(itinerary[leg_i].route_info.hasOwnProperty('route_color')) {var polyline_color = itinerary[leg_i].route_info.route_color;}
+		else {var polyline_color = '8642D2';}
 
 		var line_points = itinerary[leg_i].route_info.shape;	
 		//var offset = offsetPoints(line_points,.0001*offset,0);
 		var outline = L.polyline(line_points, {offset: (line_offset-2), color: '#fff', weight: 12, opacity: 1});
 		tripplan_polylines.push(outline);
 		itineraryGroup.addLayer(outline);// outline
-		var legPolyLine = L.polyline(line_points, {offset: line_offset, color: '#'+itinerary[leg_i].route_info.route_color, weight: 8, opacity: 1});
+		var legPolyLine = L.polyline(line_points, {offset: line_offset, color: '#'+polyline_color, weight: 8, opacity: 1});
 		tripplan_polylines.push(legPolyLine);
 		itineraryGroup.addLayer(legPolyLine);
 		
