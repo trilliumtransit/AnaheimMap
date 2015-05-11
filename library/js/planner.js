@@ -25,6 +25,16 @@ function updatePlannerPanels($targ) {
 
 $(document).ready(function(){
 
+
+	$('.planner-results-option').click(function() {
+		alert();
+		//$(this).removeClass('closed');
+		//$(this).addClass('open');
+		//$open = $('.planner-results-option.open');
+		//$open.removeClass('open');
+		//$open.addClass('closed');
+	});
+
 	//check if url has locations provided
 	var hash = window.location.hash;
 	var urlTo = getParameterByName('to');
@@ -125,6 +135,9 @@ $(document).ready(function(){
 		togglePlanner();
 		clearPlanner();
 	});
+	
+	
+	
 
 
 	
@@ -173,22 +186,30 @@ function processPlannerInput() {
 		for(var i = 0; i<itineraries_for_display['itineraries'].length; i++) {
 
 			var itenerary = itineraries_for_display['itineraries'][i];
-			if(i==0){
-				plannerHTML += '<div id="planner-results-option-'+(i+1)+'" class="planner-results-option">';
+			
+				if(i==0) {plannerHTML += '<div id="planner-results-option-'+(i+1)+'" class="planner-results-option open">';}
+				else {plannerHTML += '<div id="planner-results-option-'+(i+1)+'" class="planner-results-option closed">';} 
 				plannerHTML += '<h3 class="option-title">Option '+(i+1)+'</h3>';
 				for(var j = 0; j< itenerary.length; j++) {
 					var leg = itenerary[j]
 					console.log('leg');
 					plannerHTML += '<ul class="leg">';
-					plannerHTML += "<li><i></i>Walk to "+leg.start_stop_object.name+".</li>";
-					plannerHTML += "<li><i></i>Take bus "+leg.route_info.route_short_name+".</li>";
-					plannerHTML += "<li><i></i>Get off at "+leg.end_stop_object.name+".</li>";
+					if(j==0) {plannerHTML += '<li><i class="bullet"></i>Go to bus stop: '+leg.start_stop_object.name+' (text2go code: '+leg.start_stop_object.stop_code+').</li>';}
+					else {plannerHTML += '<li><i class="bullet"></i>Transfer at '+leg.start_stop_object.name+' (text2go code: '+leg.start_stop_object.stop_code+').</li>';}
+					plannerHTML += '<li class="bus-leg-item"><div class="bus-route-leg-item-title"><i></i><i id="icon-sml-'+leg.route_info.route_short_name+'" class="route-icon route-icon-sml"> </i>Board bus '+leg.route_info.route_short_name+".</div>";
+						plannerHTML += '<div class="bus-leg-item-frequency bus-leg-item-info">Service '+leg.route_info.frequency+'</div>';
+						plannerHTML += '<div class="bus-leg-item-first-last bus-leg-item-info"><div id="bus-leg-first"><strong>First bus today:</strong> '+moment(leg.route_info.first_bus).format('h:mm a').replace(/^0+/, '')+'</div>'+
+																'<div id="bus-leg-last"> <strong>last bus today:</strong> '+moment(leg.route_info.last_bus).format('h:mm a').replace(/^0+/, '')+'</div></div>';
+						
+						plannerHTML += '<div class="bus-leg-item-link bus-leg-item-info"><a href="'+leg.route_info.route_url+'">See full route details</a></div>';
+					plannerHTML += '</li>';
+					if(j==(itenerary.length-1)) plannerHTML += '<li><i class="bullet"></i>Get off at '+leg.end_stop_object.name+".</li>";
 					console.log(leg);
 					plannerHTML += '</ul><br style="clear: both;" />';
-		
+					
 				};
 				plannerHTML += '</div> <!-- end #planner-results-option -->';
-			}
+			
 			
 		}; 
 	
@@ -196,7 +217,7 @@ function processPlannerInput() {
 	
 	}
 	
-	map_itinerary(0);
+	//map_itinerary(0);
 		
 }
 
