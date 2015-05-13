@@ -1261,7 +1261,7 @@ function getItinerary(start,end) { // must pass data to allow for ajax success f
 							leg_counter++;
 						}
 						
-					if (current_leg.mode == 'WALK' && itinerary.legs.length == 1 && planner_response.itineraries.length == 1) {
+					if (current_leg.mode == 'WALK' && itinerary.legs.length == 1) {
 					
 					
 			
