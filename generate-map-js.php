@@ -997,7 +997,7 @@ function load_landmarks_markers() {
 						}
 		
 					}
-				
+				toggle_landmark_visibility();
 				},
 			dataType: "text"
 		
@@ -1045,6 +1045,7 @@ map.on('load',  function() {
 });
 
 load_landmarks_markers();
+toggle_stop_visibility();
 
 // add_landmarks_markers('major');
 
