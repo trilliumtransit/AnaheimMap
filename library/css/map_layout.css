@@ -1,3 +1,6 @@
+#interactive-map-holder .leaflet-control-zoom a:link {
+  color: black; }
+
 .leaflet-popup-content-wrapper {
   border-radius: 0;
   -webkit-box-shadow: 0px 4px 11px 0px rgba(0, 0, 0, 0.75) !important;
@@ -129,11 +132,6 @@
       -webkit-box-shadow: 0px 3px 17px 0px rgba(50, 50, 50, 0.75);
       -moz-box-shadow: 0px 3px 17px 0px rgba(50, 50, 50, 0.75);
       box-shadow: 0px 3px 17px 0px rgba(50, 50, 50, 0.75); }
-      #planner #from-items-container.open li.active .place-pannel .place-col-1, #planner #to-items-container.open li.active .place-pannel .place-col-1 {
-        width: 45%;
-        margin-left: 7%; }
-      #planner #from-items-container.open li.active .place-pannel .place-col-2, #planner #to-items-container.open li.active .place-pannel .place-col-2 {
-        width: 45%; }
       #planner #from-items-container.open li.active .place-pannel .place-col-1, #planner #from-items-container.open li.active .place-pannel .place-col-2, #planner #to-items-container.open li.active .place-pannel .place-col-1, #planner #to-items-container.open li.active .place-pannel .place-col-2 {
         float: left;
         margin-bottom: 1%;

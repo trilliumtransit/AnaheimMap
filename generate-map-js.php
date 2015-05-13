@@ -45,6 +45,9 @@ var landmark_categories = Array();
 var tile_layer = new Array();
 var itineraryGroup = L.featureGroup();
 var planner_itineraries_shown = new Array();
+var placePreviews = new Array();
+var startLocationMarker;
+var endLocationMarker;
 
 var landmark_markers = Array();
 var major_landmark_markers_group = L.featureGroup();
@@ -99,7 +102,7 @@ var southWest = L.latLng(33.765528, -118.042018),
 // mapbox token, basemap
 //L.mapbox.accessToken = accessToken;
 var map = L.map('<?php echo $container_id; ?>', 'trilliumtransit.5434d913', { zoomControl: false, zoomAnimation: false, maxBounds: bounds, minZoom: 13 });
-
+$(".leaflet-control-zoom").css("visibility", "hidden");
 // makes a map sandwich
 //var topPane = L.DomUtil.create('div', 'leaflet-top-pane', map.getPanes().mapPane);
 tile_layer[0] = new L.tileLayer('http://{s}.tiles.mapbox.com/v4/' + base_map_tiles + '/{z}/{x}/{y}.png?access_token=' + accessToken, {detectRetina: true,'zIndex': 10});
@@ -126,7 +129,7 @@ if (system_map) {
 			]);
         }
         
-//new L.Control.Zoom({ position: 'topright' }).addTo(map);
+new L.Control.Zoom({ position: 'topright' }).addTo(map);
 
 // FUNCTIONS
 
@@ -358,6 +361,60 @@ function activate_route_alignment(ids) {
 }
 }
 
+function showPlace(lat, lon) {
+	for(var place_ind = 0; place_ind<placePreviews.length; place_ind ++) {
+		// remove from map
+		map.removeLayer(placePreviews[place_ind]);
+	}
+	placePreviews = new Array();
+	var marker = L.marker([lat, lon]).addTo(map);
+	placePreviews.push(marker);
+}
+
+function clearPreviews() {
+	for(var place_ind = 0; place_ind<placePreviews.length; place_ind ++) {
+		// remove from map
+		map.removeLayer(placePreviews[place_ind]);
+	}
+}
+
+
+function showStartLocation(lat, lon, name) {
+	clearPreviews();
+	if(startLocationMarker != null) map.removeLayer(startLocationMarker);
+	var greenIcon = L.icon({
+    iconUrl: map_files_base+'/library/images/marker-start.gif',
+    iconAnchor: [12.5,41]
+	});
+	startLocationMarker = new L.marker([lat, lon],{
+   	icon:greenIcon,
+   	
+  		}).addTo(map);
+  		
+  		startLocationMarker.bindPopup(name).openPopup();
+}
+
+function showEndLocation(lat, lon, name) {
+	clearPreviews();
+	if(endLocationMarker != null) map.removeLayer(endLocationMarker);
+	var redIcon = L.icon({
+    	iconUrl: map_files_base+'/library/images/marker-end.gif',
+    	iconAnchor: [12.5,41]
+	});
+	endLocationMarker = new L.marker([lat, lon],{
+   	 icon:redIcon,
+  		}).addTo(map);
+  
+  		endLocationMarker.bindPopup(name).openPopup();
+}	
+
+function clearStartEndMarkers() {
+	if(startLocationMarker != null) map.removeLayer(startLocationMarker);
+	if(endLocationMarker != null) map.removeLayer(endLocationMarker);
+}
+
+
+
 function update_route_alignment_shadow(ids) {
 	
 	route_shadows.forEach(function clearShadow(shadow) {
@@ -490,6 +547,10 @@ function load_stop_markers() {
 	    	// add zoom stuff here.
 	          
 	        }
+	        
+		if(typeof(processURL) == "function") {// only happens if planner is loaded
+			processURL();
+		}
         
     });
 }
@@ -641,7 +702,8 @@ function update_landmark_info(e) {
 	// var nearest_stop = find_nearest_stop(e.target.getLatLng().lat,e.target.getLatLng().lng);
 	
 	var popup_content = '<h3 class="stop_name">'+e.target.landmark_name+'</h3>';
-	
+	popup_content += '<div class="plan-route-link plan-route-link-start" rel="'+e.target.icon_id+'">Start your trip here</div>';
+	popup_content += '<div class="plan-route-link plan-route-link-end" rel="'+e.target.icon_id+'">End your trip here</div>';
 	// <p>Nearest ART stop: ' + nearest_stop[0] + '<br/>Served by: '+nearest_stop[3].route_short_name+'</p>';
 
 
@@ -821,7 +883,7 @@ function add_object_property(property_name,object) {
 // execute this to set up map
 
 load_routes();
-//load_stop_markers();
+load_stop_markers();
 
 
 add_tile_layer(0,5);
@@ -890,6 +952,7 @@ function load_landmarks_markers(significance_designation) {
 					landmarks[landmarks_array_temp[i].landmark_id].major = landmarks_array_temp[i].major;
 					landmarks[landmarks_array_temp[i].landmark_id].category_name = landmarks_array_temp[i].category_name;
 					landmarks[landmarks_array_temp[i].landmark_id].icon_id = landmarks_array_temp[i].icon_id;
+				//	console.log(landmarks[landmarks_array_temp[i].landmark_id].icon_id);
 		
 					var icon_index = get_icon_index_for_icon(landmarks_array_temp[i].icon_id);
 		
@@ -960,6 +1023,8 @@ map.on('load',  function() {
 		setTimeout(function() {  highlight_route_alignment(route_ids_array); },5);
 
 	}
+	
+	
 
 
 });
@@ -1273,14 +1338,14 @@ itineraries_for_display = return_object;
 var itinerary_up = 0;
 var showing_itinerary;
 var start_icon = new L.Icon({ 
-		iconUrl: map_files_base+'map_ui_images/marker-flag-start-shadowed.png',
-		iconSize: [48,49],
-		iconAnchor: [48,49]
+		iconUrl: map_files_base+'/library/images/start_icon.gif',
+		iconSize: [50,75],
+		iconAnchor: [25,75]
 		});
 var end_icon = new L.Icon({ 
-		iconUrl: map_files_base+'map_ui_images/marker-flag-end-shadowed.png',
-		iconSize: [48,49],
-		iconAnchor: [48,49]
+		iconUrl: map_files_base+'/library/images/end_icon.gif',
+		iconSize: [50,75],
+		iconAnchor: [25,75]
 		});
 var tripplan_polylines = new Array();
 var tripplan_markers = new Array();
@@ -1391,11 +1456,15 @@ tripplan_markers = [];
 }
 
 function exit_tripplan_mode() {
+// add zoom reset
+	
+	map.setZoom(13);
 	itinerary_up = false;
 	add_tile_layer(0,5);
 	add_tile_layer(1,10);
 	toggle_stop_visibility();
 	toggle_minor_landmark_visibility();
+	clearStartEndMarkers();
 }
 
 
