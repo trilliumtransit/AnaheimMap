@@ -6,7 +6,9 @@ Template Name: Standalone map
 <html>
 
 <head>
-
+<meta name="viewport" content="initial-scale=1, maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+	
 <!--// this stuff needs to be updated on main site header-->
 <link rel="stylesheet" type="text/css" href="<?php echo get_template_directory_uri(); ?>/library/js/libs/leaflet-master/leaflet.css" />
 <script type="text/javascript" src="<?php echo get_template_directory_uri(); ?>/library/js/libs/leaflet-master/leaflet.js"></script>

@@ -56,6 +56,8 @@ function processURL() {
 			$('#from-items-container #attraction-id-'+urlFrom).addClass('selected');
 			console.log('text:'+$('#from-items-container #attraction-id-'+urlFrom).text());
 			$('#to-items-container #attraction-id-'+urlTo).addClass('selected');
+			// get lat lons
+		
 			processPlannerInput()
 		};
 		planner_first_load = false;
@@ -88,7 +90,7 @@ $(document).ready(function(){
 	});
 	
 	
-	$('li.menu-item').on( "click", function() {
+	$('li.menu-item').on( "click touchend", function() {
 	
 		$(this).toggleClass('selected');
 		$(this).siblings().removeClass('selected');
@@ -117,6 +119,19 @@ $(document).ready(function(){
 		
 		
 		
+	});
+	
+	$('#mobile-bottom-hide-show-planner, #mobile-top-hide-show-planner').on('click', function(e) {
+		$('#planner').toggleClass('hidden-planner');
+		$('#input-panel').toggleClass('mobile-hidden');
+		$('#output-panel').toggleClass('mobile-hidden');
+		
+		
+		//if((this).hasClass('min')) {
+	//		$(this).text('Show Planner');
+	//	} else {
+		//	$(this).text('Hide Planner');
+		//}
 	});
 	
 	
@@ -193,6 +208,10 @@ $(document).ready(function(){
 
 
 });
+
+function mobileTogglePlannerShow(e) {
+	
+}
 
 function togglePlanner() {
 		$('#input-panel').toggleClass('hidden');
