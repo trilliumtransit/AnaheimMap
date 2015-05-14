@@ -8,7 +8,7 @@ Template Name: Standalone map
 <head>
 <meta name="viewport" content="initial-scale=1, maximum-scale=1">
 <meta name="apple-mobile-web-app-capable" content="yes">
-	
+
 <!--// this stuff needs to be updated on main site header-->
 <link rel="stylesheet" type="text/css" href="<?php echo get_template_directory_uri(); ?>/library/js/libs/leaflet-master/leaflet.css" />
 <script type="text/javascript" src="<?php echo get_template_directory_uri(); ?>/library/js/libs/leaflet-master/leaflet.js"></script>
@@ -23,6 +23,7 @@ Template Name: Standalone map
 <link href='<?php echo get_template_directory_uri(); ?>/AnaheimMap/library/css/map_layout.css' rel='stylesheet' />
 <link href='<?php echo get_template_directory_uri(); ?>/library/css/planner.css' rel='stylesheet' />
 <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+<script src="http://code.jquery.com/ui/1.11.0/jquery-ui.min.js"></script>
 <script src="http://momentjs.com/downloads/moment.min.js"></script>
  <script src="<?php echo get_template_directory_uri(); ?>/library/js/jssor.slider.min.js"></script>
 <script src="<?php echo get_template_directory_uri(); ?>/AnaheimMap/jquery.csv-0.71.min.js"></script>
@@ -31,6 +32,7 @@ Template Name: Standalone map
 <script src="<?php echo get_template_directory_uri(); ?>/AnaheimMap/library/js/planner.js"></script>
 <script src="<?php echo get_template_directory_uri(); ?>/AnaheimMap/library/js/sliderTabs-1.1/jquery.sliderTabs.js"></script>
 <link href='<?php echo get_template_directory_uri(); ?>/AnaheimMap/library/js/sliderTabs-1.1/styles/jquery.sliderTabs.css' rel='stylesheet' />
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
 
 
 </head>

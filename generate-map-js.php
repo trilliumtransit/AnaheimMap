@@ -702,8 +702,9 @@ function update_landmark_info(e) {
 	// var nearest_stop = find_nearest_stop(e.target.getLatLng().lat,e.target.getLatLng().lng);
 	
 	var popup_content = '<h3 class="stop_name">'+e.target.landmark_name+'</h3>';
-	popup_content += '<div class="plan-route-link plan-route-link-start" rel="'+e.target.icon_id+'">Start your trip here</div>';
-	popup_content += '<div class="plan-route-link plan-route-link-end" rel="'+e.target.icon_id+'">End your trip here</div>';
+	popup_content += '<a class="plan-route-link plan-route-link-start" href="javascript:void(0)" rel="'+e.target.landmark_id+'"><i></i>Start your trip here</a>';
+	popup_content += '<a class="plan-route-link plan-route-link-end"  href="javascript:void(0)" rel="'+e.target.landmark_id+'"><i></i>End your trip here</a>'+
+	'<br style="clear: both;" /> ';
 	// <p>Nearest ART stop: ' + nearest_stop[0] + '<br/>Served by: '+nearest_stop[3].route_short_name+'</p>';
 
 
@@ -1402,10 +1403,14 @@ function map_itinerary(itinerary_i) {
 	
 	for(var leg_i = 0; leg_i < itinerary.length; leg_i++) {
 	
-		if (leg_i == 0) {start_marker = L.marker([itinerary[leg_i].start_stop_object.lat, itinerary[leg_i].start_stop_object.lon], {icon: start_icon,zIndexOffset: 388});
-				start_marker.addTo(map);}
+		if (leg_i == 0) {
+				start_marker = L.marker([itinerary[leg_i].start_stop_object.lat, itinerary[leg_i].start_stop_object.lon], {icon: start_icon,zIndexOffset: 388})
+				.bindPopup("Stop name: "+itinerary[leg_i].start_stop_object.name +' (text2go code: '+itinerary[leg_i].start_stop_object.stop_code+')');
+				start_marker.addTo(map);
+		}
 				
-		if (leg_i == itinerary.length-1) {end_marker = L.marker([itinerary[leg_i].end_stop_object.lat, itinerary[leg_i].end_stop_object.lon], {icon: end_icon,zIndexOffset: 388});
+		if (leg_i == itinerary.length-1) {end_marker = L.marker([itinerary[leg_i].end_stop_object.lat, itinerary[leg_i].end_stop_object.lon], {icon: end_icon,zIndexOffset: 388})
+				.bindPopup("Stop name: "+itinerary[leg_i].end_stop_object.name);
 				end_marker.addTo(map);}
 		
 		if (itinerary[leg_i].route_info.mode == 'BUS') {
