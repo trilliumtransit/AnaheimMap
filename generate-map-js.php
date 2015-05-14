@@ -188,7 +188,7 @@ function encapsulate_in_array(variable) {
 
 // Load an object with the routes
 function load_routes() {
-	var load_data_url = generate_proxy_url(api_base_url+'routes/by-feed/anaheim-ca-us');
+	var load_data_url = api_base_url+'routes/by-feed/anaheim-ca-us';
 
     routes = load_data(load_data_url);
 }
@@ -470,10 +470,20 @@ function stop_icons() {
 }
 
 
+var proxy_script = 'php-simple-proxy-master/ba-simple-proxy.php';
 
 function generate_proxy_url(url) {
-    return url;
-	} 
+    var proxy_url = proxy_script + '?url=' + encodeURIComponent(url);
+    return proxy_url;
+	}
+	
+function proxy_request(url) {
+	
+	var result_object = load_data(generate_proxy_url(url), "json");
+    var result_object_contents = result_object.contents;
+
+    return result_object_contents;
+	}
 
 
 /*pushing items into array each by each and then add markers*/
@@ -488,7 +498,7 @@ function load_stop_markers() {
     // stops_layer_group = L.layerGroup();
 
 		
-	var load_data_url = generate_proxy_url(api_base_url+'stops/by-feed/anaheim-ca-us/route-id/'+route_ids_list);
+	var load_data_url = api_base_url+'stops/by-feed/anaheim-ca-us/route-id/'+route_ids_list;
 
     //  async approach
     load_data_async(load_data_url, null,'', function(data){
@@ -611,7 +621,7 @@ landmark_markers[landmark_id].max_zoom_level = max_zoom_level;
 function find_nearest_stop (lat,lon) {
 	console.log('find_nearest_stop has run');
 
-	var load_data_url = generate_proxy_url(api_base_url+'stops/by-feed/anaheim-ca-us/nearest-to-lat-lon/'+lat+'/'+lon);
+	var load_data_url = api_base_url+'stops/by-feed/anaheim-ca-us/nearest-to-lat-lon/'+lat+'/'+lon;
 
     //  async approach
     
@@ -941,7 +951,7 @@ function load_landmarks_markers() {
 	if (landmark_markers_group.getLayers().length == 0) {
 
 		$.ajax({
-			url: map_files_base+ "landmarks.csv",
+			url: "landmarks.php",
 			async: true,
 			success: function (csvd) {
 				
