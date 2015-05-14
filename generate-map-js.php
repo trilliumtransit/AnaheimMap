@@ -470,21 +470,6 @@ function stop_icons() {
 }
 
 
-var proxy_script = 'php-simple-proxy-master/ba-simple-proxy.php';
-
-function generate_proxy_url(url) {
-    var proxy_url = proxy_script + '?url=' + encodeURIComponent(url);
-    return proxy_url;
-	}
-	
-function proxy_request(url) {
-	
-	var result_object = load_data(generate_proxy_url(url), "json");
-    var result_object_contents = result_object.contents;
-
-    return result_object_contents;
-	}
-
 
 /*pushing items into array each by each and then add markers*/
 function load_stop_markers() {
