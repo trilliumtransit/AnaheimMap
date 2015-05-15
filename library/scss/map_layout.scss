@@ -16,7 +16,7 @@ box-shadow:         0px 4px 11px 0px rgba(0, 0, 0, 0.75) !important;
 	
 	font-size: 1.3em;
 	
-	a {
+	a.start_stop {
 		color: darken(#7ed6f7,50);
 		width: 100%;
 		text-align: center;
@@ -63,12 +63,16 @@ box-shadow:         0px 4px 11px 0px rgba(0, 0, 0, 0.75) !important;
 	left: 5%;	
 }
 
+.leaflet-container {
+font: 15px !important;
+}
+
 #planner {
 	
 	position: relative;
 	left: 3%;
 	top: 113px;
-	font-size: .8em;
+	
 	background-color: white;
 	min-height: 200px;
 	-webkit-box-shadow: 0px 3px 17px 0px rgba(50, 50, 50, 0.75);
@@ -371,6 +375,7 @@ box-shadow:         0px 3px 17px 0px rgba(50, 50, 50, 0.75);
 
 
 .leaflet-control-command-interior {
+	display: none;
 	padding: 20px;
 	background: white;
 }
@@ -378,5 +383,26 @@ box-shadow:         0px 3px 17px 0px rgba(50, 50, 50, 0.75);
 .attraction-customization-panel {
 	background: white;
 	color: black;
+}
+
+
+.leaflet-label {
+	background: 0;
+	font-weight: bold;
+	font-size: 1.4em;
+	color: black;
+	 -webkit-text-stroke: 1px white;
+	 border: 0;
+  
+   text-shadow:
+       1px 1px 0 #fff,
+     -1px -1px 0 #fff,  
+      1px -1px 0 #fff,
+      -1px 1px 0 #fff,
+       1px 1px 0 #fff;
+}
+
+.leaflet-label:before  {
+	border: 0;
 }
 

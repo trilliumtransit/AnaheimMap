@@ -47,6 +47,8 @@ L.control.command = function (options) {
     return new L.Control.Command(options);
 };
 
+var leftBoundsPadding = 350;
+
 
 // initialize global variables
 var stops_layer_group = L.featureGroup();
@@ -74,6 +76,7 @@ var placePreviews = new Array();
 var startLocationMarker;
 var endLocationMarker;
 var dragableLandmarks = false;
+var prettyOverlayGroup = new L.FeatureGroup();
 
 
 var landmark_markers = Array();
@@ -120,7 +123,8 @@ var highlighted_weight = 10;
 if (route_ids_array.length == 1) {route_ids_list = route_ids_array[0];}
 else {var route_ids_list = route_ids_array.join();}
 
-var southWest = L.latLng(33.765528, -118.042018),
+var boundsPadding = -.1;
+var southWest = L.latLng(33.765528, -118.042018 + boundsPadding),
     northEast = L.latLng(33.863041, -117.803086),
     bounds = L.latLngBounds(southWest, northEast);
     
@@ -134,6 +138,8 @@ var southWest = L.latLng(33.765528, -118.042018),
 // mapbox token, basemap
 //L.mapbox.accessToken = accessToken;
 var map = L.map('<?php echo $container_id; ?>', 'trilliumtransit.5434d913', { zoomControl: false, zoomAnimation: false, maxBounds: bounds, minZoom: 13 });
+map.setMaxBounds(bounds);
+map.setMinZoom(13);
 $(".leaflet-control-zoom").css("visibility", "hidden");
 // makes a map sandwich
 //var topPane = L.DomUtil.create('div', 'leaflet-top-pane', map.getPanes().mapPane);
@@ -151,10 +157,17 @@ var newControlPanelHTML = controlPanelHtml.replace(/(\r\n|\n|\r)/gm,"");
 $('.leaflet-control-command-interior').html(newControlPanelHTML);
 
 
+var overlayOffset = -.04;
 var imageUrl = 'http://<?php echo $naked_url_base; ?>wp-content/themes/art/library/images/map_blue_coverfade.png',
-    imageBounds = [[33.63405913759068, -117.62203216552736], [33.97126744667272, -118.22628021240236]];
+    imageBounds = [[33.634773754186114, -117.56418228149414 + overlayOffset], [33.970128544237255, -118.1689453125 + overlayOffset]];
+var blueFadeOverlay = L.imageOverlay(imageUrl, imageBounds).addTo(map);
+prettyOverlayGroup.addLayer(blueFadeOverlay);
+ imageUrl = 'http://<?php echo $naked_url_base; ?>wp-content/themes/art/AnaheimMap/library/images/anaheim_resort_area_label.png';
+  imageBounds = [[33.82322493125927, -117.91866302490236], [33.8050403230646, -117.88347244262695]];
 
-var overlay = L.imageOverlay(imageUrl, imageBounds).addTo(map);
+var overlay_anaheim_label = L.imageOverlay(imageUrl, imageBounds).addTo(map);
+prettyOverlayGroup.addLayer(overlay_anaheim_label);
+prettyOverlayGroup.addTo(map);
 //overlay.setOpacity(.5);
 //alert(topPane);
 //topPane.appendChild(tile_layer[1].getContainer());
@@ -165,7 +178,13 @@ if (system_map) {
 			 map.fitBounds([
 				[33.76659033487751, -118.00518035888673],
 				[33.85288250307444, -117.86304473876955]
-			]);
+			], {
+    // this preserves the space from the left of the real map to 200px
+    // for content. the format is [x, y]. See
+    // http://leafletjs.com/reference.html#map-paddingtopleft
+    // for full documentation and other options
+    paddingTopLeft: [leftBoundsPadding, 0]
+});
         }
         
 new L.Control.Zoom({ position: 'topright' }).addTo(map);
@@ -580,11 +599,13 @@ function load_stop_markers() {
             }
 
         }
-        map.addLayer(stops_layer_group);
+      //  map.addLayer(stops_layer_group);
         
         if (!system_map) {
 			 
-	    	map.fitBounds(stops_layer_group.getBounds(), {animate: false});
+	    	map.fitBounds(stops_layer_group.getBounds(), {animate: false, 
+    paddingTopLeft: [leftBoundsPadding, 0]
+});
 	    	// add zoom stuff here.
 	          
 	        }
@@ -752,8 +773,8 @@ function update_landmark_info(e) {
 	// var nearest_stop = find_nearest_stop(e.target.getLatLng().lat,e.target.getLatLng().lng);
 	
 	var popup_content = '<h3 class="stop_name">'+e.target.landmark_name+'</h3>';
-	popup_content += '<a class="plan-route-link plan-route-link-start" href="javascript:void(0)" rel="'+e.target.landmark_id+'"><i></i>Start your trip here</a>';
-	popup_content += '<a class="plan-route-link plan-route-link-end"  href="javascript:void(0)" rel="'+e.target.landmark_id+'"><i></i>End your trip here</a>'+
+	popup_content += '<a class="plan-route-link plan-route-link-start start_stop" href="javascript:void(0)" rel="'+e.target.landmark_id+'"><i></i>Start your trip here</a>';
+	popup_content += '<a class="plan-route-link plan-route-link-end start_stop"  href="javascript:void(0)" rel="'+e.target.landmark_id+'"><i></i>End your trip here</a>'+
 	'<br style="clear: both;" /> ';
 	// <p>Nearest ART stop: ' + nearest_stop[0] + '<br/>Served by: '+nearest_stop[3].route_short_name+'</p>';
 
@@ -911,9 +932,14 @@ function refresh_landmark_view() {
 function toggle_stop_visibility() {
     if ( (map.getZoom() < ZoomLevelThreshhold && map.hasLayer(stops_layer_group)) || itinerary_up == true) {
         map.removeLayer(stops_layer_group);
+        
+        map.removeLayer(tile_layer[1]);
     }
     if ( (map.getZoom() >= ZoomLevelThreshhold && map.hasLayer(stops_layer_group) == false) && !itinerary_up ) {
-        load_stop_markers();
+        
+        stops_layer_group.addTo(map);
+        add_tile_layer(1,10);   
+    
     }
 }
 
@@ -1104,8 +1130,12 @@ toggle_stop_visibility();
 
 
 map.on('zoomend', function(e) {
-
-		
+		console.log(map.getZoom());
+		if(map.getZoom() != 13) {
+			if(map.hasLayer(prettyOverlayGroup)) map.removeLayer(prettyOverlayGroup);
+		} else {
+			if(!map.hasLayer(prettyOverlayGroup)) prettyOverlayGroup.addTo(map);
+		}
 		refresh_landmark_view();
 		toggle_stop_visibility();
 		toggle_landmark_visibility();
@@ -1493,7 +1523,15 @@ function map_itinerary(itinerary_i) {
 	}
 	
 	itineraryGroup.addTo(map);
-	map.fitBounds(itineraryGroup.getBounds());
+	map.fitBounds(itineraryGroup.getBounds(), {
+    // this preserves the space from the left of the real map to 200px
+    // for content. the format is [x, y]. See
+    // http://leafletjs.com/reference.html#map-paddingtopleft
+    // for full documentation and other options
+    paddingTopLeft: [leftBoundsPadding, 0],
+    paddingTop: 50,
+    paddingBottom: 50 ,
+});
 
 	
 }
@@ -1538,12 +1576,23 @@ function exit_tripplan_mode() {
 // add zoom reset
 	
 	map.setZoom(13);
+	map.fitBounds([
+				[33.76659033487751, -118.00518035888673],
+				[33.85288250307444, -117.86304473876955]
+			], {
+    // this preserves the space from the left of the real map to 200px
+    // for content. the format is [x, y]. See
+    // http://leafletjs.com/reference.html#map-paddingtopleft
+    // for full documentation and other options
+    paddingTopLeft: [leftBoundsPadding, 0]
+});
 	itinerary_up = false;
 	add_tile_layer(0,5);
-	add_tile_layer(1,10);
+	//add_tile_layer(1,10);
 	toggle_stop_visibility();
 	toggle_landmark_visibility();
 	clearStartEndMarkers();
+	t = 0;
 }
 
 function toggleDragableLandmarks() {
@@ -1581,6 +1630,31 @@ function sendUpdatesToServer() {
 	// go through all landmarks
 	JSON.stringify(yourArray);
 }
+
+var cloud1InitialLatLng = [ 33.76838748946505, -117.95282363891603 ];
+
+var cloud1Icon = L.icon({
+    iconUrl: map_files_base+'/library/images/cloud1.png',
+    shadowUrl: map_files_base+'/library/images/cloud1_shadow.png',
+    shadowAnchor: [-50, -50],  // the same for the shadow
+	});
+	var cloud1 = new L.marker(cloud1InitialLatLng,{
+   	icon:cloud1Icon,
+   	zIndexOffset:200,
+   	
+  		}).addTo(map);
+var t = 0;
+
+prettyOverlayGroup.addLayer(cloud1);
+
+window.setInterval(function() {
+    // Making a lissajous curve just for fun.
+    // Create your own animated path here.
+    cloud1.setLatLng(L.latLng(
+        cloud1InitialLatLng[0] ,
+        cloud1InitialLatLng[1] + (t/10000)%.2));
+    t += 1;
+}, 50);
 
 
 

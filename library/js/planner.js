@@ -92,6 +92,11 @@ function setEndFromID(attraction_id) {
 
 
 $(document).ready(function(){
+
+	var editMarkers	 = getParameterByName('edit');
+	if(editMarkers == 'true') {
+			$('.leaflet-control-command-interior').css('display','inherit');
+	}
 	$( "#share-link-dialog" ).dialog({autoOpen: false});
 	$('#share-this-map-link').click( function() {
 		$( "#share-link-dialog" ).text(window.location.href + 

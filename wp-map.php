@@ -20,7 +20,7 @@ Template Name: Standalone map
 <link href='http://rideart.org/wp-content/themes/art/library/css/route-icons.css' rel='stylesheet' />
 <link href='<?php echo get_template_directory_uri(); ?>/library/css/style.css' rel='stylesheet' />
 <link rel="stylesheet" type="text/css" href="<?php echo get_template_directory_uri(); ?>/library/fonts/MyFontsWebfontsKit.css"> 
-<link href='<?php echo get_template_directory_uri(); ?>/AnaheimMap/library/css/map_layout.css' rel='stylesheet' />
+
 <link href='<?php echo get_template_directory_uri(); ?>/library/css/planner.css' rel='stylesheet' />
 <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
 <script src="http://code.jquery.com/ui/1.11.0/jquery-ui.min.js"></script>
@@ -35,7 +35,7 @@ Template Name: Standalone map
 <link rel="stylesheet" href="http://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
 <script src="<?php echo get_template_directory_uri(); ?>/AnaheimMap/library/js/leaflet.label/leaflet.label.js"></script>
 <link href='<?php echo get_template_directory_uri(); ?>/AnaheimMap/library/js/leaflet.label/leaflet.label.css' rel='stylesheet' />
-
+<link href='<?php echo get_template_directory_uri(); ?>/AnaheimMap/library/css/map_layout.css' rel='stylesheet' />
 
 </head>
 
