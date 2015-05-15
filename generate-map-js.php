@@ -1038,6 +1038,8 @@ function load_landmarks_markers() {
 					landmarks[landmarks_array_temp[i].landmark_id].lat = landmark_lat_temp;
 					var landmark_lon_temp = landmarks_array_temp[i].longitude;
 					landmarks[landmarks_array_temp[i].landmark_id].lon = landmark_lon_temp;
+					landmarks[landmarks_array_temp[i].landmark_id].plan_lat = landmarks_array_temp[i].trip_planning_latitude;
+					landmarks[landmarks_array_temp[i].landmark_id].plan_lon = landmarks_array_temp[i].trip_planning_longitude;
 					landmarks[landmarks_array_temp[i].landmark_id].major = landmarks_array_temp[i].major;
 					landmarks[landmarks_array_temp[i].landmark_id].category_name = landmarks_array_temp[i].category_name;
 					landmarks[landmarks_array_temp[i].landmark_id].icon_id = landmarks_array_temp[i].icon_id;
@@ -1234,7 +1236,7 @@ function isNumeric(n) {
 function getItinerary(start,end) { // must pass data to allow for ajax success funtions
 	
 	if (typeof start[0] == "undefined") {
-		var start_coords = new Array(landmarks[start].lat,landmarks[start].lon);
+		var start_coords = new Array(landmarks[start].plan_lat,landmarks[start].plan_lon);
 		var start_landmark_id = start;
 		//ga('send', 'event', 'map', 'Plan trip - landmarks', 'From: '+landmarks[start].landmark_name + 'To: '+landmarks[end].landmark_name);
 		}
@@ -1245,7 +1247,7 @@ function getItinerary(start,end) { // must pass data to allow for ajax success f
 		}
 		
 	if (typeof end[0] == "undefined") {
-		var end_coords = new Array(landmarks[end].lat,landmarks[end].lon);
+		var end_coords = new Array(landmarks[end].plan_lat,landmarks[end].plan_lon);
 		var end_landmark_id = end;
 		}
 	else {
