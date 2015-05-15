@@ -6,9 +6,6 @@
   -webkit-box-shadow: 0px 4px 11px 0px rgba(0, 0, 0, 0.75) !important;
   -moz-box-shadow: 0px 4px 11px 0px rgba(0, 0, 0, 0.75) !important;
   box-shadow: 0px 4px 11px 0px rgba(0, 0, 0, 0.75) !important;
-  border-top: 2px solid #7ed6f7;
-  border-left: 2px solid #7ed6f7;
-  border-right: 2px solid #7ed6f7;
   font-size: 1.3em; }
   .leaflet-popup-content-wrapper a {
     color: #07536f;
@@ -219,3 +216,11 @@
       color: black; }
   #planner .ui-slider-tabs-content-container {
     border: 0; }
+
+.leaflet-control-command-interior {
+  padding: 20px;
+  background: white; }
+
+.attraction-customization-panel {
+  background: white;
+  color: black; }

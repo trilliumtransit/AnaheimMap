@@ -79,6 +79,7 @@ function setStartFromID(attraction_id) {
 	//insertParam('from', attraction_id);
 	$('#from-selection-preview').addClass('active').text($('#attraction-id-'+attraction_id).text());
 	$('#from-items-container #attraction-id-'+attraction_id).addClass('selected');
+	showStartLocation($('#from-items-container #attraction-id-'+attraction_id).attr('rel').split(';')[3],$('#from-items-container #attraction-id-'+attraction_id).attr('rel').split(';')[4]);
 }
 
 function setEndFromID(attraction_id) {
@@ -86,6 +87,7 @@ function setEndFromID(attraction_id) {
 	//insertParam('to', attraction_id);
 	$('#to-selection-preview').addClass('active').text($('#attraction-id-'+attraction_id).text());	
 	$('#to-items-container #attraction-id-'+attraction_id).addClass('selected');
+	showEndLocation($('#from-items-container #attraction-id-'+attraction_id).attr('rel').split(';')[3],$('#from-items-container #attraction-id-'+attraction_id).attr('rel').split(';')[4]);
 }
 
 

@@ -24,6 +24,30 @@ $naked_url_base .= "/art/";
 $map_files_base_split = explode("generate-map-js.php", $map_files_base);
 ?>
 
+L.Control.Command = L.Control.extend({
+    options: {
+        position: 'bottomleft',
+    },
+
+    onAdd: function (map) {
+        var controlDiv = L.DomUtil.create('div', 'leaflet-control-command');
+        L.DomEvent
+            .addListener(controlDiv, 'click', L.DomEvent.stopPropagation)
+            .addListener(controlDiv, 'click', L.DomEvent.preventDefault)
+        .addListener(controlDiv, 'click', function () {  });
+
+        var controlUI = L.DomUtil.create('div', 'leaflet-control-command-interior', controlDiv);
+        controlUI.title = 'Map Commands';
+        return controlDiv;
+    }
+});
+
+
+L.control.command = function (options) {
+    return new L.Control.Command(options);
+};
+
+
 // initialize global variables
 var stops_layer_group = L.featureGroup();
 var stops = Array();
@@ -42,12 +66,15 @@ var zoom_icon_scale = Array();
 var landmarks = Array();
 var landmark_icons = Array();
 var landmark_categories = Array();
+var customizedLandmarkData = new Array();
 var tile_layer = new Array();
 var itineraryGroup = L.featureGroup();
 var planner_itineraries_shown = new Array();
 var placePreviews = new Array();
 var startLocationMarker;
 var endLocationMarker;
+var dragableLandmarks = false;
+
 
 var landmark_markers = Array();
 var landmark_markers_group = L.featureGroup();
@@ -96,6 +123,13 @@ else {var route_ids_list = route_ids_array.join();}
 var southWest = L.latLng(33.765528, -118.042018),
     northEast = L.latLng(33.863041, -117.803086),
     bounds = L.latLngBounds(southWest, northEast);
+    
+    
+    
+// load in custom icon data
+//    read in csv
+
+
 
 // mapbox token, basemap
 //L.mapbox.accessToken = accessToken;
@@ -103,11 +137,18 @@ var map = L.map('<?php echo $container_id; ?>', 'trilliumtransit.5434d913', { zo
 $(".leaflet-control-zoom").css("visibility", "hidden");
 // makes a map sandwich
 //var topPane = L.DomUtil.create('div', 'leaflet-top-pane', map.getPanes().mapPane);
+if(L.Browser.mobile){  
+  // need to load separate labels tiles with larger labels
+}
 tile_layer[0] = new L.tileLayer('http://{s}.tiles.mapbox.com/v4/' + base_map_tiles + '/{z}/{x}/{y}.png?access_token=' + accessToken, {detectRetina: true,'zIndex': 10});
 tile_layer[1] = new L.tileLayer('http://{s}.tiles.mapbox.com/v4/' + route_alignments_tiles + '/{z}/{x}/{y}.png?access_token=' + accessToken, {detectRetina: true,'zIndex': 500});
 tile_layer[2] = new L.tileLayer('http://{s}.tiles.mapbox.com/v4/' + road_label_tiles + '/{z}/{x}/{y}.png?access_token=' + accessToken,
 		{detectRetina: true,'clickable': 'false', 'zIndex': 1000, pane: 'overlayPane'}).addTo(map);
 //topPane.appendChild(tile_layer[2].getContainer())
+var commandPanel = new L.control.command().addTo(map);
+var controlPanelHtml = '<?php echo str_replace(array("\r\n", "\r", "\n"), "",file_get_contents($map_files_base_split[0].'/map_editor_panel.html')); ?>';
+var newControlPanelHTML = controlPanelHtml.replace(/(\r\n|\n|\r)/gm,"");
+$('.leaflet-control-command-interior').html(newControlPanelHTML);
 
 
 var imageUrl = 'http://<?php echo $naked_url_base; ?>wp-content/themes/art/library/images/map_blue_coverfade.png',
@@ -385,11 +426,12 @@ function showStartLocation(lat, lon, name) {
     iconAnchor: [12.5,41]
 	});
 	startLocationMarker = new L.marker([lat, lon],{
-   	icon:greenIcon,
+   	icon:start_icon,
+   	zIndexOffset:1000,
    	
   		}).addTo(map);
   		
-  		startLocationMarker.bindPopup(name).openPopup();
+  		//startLocationMarker.bindPopup(name).openPopup();
 }
 
 function showEndLocation(lat, lon, name) {
@@ -400,10 +442,11 @@ function showEndLocation(lat, lon, name) {
     	iconAnchor: [12.5,41]
 	});
 	endLocationMarker = new L.marker([lat, lon],{
-   	 icon:redIcon,
+   	 icon:end_icon,
+   	    	zIndexOffset:1000,
   		}).addTo(map);
   
-  		endLocationMarker.bindPopup(name).openPopup();
+  		//endLocationMarker.bindPopup(name).openPopup();
 }	
 
 function clearStartEndMarkers() {
@@ -579,8 +622,15 @@ function create_landmark_marker(i,width,height,landmark_id,icon_index,landmark_l
 	draggable: <?php echo $dragable_icons; ?>,
 	icon: zoom_level_icon,
 	title: landmark_name,
-	zIndexOffset: 100
-	}).bindPopup(landmark_name, {maxWidth: 400});
+	zIndexOffset: 100,
+	
+
+	}).bindPopup(landmark_name, {maxWidth: 400})
+	.bindLabel(landmark_name,
+	{
+		 noHide: true,
+		 
+	});
 		
 
 landmark_markers[landmark_id].landmark_id = landmark_id;
@@ -736,7 +786,8 @@ function landmark_icon(width,height,icon_index,filename) {
 	landmark_icons[icon_index].icons[current_zoom] = new L.Icon({ 
 		iconUrl: map_files_base+'landmark_icons/'+filename,
 		iconSize: [scaled_width, scaled_height],
-		iconAnchor: [scaled_width/2, scaled_height/2]
+		iconAnchor: [scaled_width/2, scaled_height/2],
+		labelAnchor: [-scaled_width, scaled_height]
 		});
 		
 	}
@@ -851,6 +902,7 @@ function refresh_landmark_view() {
 			var width = landmark_icons[icon_index].width;
 			var filename = landmark_icons[icon_index].filename;
 			marker_set[i].setIcon(landmark_icon(width,height,icon_index,filename));
+			//setCustomLatLng(landmark_id);
 		}
 	}
 }
@@ -1492,6 +1544,42 @@ function exit_tripplan_mode() {
 	toggle_stop_visibility();
 	toggle_landmark_visibility();
 	clearStartEndMarkers();
+}
+
+function toggleDragableLandmarks() {
+
+	for (var i = 0; i < landmark_markers.length; i++) {
+		if (typeof landmark_markers[i] !== 'undefined'){
+			if(map.hasLayer(landmark_markers[i])) {
+				if(dragableLandmarks) {
+					landmark_markers[i].dragging.disable();
+				}
+				else {
+					landmark_markers[i].dragging.enable();
+				}
+				
+			}
+		
+		
+		}
+		
+	}
+	dragableLandmarks = !dragableLandmarks;
+}
+
+
+function getCustomLatLng(attraction_id) {
+	// 
+	
+}
+
+function resetCustomLandmarkEdits() {
+
+}
+
+function sendUpdatesToServer() {
+	// go through all landmarks
+	JSON.stringify(yourArray);
 }
 
 
