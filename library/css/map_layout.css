@@ -35,15 +35,15 @@
   font-size: 1.2em; }
 
 #planner-wrap {
-  left: 5%; }
+  left: 0; }
 
 .leaflet-container {
   font: 15px !important; }
 
 #planner {
   position: relative;
-  left: 3%;
-  top: 113px;
+  left: 0;
+  top: 75px;
   background-color: white;
   min-height: 200px;
   -webkit-box-shadow: 0px 3px 17px 0px rgba(50, 50, 50, 0.75);
@@ -51,7 +51,7 @@
   box-shadow: 0px 3px 17px 0px rgba(50, 50, 50, 0.75); }
   @media only screen and (min-width: 1380px) {
     #planner {
-      top: 163px; } }
+      top: 75px; } }
   #planner #inner-planner {
     padding: 10px 6.5% 0; }
   #planner hr {

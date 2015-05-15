@@ -60,7 +60,7 @@ box-shadow:         0px 4px 11px 0px rgba(0, 0, 0, 0.75) !important;
 }  
 
 #planner-wrap {
-	left: 5%;	
+	left: 0;	
 }
 
 .leaflet-container {
@@ -70,8 +70,8 @@ font: 15px !important;
 #planner {
 	
 	position: relative;
-	left: 3%;
-	top: 113px;
+	left: 0;
+	top: 75px;
 	
 	background-color: white;
 	min-height: 200px;
@@ -82,7 +82,7 @@ box-shadow:         0px 3px 17px 0px rgba(50, 50, 50, 0.75);
 	
 	
 	@media only screen and (min-width: 1380px) {
-	top: 163px;
+	top: 75px;
 	
 	}
 	

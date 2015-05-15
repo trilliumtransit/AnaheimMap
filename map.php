@@ -2,28 +2,39 @@
 
 <head>
 
-<script src='https://api.tiles.mapbox.com/mapbox.js/v2.1.9/mapbox.js'></script>
+<meta name="viewport" content="initial-scale=1, maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+<!--// this stuff needs to be updated on main site header-->
+<link rel="stylesheet" type="text/css" href="<?php echo get_template_directory_uri(); ?>/library/js/libs/leaflet-master/leaflet.css" />
+<script type="text/javascript" src="<?php echo get_template_directory_uri(); ?>/library/js/libs/leaflet-master/leaflet.js"></script>
+
+<!--<script src='https://api.tiles.mapbox.com/mapbox.js/v2.1.9/mapbox.standalone.js'></script>
 <link href='https://api.tiles.mapbox.com/mapbox.js/v2.1.9/mapbox.css' rel='stylesheet' />
-<script src='http://rideart.org/wp-content/themes/art/AnaheimMap/library/js/leaflet.polylineoffset.js'></script>
+///////-->
+
 <link href='http://rideart.org/wp-content/themes/art/library/css/route-icons.css' rel='stylesheet' />
-<link href='map_layout.css' rel='stylesheet' />
+<link href='<?php echo get_template_directory_uri(); ?>/library/css/style.css' rel='stylesheet' />
+<link rel="stylesheet" type="text/css" href="<?php echo get_template_directory_uri(); ?>/library/fonts/MyFontsWebfontsKit.css"> 
+
+<link href='<?php echo get_template_directory_uri(); ?>/library/css/planner.css' rel='stylesheet' />
 <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
-<script src="jquery.csv-0.71.min.js"></script>
-<script src="layout.js"></script>
-
-<script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-  ga('create', 'UA-19485598-1', 'auto');
-  ga('send', 'pageview');
-
-</script>
-
+<script src="http://code.jquery.com/ui/1.11.0/jquery-ui.min.js"></script>
+<script src="http://momentjs.com/downloads/moment.min.js"></script>
+ <script src="<?php echo get_template_directory_uri(); ?>/library/js/jssor.slider.min.js"></script>
+<script src="<?php echo get_template_directory_uri(); ?>/AnaheimMap/jquery.csv-0.71.min.js"></script>
+<script src="<?php echo get_template_directory_uri(); ?>/library/js/art.js"></script>
+<script src="<?php echo get_template_directory_uri(); ?>/AnaheimMap/library/js/layout.js"></script>
+<script src="<?php echo get_template_directory_uri(); ?>/AnaheimMap/library/js/planner.js"></script>
+<script src="<?php echo get_template_directory_uri(); ?>/AnaheimMap/library/js/sliderTabs-1.1/jquery.sliderTabs.js"></script>
+<link href='<?php echo get_template_directory_uri(); ?>/AnaheimMap/library/js/sliderTabs-1.1/styles/jquery.sliderTabs.css' rel='stylesheet' />
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
+<script src="<?php echo get_template_directory_uri(); ?>/AnaheimMap/library/js/leaflet.label/leaflet.label.js"></script>
+<link href='<?php echo get_template_directory_uri(); ?>/AnaheimMap/library/js/leaflet.label/leaflet.label.css' rel='stylesheet' />
+<link href='<?php echo get_template_directory_uri(); ?>/AnaheimMap/library/css/map_layout.css' rel='stylesheet' />
 
 </head>
+
 
 <body style="background-color:#2068A7">
 <div id="interactive-map-holder-wrap" style="width:100%;height:100%;position: relative;">
