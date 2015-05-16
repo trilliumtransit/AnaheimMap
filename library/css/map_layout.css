@@ -35,7 +35,7 @@
   font-size: 1.2em; }
 
 #planner-wrap {
-  left: 0; }
+  left: 5%; }
 
 .leaflet-container {
   font: 15px !important; }
@@ -239,3 +239,24 @@
 
 .leaflet-label:before {
   border: 0; }
+
+.landmark-icon {
+  text-align: center;
+  display: inline-block;
+  z-index: 500;
+  background: 0;
+  font-weight: bold;
+  font-size: 1.4em;
+  color: black;
+  -webkit-text-stroke: 1px white;
+  border: 0;
+  line-height: 1.1em;
+  text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff,   1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff; }
+  .landmark-icon img {
+    margin: 0 30px; }
+
+.landmark-icon:focus {
+  outline: 0; }
+
+.leaflet-marker-icon:focus {
+  outline: 0; }

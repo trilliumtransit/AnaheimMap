@@ -77,6 +77,8 @@ var startLocationMarker;
 var endLocationMarker;
 var dragableLandmarks = false;
 var prettyOverlayGroup = new L.FeatureGroup();
+var prevZoom = -1;
+
 
 
 var landmark_markers = Array();
@@ -108,7 +110,7 @@ var StopIcon = L.Icon.extend({
 });
 
 zoom_icon_scale[12] = .25;
-zoom_icon_scale[13] = .3;
+zoom_icon_scale[13] = .6;
 zoom_icon_scale[14] = .35;
 zoom_icon_scale[15] = .6;
 zoom_icon_scale[16] = 1;
@@ -632,7 +634,7 @@ function create_landmark_marker(i,width,height,landmark_id,icon_index,landmark_l
 		landmark_categories.push(category_name);
 	}
  
-	var zoom_level_icon = landmark_icon(width,height,icon_index,filename);
+	var zoom_level_icon = landmark_icon(width,height,icon_index,filename,landmark_name,landmark_id);
 
 	landmark_markers[landmark_id] = L.marker([landmark_lat, landmark_lon], {
 	draggable: <?php echo $dragable_icons; ?>,
@@ -641,12 +643,12 @@ function create_landmark_marker(i,width,height,landmark_id,icon_index,landmark_l
 	zIndexOffset: 100,
 	
 
-	}).bindPopup(landmark_name, {maxWidth: 400})
-	.bindLabel(landmark_name,
-	{
-		 noHide: true,
-		 
-	});
+	}).bindPopup(landmark_name, {maxWidth: 400});
+	//.bindLabel(landmark_name,
+	//{
+//		 noHide: true,
+	///	 
+	//});
 		
 
 landmark_markers[landmark_id].landmark_id = landmark_id;
@@ -783,7 +785,7 @@ e.target.setPopupContent(popup_content);
 }
 
 
-function landmark_icon(width,height,icon_index,filename) {
+function landmark_icon(width,height,icon_index,filename, title, landmark_id ) {
 	var current_zoom = map.getZoom();
 	if(typeof current_zoom == 'undefined'){current_zoom = 15;}
 	
@@ -799,12 +801,25 @@ function landmark_icon(width,height,icon_index,filename) {
 	var scaled_width = zoom_icon_scale[current_zoom] * width;
 	var scaled_height = zoom_icon_scale[current_zoom] * height;
 
-	landmark_icons[icon_index].icons[current_zoom] = new L.Icon({ 
+/*	landmark_icons[icon_index].icons[current_zoom] = new L.Icon({ 
 		iconUrl: map_files_base+'landmark_icons/'+filename,
 		iconSize: [scaled_width, scaled_height],
 		iconAnchor: [scaled_width/2, scaled_height/2],
 		labelAnchor: [-scaled_width, scaled_height]
-		});
+		});*/
+		
+	landmark_icons[icon_index].icons[current_zoom] = new L.divIcon({
+                className: 'label',
+                html: '<div class="landmark-icon" id="landmark-icon-'+landmark_id+'">'+
+						'<img src="'+map_files_base+'landmark_icons/'+filename+'" width="'+scaled_width+'" /> '+
+						'<div class="icon-centered-label" id="landmark-icon-label-'+landmark_id+'">'+title+
+						'</div>'+
+                	'</div>',
+                iconSize: [100, 40],
+                iconAnchor: [(scaled_width + 60)/2, (scaled_height + 50)/2],
+                });
+           
+      
 		
 	}
 	
@@ -917,7 +932,9 @@ function refresh_landmark_view() {
 			var height = landmark_icons[icon_index].height;
 			var width = landmark_icons[icon_index].width;
 			var filename = landmark_icons[icon_index].filename;
-			marker_set[i].setIcon(landmark_icon(width,height,icon_index,filename));
+			
+			var landmark_name = marker_set[i].landmark_name;
+			marker_set[i].setIcon(landmark_icon(width,height,icon_index,filename,landmark_name,landmark_id));
 			//setCustomLatLng(landmark_id);
 		}
 	}
@@ -1014,7 +1031,7 @@ function load_landmarks_markers() {
 	if (landmark_markers_group.getLayers().length == 0) {
 
 		$.ajax({
-			url: "landmarks.php",
+			url: map_files_base+"/landmarks.php",
 			async: true,
 			success: function (csvd) {
 				
@@ -1127,8 +1144,9 @@ toggle_stop_visibility();
 
 
 map.on('zoomend', function(e) {
-		console.log(map.getZoom());
-		if(map.getZoom() != 13) {
+		var newZoom = map.getZoom();
+		console.log(newZoom);
+		if(newZoom!= 13) {
 			if(map.hasLayer(prettyOverlayGroup)) map.removeLayer(prettyOverlayGroup);
 		} else {
 			if(!map.hasLayer(prettyOverlayGroup)) prettyOverlayGroup.addTo(map);
@@ -1136,6 +1154,13 @@ map.on('zoomend', function(e) {
 		refresh_landmark_view();
 		toggle_stop_visibility();
 		toggle_landmark_visibility();
+		
+		if(prevZoom != -1) {
+			$('#<?php echo $container_id; ?>').removeClass('zoom-level-'+prevZoom);
+			prevZoom = newZoom;
+		}
+		$('#<?php echo $container_id; ?>').addClass('zoom-level-'+map.getZoom());
+		//arrangeLabels();
 
 });
 
@@ -1652,6 +1677,61 @@ window.setInterval(function() {
         cloud1InitialLatLng[1] + (t/10000)%.2));
     t += 1;
 }, 50);
+
+function spaceOutLabels() {
+	for (var i = 0; i < landmark_markers.length; i++) {
+	
+		if (typeof landmark_markers[i] !== 'undefined') {
+			
+		}
+	
+	}
+
+}
+
+function arrangeLabels() {
+  var move = 1;
+  while(move > 0) {
+    move = 0;
+    $(".icon-centered-label")
+       .each(function() {
+       //	console.log($(this).css('transform'));
+         var that = $(this),
+             a = $(this)[0].getBoundingClientRect();
+           //  console.log($(this));
+          // console.log(that.attr('id'));
+         $(".icon-centered-label")
+            .each(function() {
+              if(!that.is(this)) {
+             
+              //  var b = $(this)[0].getBoundingClientRect();
+              /*  if((Math.abs(a.left - b.left) * 2 < (a.width + b.width)) &&
+                   (Math.abs(a.top - b.top) * 2 < (a.height + b.height))) {
+                  // overlap, move labels
+                  var dx = (Math.max(0, a.right - b.left) +
+                           Math.min(0, a.left - b.right)) * 0.01,
+                      dy = (Math.max(0, a.bottom - b.top) +
+                           Math.min(0, a.top - b.bottom)) * 0.02
+                      //tt = d3.transform(d3.select(this).attr("transform")),
+                      tt = [parseInt($(this).css("transform")[4]),parseInt($(this).css("transform")[5])],
+                      //to = d3.transform(d3.select(that).attr("transform"));
+                      to = [parseInt(that.css("transform")[4]),parseInt(that.css("transform")[5])];
+               // console.log(to);
+                  move += Math.abs(dx) + Math.abs(dy);
+                	//to.translate = [ to.translate[0] + dx, to.translate[1] + dy ];
+                  to = [ to[0] + dx, to[1] + dy ];
+                   //tt.translate = [ tt.translate[0] - dx, tt.translate[1] - dy ];
+                  tt = [ tt[0] - dx, tt[1] - dy ];
+                  
+                  $(this).css("transform", "translate3d(" + tt[0] + "px, "+tt[1]+"px ,0px)");
+                  that.css("transform", "translate3d(" + to[0] + "px, "+to[1]+"px ,0px)");
+                  a = $(this)[0].getBoundingClientRect();
+                } */
+              }
+            });
+       });
+  }
+}
 
 
 
