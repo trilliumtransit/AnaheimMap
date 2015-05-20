@@ -1163,7 +1163,7 @@ map.on('zoomend', function(e) {
 		}
 		refresh_landmark_view();
 		toggle_stop_visibility();
-	//	toggle_landmark_visibility();
+		toggle_landmark_visibility();
 		
 		if(prevZoom != -1) {
 			$('#<?php echo $container_id; ?>').removeClass('zoom-level-'+prevZoom);
