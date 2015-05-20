@@ -51,6 +51,8 @@ var leftBoundsPadding = 350;
 
 
 // initialize global variables
+var isMobile = '<?php echo $is_mobile; ?>';
+
 var stops_layer_group = L.featureGroup();
 var stops = Array();
 var StopIcons = Array();
@@ -98,7 +100,7 @@ var accessToken = 'pk.eyJ1IjoidHJpbGxpdW10cmFuc2l0IiwiYSI6ImVUQ2x0blUifQ.2-Z9TGH
 
 var default_icon_color = '575757';
 
-var ZoomLevelThreshhold = 15;
+var ZoomLevelThreshhold = 14;
 
 // define the StopIcon
 var StopIcon = L.Icon.extend({
@@ -110,7 +112,7 @@ var StopIcon = L.Icon.extend({
 });
 
 zoom_icon_scale[12] = .25;
-zoom_icon_scale[13] = .6;
+zoom_icon_scale[13] = .3;
 zoom_icon_scale[14] = .35;
 zoom_icon_scale[15] = .6;
 zoom_icon_scale[16] = 1;
@@ -160,11 +162,11 @@ $('.leaflet-control-command-interior').html(newControlPanelHTML);
 
 
 var overlayOffset = -.04;
-var imageUrl = 'http://<?php echo $naked_url_base; ?>wp-content/themes/art/library/images/map_blue_coverfade.png',
+var imageUrl = 'http://<?php echo $naked_url_base; ?>/wp-content/themes/art/library/images/map_blue_coverfade.png',
     imageBounds = [[33.634773754186114, -117.56418228149414 + overlayOffset], [33.970128544237255, -118.1689453125 + overlayOffset]];
 var blueFadeOverlay = L.imageOverlay(imageUrl, imageBounds).addTo(map);
 prettyOverlayGroup.addLayer(blueFadeOverlay);
- imageUrl = 'http://<?php echo $naked_url_base; ?>wp-content/themes/art/AnaheimMap/library/images/anaheim_resort_area_label.png';
+ imageUrl = 'http://<?php echo $naked_url_base; ?>/wp-content/themes/art/AnaheimMap/library/images/anaheim_resort_area_label.png';
   imageBounds = [[33.82322493125927, -117.91866302490236], [33.8050403230646, -117.88347244262695]];
 
 var overlay_anaheim_label = L.imageOverlay(imageUrl, imageBounds).addTo(map);
@@ -628,27 +630,25 @@ function remove_route_alignment(ids) {
 }
 
 
-function create_landmark_marker(i,width,height,landmark_id,icon_index,landmark_lat,landmark_lon,filename,category_name,landmark_name,min_zoom_level,max_zoom_level) {
+function create_landmark_marker(i,width,height,landmark_id,icon_index,landmark_lat,landmark_lon,filename,category_name,landmark_name,min_zoom_level,max_zoom_level, major) {
 
 	if (!isInArray(category_name,landmark_categories)) {
 		landmark_categories.push(category_name);
 	}
  
-	var zoom_level_icon = landmark_icon(width,height,icon_index,filename,landmark_name,landmark_id);
+	var zoom_level_icon = landmark_icon(width,height,icon_index,filename,landmark_name,landmark_id, major);
 
-	landmark_markers[landmark_id] = L.marker([landmark_lat, landmark_lon], {
-	draggable: <?php echo $dragable_icons; ?>,
-	icon: zoom_level_icon,
-	title: landmark_name,
-	zIndexOffset: 100,
+	
+		landmark_markers[landmark_id] = L.marker([landmark_lat, landmark_lon], {
+		draggable: <?php echo $dragable_icons; ?>,
+		icon: zoom_level_icon,
+		title: landmark_name,
+		zIndexOffset: 100,
+		
 	
 
-	}).bindPopup(landmark_name, {maxWidth: 400});
-	//.bindLabel(landmark_name,
-	//{
-//		 noHide: true,
-	///	 
-	//});
+		}).bindPopup(landmark_name, {maxWidth: 400});
+	
 		
 
 landmark_markers[landmark_id].landmark_id = landmark_id;
@@ -785,7 +785,7 @@ e.target.setPopupContent(popup_content);
 }
 
 
-function landmark_icon(width,height,icon_index,filename, title, landmark_id ) {
+function landmark_icon(width,height,icon_index,filename, title, landmark_id, major ) {
 	var current_zoom = map.getZoom();
 	if(typeof current_zoom == 'undefined'){current_zoom = 15;}
 	
@@ -807,17 +807,25 @@ function landmark_icon(width,height,icon_index,filename, title, landmark_id ) {
 		iconAnchor: [scaled_width/2, scaled_height/2],
 		labelAnchor: [-scaled_width, scaled_height]
 		});*/
-		
+	if(major == 1 || major == "1" ) {
 	landmark_icons[icon_index].icons[current_zoom] = new L.divIcon({
                 className: 'label',
                 html: '<div class="landmark-icon" id="landmark-icon-'+landmark_id+'">'+
 						'<img src="'+map_files_base+'landmark_icons/'+filename+'" width="'+scaled_width+'" /> '+
-						'<div class="icon-centered-label" id="landmark-icon-label-'+landmark_id+'">'+title+
-						'</div>'+
-                	'</div>',
+						'<div class="icon-centered-label" id="landmark-icon-label-'+landmark_id+'" >'+title+ 
+						'<br style="clear: both;" /></div>'+
+                	'<br style="clear: both;" /></div>',
                 iconSize: [100, 40],
                 iconAnchor: [(scaled_width + 60)/2, (scaled_height + 50)/2],
                 });
+    } else {
+    	landmark_icons[icon_index].icons[current_zoom] = new L.Icon({ 
+		iconUrl: map_files_base+'landmark_icons/'+filename,
+		iconSize: [scaled_width, scaled_height],
+		iconAnchor: [scaled_width/2, scaled_height/2],
+		labelAnchor: [-scaled_width, scaled_height]
+		});
+    }
            
       
 		
@@ -932,9 +940,10 @@ function refresh_landmark_view() {
 			var height = landmark_icons[icon_index].height;
 			var width = landmark_icons[icon_index].width;
 			var filename = landmark_icons[icon_index].filename;
+			var major = landmarks[landmark_id].major;
 			
 			var landmark_name = marker_set[i].landmark_name;
-			marker_set[i].setIcon(landmark_icon(width,height,icon_index,filename,landmark_name,landmark_id));
+			marker_set[i].setIcon(landmark_icon(width,height,icon_index,filename,landmark_name,landmark_id, major));
 			//setCustomLatLng(landmark_id);
 		}
 	}
@@ -1073,10 +1082,11 @@ function load_landmarks_markers() {
 						var height = landmark_icons[icon_index].height;
 						var filename = landmark_icons[icon_index].filename;
 						var landmark_id = landmarks_array_temp[i].landmark_id;
+						var major = landmarks_array_temp[i].major;
 		
 						// var current_zoom = map.getZoom();
 		
-						create_landmark_marker(i,width,height,landmark_id,icon_index,landmark_lat_temp,landmark_lon_temp,filename,landmarks_array_temp[i].category_name,landmark_name,min_zoom_level,max_zoom_level);
+						create_landmark_marker(i,width,height,landmark_id,icon_index,landmark_lat_temp,landmark_lon_temp,filename,landmarks_array_temp[i].category_name,landmark_name,min_zoom_level,max_zoom_level,major);
 				
 						var LamMarker = landmark_markers[landmark_id];
 						LamMarker.on('popupopen', update_landmark_info);
@@ -1653,7 +1663,7 @@ function sendUpdatesToServer() {
 	JSON.stringify(yourArray);
 }
 
-var cloud1InitialLatLng = [ 33.76838748946505, -117.95282363891603 ];
+/*var cloud1InitialLatLng = [ 33.76838748946505, -117.95282363891603 ];
 
 var cloud1Icon = L.icon({
     iconUrl: map_files_base+'/library/images/cloud1.png',
@@ -1676,7 +1686,7 @@ window.setInterval(function() {
         cloud1InitialLatLng[0] ,
         cloud1InitialLatLng[1] + (t/10000)%.2));
     t += 1;
-}, 50);
+}, 50);*/
 
 function spaceOutLabels() {
 	for (var i = 0; i < landmark_markers.length; i++) {
@@ -1697,42 +1707,72 @@ function arrangeLabels() {
        .each(function() {
        //	console.log($(this).css('transform'));
          var that = $(this),
-             a = $(this)[0].getBoundingClientRect();
+             a = that[0].getBoundingClientRect();
            //  console.log($(this));
           // console.log(that.attr('id'));
          $(".icon-centered-label")
-            .each(function() {
-              if(!that.is(this)) {
-             
-              //  var b = $(this)[0].getBoundingClientRect();
-              /*  if((Math.abs(a.left - b.left) * 2 < (a.width + b.width)) &&
-                   (Math.abs(a.top - b.top) * 2 < (a.height + b.height))) {
+            .each(function() { 
+              if(!that.is($(this))) {
+             	
+               var b = $(this)[0].getBoundingClientRect();
+                //if((Math.abs(a.left - b.left) * 2 < (a.width + b.width)) &&
+                //   (Math.abs(a.top - b.top) * 2 < (a.height + b.height))) {
+                   if (intersectRect(a,b))  {
                   // overlap, move labels
+                  alert();
                   var dx = (Math.max(0, a.right - b.left) +
                            Math.min(0, a.left - b.right)) * 0.01,
                       dy = (Math.max(0, a.bottom - b.top) +
-                           Math.min(0, a.top - b.bottom)) * 0.02
-                      //tt = d3.transform(d3.select(this).attr("transform")),
-                      tt = [parseInt($(this).css("transform")[4]),parseInt($(this).css("transform")[5])],
+                           Math.min(0, a.top - b.bottom)) * 0.01,
+                           // need to add
+                  // var dx = ((a.left + a.right)/2 - (b.left + b.right)/2)*.02,
+				//		dy = ((a.bottom + a.top)/2 - (b.bottom + b.top)/2)*.02,
+                  //    //tt = d3.transform(d3.select(this).attr("transform")),
+                      tt = [parseInt(getTransform($(this)[0])[0]),
+                            parseInt(getTransform($(this)[0])[1])],
                       //to = d3.transform(d3.select(that).attr("transform"));
-                      to = [parseInt(that.css("transform")[4]),parseInt(that.css("transform")[5])];
+                      to = [parseInt(getTransform(that[0])[0]),
+                            parseInt(getTransform(that[0])[1])];
                // console.log(to);
                   move += Math.abs(dx) + Math.abs(dy);
+                  
+                  
                 	//to.translate = [ to.translate[0] + dx, to.translate[1] + dy ];
                   to = [ to[0] + dx, to[1] + dy ];
                    //tt.translate = [ tt.translate[0] - dx, tt.translate[1] - dy ];
                   tt = [ tt[0] - dx, tt[1] - dy ];
-                  
+                  // d3.select(this).attr("transform", "translate(" + tt.translate + ")");
+                  //d3.select(that).attr("transform", "translate(" + to.translate + ")");
                   $(this).css("transform", "translate3d(" + tt[0] + "px, "+tt[1]+"px ,0px)");
                   that.css("transform", "translate3d(" + to[0] + "px, "+to[1]+"px ,0px)");
                   a = $(this)[0].getBoundingClientRect();
-                } */
+                } 
               }
             });
        });
   }
+  return true;
 }
 
+function getTransform(el) {
+    var transform = window.getComputedStyle(el, null).getPropertyValue('-webkit-transform');
+    var results = transform.match(/matrix(?:(3d)\(-{0,1}\d+(?:, -{0,1}\d+)*(?:, (-{0,1}\d+))(?:, (-{0,1}\d+))(?:, (-{0,1}\d+)), -{0,1}\d+\)|\(-{0,1}\d+(?:, -{0,1}\d+)*(?:, (-{0,1}\d+))(?:, (-{0,1}\d+))\))/);
 
+    if(!results) return [0, 0, 0];
+    if(results[1] == '3d') return results.slice(2,5);
+
+    results.push(0);
+    return results.slice(5, 8); // returns the [X,Y,Z,1] values
+}
+
+function intersectRect(r1, r2) {
+  return !(r2.left > r1.right || 
+           r2.right < r1.left || 
+           r2.top > r1.bottom ||
+           r2.bottom < r1.top);
+}
+
+//landmark-icon-label-101  landmark-icon-label-41
 
 // http://gtfs-api.ed-groth.com/trip-planner/anaheim-ca-us/plan-then-merge-by-route-sequence?fromPlace=33.8046480634388%2C-117.915358543396&toPlace=33.82422318995612%2C-117.90390014648436&time=1%3A29pm&date=03-31-2015
+
