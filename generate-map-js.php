@@ -1065,7 +1065,7 @@ function load_landmarks_markers() {
 					max_zoom_level = landmarks_array_temp[i].max_zoom_level;
 					landmark_name = landmarks_array_temp[i].landmark_name;
 					landmarks[landmarks_array_temp[i].landmark_id].category_name = landmarks_array_temp[i].category_name;
-					landmarks[landmarks_array_temp[i].landmark_id].landmark_url = landmarks_array_temp[i].landmark_url;
+					landmarks[landmarks_array_temp[i].landmark_id].url = landmarks_array_temp[i].landmark_url;
 					var landmark_lat_temp = landmarks_array_temp[i].latitude;
 					landmarks[landmarks_array_temp[i].landmark_id].lat = landmark_lat_temp;
 					var landmark_lon_temp = landmarks_array_temp[i].longitude;
@@ -1073,7 +1073,6 @@ function load_landmarks_markers() {
 					landmarks[landmarks_array_temp[i].landmark_id].plan_lat = landmarks_array_temp[i].trip_planning_latitude;
 					landmarks[landmarks_array_temp[i].landmark_id].plan_lon = landmarks_array_temp[i].trip_planning_longitude;
 					landmarks[landmarks_array_temp[i].landmark_id].note = landmarks_array_temp[i].landmark_note;
-					landmarks[landmarks_array_temp[i].landmark_id].url = landmarks_array_temp[i].landmark_url;
 					landmarks[landmarks_array_temp[i].landmark_id].major = landmarks_array_temp[i].major;
 					landmarks[landmarks_array_temp[i].landmark_id].category_name = landmarks_array_temp[i].category_name;
 					landmarks[landmarks_array_temp[i].landmark_id].icon_id = landmarks_array_temp[i].icon_id;
