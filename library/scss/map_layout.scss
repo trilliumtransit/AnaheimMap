@@ -412,9 +412,9 @@ box-shadow:         0px 3px 17px 0px rgba(50, 50, 50, 0.75);
 	z-index: 500;
 	background: 0;
 	font-weight: bold;
-	font-size: 1.4em;
+	font-size: 1.1em;
 	color: black;
-	 -webkit-text-stroke: 1px white;
+	
 	 border: 0;
 	 line-height:1.1em;
   
@@ -437,4 +437,15 @@ box-shadow:         0px 3px 17px 0px rgba(50, 50, 50, 0.75);
 .leaflet-marker-icon:focus {
 	outline: 0;
 }
+
+.icon-centered-label {
+	
+}
+
+.landmark-icon:hover  {
+	//background: rgba(0,0,255,.2);
+	//border-radius: 20px;
+}
+
+
 

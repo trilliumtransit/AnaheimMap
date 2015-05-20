@@ -246,9 +246,8 @@
   z-index: 500;
   background: 0;
   font-weight: bold;
-  font-size: 1.4em;
+  font-size: 1.1em;
   color: black;
-  -webkit-text-stroke: 1px white;
   border: 0;
   line-height: 1.1em;
   text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff,   1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff; }
