@@ -131,7 +131,7 @@ var highlighted_weight = 10;
 if (route_ids_array.length == 1) {route_ids_list = route_ids_array[0];}
 else {var route_ids_list = route_ids_array.join();}
 
-var boundsPadding = -.1;
+var boundsPadding = -.15;
 var southWest = L.latLng(33.765528, -118.042018 + boundsPadding),
     northEast = L.latLng(33.863041, -117.803086),
     bounds = L.latLngBounds(southWest, northEast);
