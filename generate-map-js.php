@@ -773,7 +773,9 @@ function update_landmark_info(e) {
 
 	// var nearest_stop = find_nearest_stop(e.target.getLatLng().lat,e.target.getLatLng().lng);
 	
-	var popup_content = '<h3 class="stop_name">'+e.target.landmark_name+'</h3>';
+	if (e.target.url == '') {var popup_content = '<h3 class="stop_name">'+e.target.landmark_name+'</h3>';}
+	else {var popup_content = '<h3 class="stop_name"><a href="'+e.target.url+'">'+e.target.landmark_name+'</a></h3>';}
+	if (e.target.note != '') {popup_content += '<p>' + e.target.note + '</p>';}
 	popup_content += '<a class="plan-route-link plan-route-link-start start_stop" href="javascript:void(0)" rel="'+e.target.landmark_id+'"><i></i>Start your trip here</a>';
 	popup_content += '<a class="plan-route-link plan-route-link-end start_stop"  href="javascript:void(0)" rel="'+e.target.landmark_id+'"><i></i>End your trip here</a>'+
 	'<br style="clear: both;" /> ';
@@ -1070,6 +1072,8 @@ function load_landmarks_markers() {
 					landmarks[landmarks_array_temp[i].landmark_id].lon = landmark_lon_temp;
 					landmarks[landmarks_array_temp[i].landmark_id].plan_lat = landmarks_array_temp[i].trip_planning_latitude;
 					landmarks[landmarks_array_temp[i].landmark_id].plan_lon = landmarks_array_temp[i].trip_planning_longitude;
+					landmarks[landmarks_array_temp[i].landmark_id].note = landmarks_array_temp[i].landmark_note;
+					landmarks[landmarks_array_temp[i].landmark_id].url = landmarks_array_temp[i].landmark_url;
 					landmarks[landmarks_array_temp[i].landmark_id].major = landmarks_array_temp[i].major;
 					landmarks[landmarks_array_temp[i].landmark_id].category_name = landmarks_array_temp[i].category_name;
 					landmarks[landmarks_array_temp[i].landmark_id].icon_id = landmarks_array_temp[i].icon_id;
