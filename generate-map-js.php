@@ -22,6 +22,10 @@ if (strpos($map_files_base, 'localhost') !== FALSE) { // check if on mamp/apache
 $naked_url_base .= "/art/";
 }
 $map_files_base_split = explode("generate-map-js.php", $map_files_base);
+if (strpos($map_files_base, 'staging') == FALSE) { // check if on staging
+	echo "var landmarks_proxy_url = 'landmarks.php';";
+	}
+else{echo "var landmarks_proxy_url = 'landmarks.php?staging=1';";}
 ?>
 
 L.Control.Command = L.Control.extend({
@@ -1040,7 +1044,7 @@ function load_landmarks_markers() {
 	if (landmark_markers_group.getLayers().length == 0) {
 
 		$.ajax({
-			url: map_files_base+"/landmarks.php",
+			url: map_files_base+"/"+landmarks_proxy_url,
 			async: true,
 			success: function (csvd) {
 				
