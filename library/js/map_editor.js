@@ -7,6 +7,21 @@ var markerLookup = {};
 
 var currentMarker = null;
 
+var editedMarkers = new Array();
+
+
+
+
+function updateEditedMarkers(marker, allZoom) { // object, bool
+	var zoom = map.getZoom();
+	// this is the function to call when saving the data
+	
+
+}
+
+
+
+
 $(document).ready(function(){
 
 
@@ -28,20 +43,50 @@ $(document).ready(function(){
 	
 	
 	map.on('zoomend', function(e) {
-		
-		$('#control-zoom-level').text('Zoom Level: '+map.getZoom());
+		var zoom = map.getZoom();	
+		$('#control-zoom-level').text('Zoom Level: '+zoom);
 		// finds the new marker at new zoom level
-		var lastSelected = new EditableMarker(landmark_markers[editorSelected.id]);
-		lastSelected.disable();
-		editorSelected = lastSelected;
-		editorSelected.enable();
 		
-	
+		if(! editedMarkers[editorSelected.id]) {
+			// add entry
+			//add an array at for this marker
+			editedMarkers[editorSelected.id] = new Array();
+		}
+		
+		if(! editedMarkers[editorSelected.id][zoom]) {
+		
+			var newMarkerEntry = new EditableMarker(landmark_markers[editorSelected.id]); 
+			editedMarkers[editorSelected.id][zoom] = newMarkerEntry;
+			editorSelected.disable();
+			editorSelected = newMarkerEntry;
+			editorSelected.enable();
+			
+		} else {
+		
+			editorSelect.disable();
+			editorSelected = editedMarkers[marker.id][zoom];
+			editorSelected.engable();
+			
+		}
+			
 	});
-
-	
-
 });
+
+function saveCurrentMarker() {
+	var zoom = map.getZoom();
+	if(! editedMarkers[marker.id]) {
+		// add entry
+		//add an array at for this marker
+			editedMarkers[marker.id] = new Array();
+	}
+	if(! editedMarkers[marker.id][zoom]) {
+		editedMarkers[marker.id][zoom] = editorSelected;
+	}
+}
+
+function revertCurrentMarker() {
+
+}
 
 
 function editorRespondToIconClick(marker) {
@@ -61,6 +106,9 @@ function EditableMarker(marker) {
 	
 	this.currentLatLng = marker._latlng;
 	this.latLngOffset = new L.LatLng(0,0);
+	this.labelOffsetX = -1;
+	this.labelOffsetY = -1;
+	this.sizeMultiplier = -1;
 	
 	var that = this;
 	
@@ -76,6 +124,9 @@ function EditableMarker(marker) {
 		$(this.marker._icon).addClass('editor-selected');
 		$('.control-selected-landmark').attr('value',(this.marker.landmark_name));
 		this.marker.dragging.enable();
+		
+		
+		
 	}
 		
 	this.disable = function() {

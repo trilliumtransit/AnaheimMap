@@ -779,15 +779,21 @@ function update_landmark_info(e) {
 
 	// var nearest_stop = find_nearest_stop(e.target.getLatLng().lat,e.target.getLatLng().lng);
 	
-
-	if (e.target.url == '') {var popup_content = '<h3 class="stop_name">'+e.target.landmark_name+'</h3>';}
-	else {var popup_content = '<h3 class="stop_name"><a href="'+e.target.url+'">'+e.target.landmark_name+'</a></h3>';}
-	if (e.target.note != '') {popup_content += '<p>' + e.target.note + '</p>';}
+<<<<<<< HEAD
+	var popup_content = '<h3 class="stop_name">'+e.target.landmark_name+'</h3>';
+	
 	if(system_map) {
 		popup_content += '<a class="plan-route-link plan-route-link-start start_stop" href="javascript:void(0)" rel="'+e.target.landmark_id+'"><i></i>Start your trip here</a>';
 		popup_content += '<a class="plan-route-link plan-route-link-end start_stop"  href="javascript:void(0)" rel="'+e.target.landmark_id+'"><i></i>End your trip here</a>'+
 		'<br style="clear: both;" /> ';
-
+=======
+	if (e.target.url == '') {var popup_content = '<h3 class="stop_name">'+e.target.landmark_name+'</h3>';}
+	else {var popup_content = '<h3 class="stop_name"><a href="'+e.target.url+'">'+e.target.landmark_name+'</a></h3>';}
+	if (e.target.note != '') {popup_content += '<p>' + e.target.note + '</p>';}
+	popup_content += '<a class="plan-route-link plan-route-link-start start_stop" href="javascript:void(0)" rel="'+e.target.landmark_id+'"><i></i>Start your trip here</a>';
+	popup_content += '<a class="plan-route-link plan-route-link-end start_stop"  href="javascript:void(0)" rel="'+e.target.landmark_id+'"><i></i>End your trip here</a>'+
+	'<br style="clear: both;" /> ';
+>>>>>>> d6a0387eb2cfa9ab603b7e15c3eb48c081f763e4
 	// <p>Nearest ART stop: ' + nearest_stop[0] + '<br/>Served by: '+nearest_stop[3].route_short_name+'</p>';
 	}
 
