@@ -37,6 +37,7 @@ L.Control.Command = L.Control.extend({
         var controlDiv = L.DomUtil.create('div', 'leaflet-control-command');
         L.DomEvent
             .addListener(controlDiv, 'click', L.DomEvent.stopPropagation)
+            .addListener(controlDiv, 'dblclick', L.DomEvent.stopPropagation)
             .addListener(controlDiv, 'click', L.DomEvent.preventDefault)
         .addListener(controlDiv, 'click', function () {  });
 
@@ -658,6 +659,8 @@ function create_landmark_marker(i,width,height,landmark_id,icon_index,landmark_l
 				editorRespondToIconClick($(this));
 			});
 		}
+		
+		
 	
 		
 
@@ -779,10 +782,10 @@ function update_landmark_info(e) {
 
 	// var nearest_stop = find_nearest_stop(e.target.getLatLng().lat,e.target.getLatLng().lng);
 	
-
-	if (e.target.url == '') {var popup_content = '<h3 class="stop_name">'+e.target.landmark_name+'</h3>';}
-	else {var popup_content = '<h3 class="stop_name"><a href="'+e.target.url+'">'+e.target.landmark_name+'</a></h3>';}
-	if (e.target.note != '') {popup_content += '<p>' + e.target.note + '</p>';}
+	var popup_content = '';
+	if (typeof e.target.url === 'undefined') { popup_content += '<h3 class="stop_name">'+e.target.landmark_name+'</h3>';}
+	else {popup_content += '<h3 class="stop_name"><a href="'+e.target.url+'">'+e.target.landmark_name+'</a></h3>';}
+	if (typeof e.target.note !== 'undefined' ) {popup_content += '<p>' + e.target.note + '</p>';}
 	if(system_map) {
 		popup_content += '<a class="plan-route-link plan-route-link-start start_stop" href="javascript:void(0)" rel="'+e.target.landmark_id+'"><i></i>Start your trip here</a>';
 		popup_content += '<a class="plan-route-link plan-route-link-end start_stop"  href="javascript:void(0)" rel="'+e.target.landmark_id+'"><i></i>End your trip here</a>'+
@@ -960,6 +963,11 @@ function refresh_landmark_view() {
 			var landmark_name = marker_set[i].landmark_name;
 			marker_set[i].setIcon(landmark_icon(width,height,icon_index,filename,landmark_name,landmark_id, major));
 			//setCustomLatLng(landmark_id);
+			
+			// if control panel script is included
+			if(typeof bindNewMarkerToEditorData == 'function') {
+				bindNewMarkerToEditorData(landmark_id);
+			}
 		}
 	}
 }
@@ -1697,7 +1705,7 @@ function spaceOutLabels() {
 }
 
 
-var cloud1InitialLatLng = [ 33.76838748946505, -117.95282363891603 ],
+var cloud1InitialLatLng = [ 33.781715581089884, -117.95076370239259 ],
     cloud1ImageFile = map_files_base+'/library/images/cloud1.png',
     cloud1ShadowImageFile = map_files_base+'/library/images/cloud1_shadow.png';
 var cloud1 = new Cloud(cloud1ImageFile,cloud1ShadowImageFile,cloud1InitialLatLng,[-50,-50], -100, 100, -.6);
