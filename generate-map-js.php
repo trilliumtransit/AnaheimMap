@@ -22,6 +22,10 @@ if (strpos($map_files_base, 'localhost') !== FALSE) { // check if on mamp/apache
 $naked_url_base .= "/art/";
 }
 $map_files_base_split = explode("generate-map-js.php", $map_files_base);
+if (strpos($map_files_base, 'staging') == FALSE) { // check if on staging
+	echo "var landmarks_proxy_url = 'landmarks.php';";
+	}
+else{echo "var landmarks_proxy_url = 'landmarks.php?staging=1';";}
 ?>
 
 L.Control.Command = L.Control.extend({
@@ -127,7 +131,7 @@ var highlighted_weight = 10;
 if (route_ids_array.length == 1) {route_ids_list = route_ids_array[0];}
 else {var route_ids_list = route_ids_array.join();}
 
-var boundsPadding = -.1;
+var boundsPadding = -.15;
 var southWest = L.latLng(33.765528, -118.042018 + boundsPadding),
     northEast = L.latLng(33.863041, -117.803086),
     bounds = L.latLngBounds(southWest, northEast);
@@ -775,12 +779,12 @@ function update_landmark_info(e) {
 
 	// var nearest_stop = find_nearest_stop(e.target.getLatLng().lat,e.target.getLatLng().lng);
 	
-	var popup_content = '<h3 class="stop_name">'+e.target.landmark_name+'</h3>';
-	
-	if(system_map) {
-		popup_content += '<a class="plan-route-link plan-route-link-start start_stop" href="javascript:void(0)" rel="'+e.target.landmark_id+'"><i></i>Start your trip here</a>';
-		popup_content += '<a class="plan-route-link plan-route-link-end start_stop"  href="javascript:void(0)" rel="'+e.target.landmark_id+'"><i></i>End your trip here</a>'+
-		'<br style="clear: both;" /> ';
+	if (e.target.url == '') {var popup_content = '<h3 class="stop_name">'+e.target.landmark_name+'</h3>';}
+	else {var popup_content = '<h3 class="stop_name"><a href="'+e.target.url+'">'+e.target.landmark_name+'</a></h3>';}
+	if (e.target.note != '') {popup_content += '<p>' + e.target.note + '</p>';}
+	popup_content += '<a class="plan-route-link plan-route-link-start start_stop" href="javascript:void(0)" rel="'+e.target.landmark_id+'"><i></i>Start your trip here</a>';
+	popup_content += '<a class="plan-route-link plan-route-link-end start_stop"  href="javascript:void(0)" rel="'+e.target.landmark_id+'"><i></i>End your trip here</a>'+
+	'<br style="clear: both;" /> ';
 	// <p>Nearest ART stop: ' + nearest_stop[0] + '<br/>Served by: '+nearest_stop[3].route_short_name+'</p>';
 	}
 
@@ -1048,7 +1052,7 @@ function load_landmarks_markers() {
 	if (landmark_markers_group.getLayers().length == 0) {
 
 		$.ajax({
-			url: map_files_base+"/landmarks.php",
+			url: map_files_base+"/"+landmarks_proxy_url,
 			async: true,
 			success: function (csvd) {
 				
@@ -1067,13 +1071,14 @@ function load_landmarks_markers() {
 					max_zoom_level = landmarks_array_temp[i].max_zoom_level;
 					landmark_name = landmarks_array_temp[i].landmark_name;
 					landmarks[landmarks_array_temp[i].landmark_id].category_name = landmarks_array_temp[i].category_name;
-					landmarks[landmarks_array_temp[i].landmark_id].landmark_url = landmarks_array_temp[i].landmark_url;
+					landmarks[landmarks_array_temp[i].landmark_id].url = landmarks_array_temp[i].landmark_url;
 					var landmark_lat_temp = landmarks_array_temp[i].latitude;
 					landmarks[landmarks_array_temp[i].landmark_id].lat = landmark_lat_temp;
 					var landmark_lon_temp = landmarks_array_temp[i].longitude;
 					landmarks[landmarks_array_temp[i].landmark_id].lon = landmark_lon_temp;
 					landmarks[landmarks_array_temp[i].landmark_id].plan_lat = landmarks_array_temp[i].trip_planning_latitude;
 					landmarks[landmarks_array_temp[i].landmark_id].plan_lon = landmarks_array_temp[i].trip_planning_longitude;
+					landmarks[landmarks_array_temp[i].landmark_id].note = landmarks_array_temp[i].landmark_note;
 					landmarks[landmarks_array_temp[i].landmark_id].major = landmarks_array_temp[i].major;
 					landmarks[landmarks_array_temp[i].landmark_id].category_name = landmarks_array_temp[i].category_name;
 					landmarks[landmarks_array_temp[i].landmark_id].icon_id = landmarks_array_temp[i].icon_id;
