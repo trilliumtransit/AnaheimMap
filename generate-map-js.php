@@ -1,7 +1,7 @@
 <?php
 header( 'application/javascript' );
 if(function_exists('imagepng')){
-  echo  "//imagepng() -Exists-";
+  echo  "//imagepng() -Exists-\n";
 }else{
   echo "//imagepng() ==== DOES NOT ==== Exist";
 }
@@ -22,7 +22,7 @@ if (strpos($map_files_base, 'localhost') !== FALSE) { // check if on mamp/apache
 $naked_url_base .= "/art/";
 }
 $map_files_base_split = explode("generate-map-js.php", $map_files_base);
-if (strpos($map_files_base, 'staging') == FALSE) { // check if on staging
+if (strpos($map_files_base, 'staging') === FALSE) { // check if on staging
 	echo "var landmarks_proxy_url = 'landmarks.php';";
 	}
 else{echo "var landmarks_proxy_url = 'landmarks.php?staging=1';";}
