@@ -259,3 +259,10 @@
 
 .leaflet-marker-icon:focus {
   outline: 0; }
+
+.leaflet-popup-close-button {
+  text-indent: 0; }
+
+.editor-selected .landmark-icon, img.editor-selected {
+  background: rgba(255, 0, 0, 0.4);
+  border-radius: 10px; }

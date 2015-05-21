@@ -14,7 +14,14 @@ function updatePlannerPanels($targ) {
 			}
 		});
 		
-		// calculate height stuff to keep all ui visible
+		updatePanelHeight($targ);
+		
+		
+		
+}
+
+function updatePanelHeight($targ) {
+// calculate height stuff to keep all ui visible
 		$item_container = $targ.closest('.items-container');
 		if($item_container.hasClass('open')) {
 			$item_container.height($targ.siblings('.place-pannel').height() + 45);
@@ -22,8 +29,9 @@ function updatePlannerPanels($targ) {
 		else {
 			$item_container.height(40);
 		}
-		
 }
+
+
 
 
 function setupResults() {
@@ -99,9 +107,13 @@ $(document).ready(function(){
 	}
 	$( "#share-link-dialog" ).dialog({autoOpen: false});
 	$('#share-this-map-link').click( function() {
-		$( "#share-link-dialog" ).text(window.location.href + 
-								'?from='+$('#from-items-container .selected').attr('rel').split(';')[1]+
-								'&to='+$('#to-items-container .selected').attr('rel').split(';')[1]);
+		if($('#from-items-container .selected, #to-items-container .selected').length == 2) {
+			$( "#share-link-dialog" ).text("http://www.rideart.org/standalone-map/" + 
+									'?from='+$('#from-items-container .selected').attr('rel').split(';')[1]+
+									'&to='+$('#to-items-container .selected').attr('rel').split(';')[1]);
+		} else {
+			$( "#share-link-dialog" ).text("http://www.rideart.org/standalone-map/");
+		} 
 		$( "#share-link-dialog" ).dialog( "open" );
 	});
 
@@ -114,6 +126,10 @@ $(document).ready(function(){
 		
 		var target = $(e.target);
 		setEndFromID(target.attr('rel'));
+		//if start selected 
+		if($('#from-items-container .selected').length > 0) {
+					processPlannerInput();	
+		} 
 	});
 	
 	
@@ -153,12 +169,19 @@ $(document).ready(function(){
 			$(this).closest('.items-container').prev('.planner-selection-preview').text('').removeClass('active');
 		}
 		
+		// close panel
+		
+		
 		if($(this).hasClass('selected')){
 			if($(this).closest('#from-items-container').length > 0) {
+				$(this).closest('.tab').removeClass('active');
+					updatePanelHeight($(this));
 				//insertParam('from', $(this).attr('rel').split(';')[1]);
 				showStartLocation($(this).attr('rel').split(';')[3], $(this).attr('rel').split(';')[4],$(this).text());
 			} 
 			else if ($(this).closest('#to-items-container').length > 0) {
+				$(this).closest('.tab').removeClass('active');
+				updatePanelHeight($(this));
 				//	insertParam('to', $(this).attr('rel').split(';')[1]);
 				showEndLocation($(this).attr('rel').split(';')[3], $(this).attr('rel').split(';')[4],$(this).text());
 			}

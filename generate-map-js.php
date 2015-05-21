@@ -142,7 +142,7 @@ var southWest = L.latLng(33.765528, -118.042018 + boundsPadding),
 // mapbox token, basemap
 //L.mapbox.accessToken = accessToken;
 var map = L.map('<?php echo $container_id; ?>', 'trilliumtransit.5434d913', { zoomControl: false, zoomAnimation: false, maxBounds: bounds, minZoom: 13 });
-map.setMaxBounds(bounds);
+if(system_map) {map.setMaxBounds(bounds)};
 map.setMinZoom(13);
 $(".leaflet-control-zoom").css("visibility", "hidden");
 // makes a map sandwich
@@ -151,7 +151,7 @@ if(L.Browser.mobile){
   // need to load separate labels tiles with larger labels
 }
 tile_layer[0] = new L.tileLayer('http://{s}.tiles.mapbox.com/v4/' + base_map_tiles + '/{z}/{x}/{y}.png?access_token=' + accessToken, {detectRetina: true,'zIndex': 10});
-tile_layer[1] = new L.tileLayer('http://{s}.tiles.mapbox.com/v4/' + route_alignments_tiles + '/{z}/{x}/{y}.png?access_token=' + accessToken, {detectRetina: true,'zIndex': 500});
+if(system_map)tile_layer[1] = new L.tileLayer('http://{s}.tiles.mapbox.com/v4/' + route_alignments_tiles + '/{z}/{x}/{y}.png?access_token=' + accessToken, {detectRetina: true,'zIndex': 500});
 tile_layer[2] = new L.tileLayer('http://{s}.tiles.mapbox.com/v4/' + road_label_tiles + '/{z}/{x}/{y}.png?access_token=' + accessToken,
 		{detectRetina: true,'clickable': 'false', 'zIndex': 1000, pane: 'overlayPane'}).addTo(map);
 //topPane.appendChild(tile_layer[2].getContainer())
@@ -648,6 +648,12 @@ function create_landmark_marker(i,width,height,landmark_id,icon_index,landmark_l
 	
 
 		}).bindPopup(landmark_name, {maxWidth: 400});
+		
+		if(typeof editorRespondToIconClick == 'function') {
+			landmark_markers[landmark_id].on('click',function() {
+				editorRespondToIconClick($(this));
+			});
+		}
 	
 		
 
@@ -770,11 +776,13 @@ function update_landmark_info(e) {
 	// var nearest_stop = find_nearest_stop(e.target.getLatLng().lat,e.target.getLatLng().lng);
 	
 	var popup_content = '<h3 class="stop_name">'+e.target.landmark_name+'</h3>';
-	popup_content += '<a class="plan-route-link plan-route-link-start start_stop" href="javascript:void(0)" rel="'+e.target.landmark_id+'"><i></i>Start your trip here</a>';
-	popup_content += '<a class="plan-route-link plan-route-link-end start_stop"  href="javascript:void(0)" rel="'+e.target.landmark_id+'"><i></i>End your trip here</a>'+
-	'<br style="clear: both;" /> ';
+	
+	if(system_map) {
+		popup_content += '<a class="plan-route-link plan-route-link-start start_stop" href="javascript:void(0)" rel="'+e.target.landmark_id+'"><i></i>Start your trip here</a>';
+		popup_content += '<a class="plan-route-link plan-route-link-end start_stop"  href="javascript:void(0)" rel="'+e.target.landmark_id+'"><i></i>End your trip here</a>'+
+		'<br style="clear: both;" /> ';
 	// <p>Nearest ART stop: ' + nearest_stop[0] + '<br/>Served by: '+nearest_stop[3].route_short_name+'</p>';
-
+	}
 
 
 // final action - set popup content
@@ -1663,30 +1671,11 @@ function sendUpdatesToServer() {
 	JSON.stringify(yourArray);
 }
 
-/*var cloud1InitialLatLng = [ 33.76838748946505, -117.95282363891603 ];
 
-var cloud1Icon = L.icon({
-    iconUrl: map_files_base+'/library/images/cloud1.png',
-    shadowUrl: map_files_base+'/library/images/cloud1_shadow.png',
-    shadowAnchor: [-50, -50],  // the same for the shadow
-	});
-	var cloud1 = new L.marker(cloud1InitialLatLng,{
-   	icon:cloud1Icon,
-   	zIndexOffset:200,
-   	
-  		}).addTo(map);
-var t = 0;
 
-prettyOverlayGroup.addLayer(cloud1);
 
-window.setInterval(function() {
-    // Making a lissajous curve just for fun.
-    // Create your own animated path here.
-    cloud1.setLatLng(L.latLng(
-        cloud1InitialLatLng[0] ,
-        cloud1InitialLatLng[1] + (t/10000)%.2));
-    t += 1;
-}, 50);*/
+
+
 
 function spaceOutLabels() {
 	for (var i = 0; i < landmark_markers.length; i++) {
@@ -1698,6 +1687,62 @@ function spaceOutLabels() {
 	}
 
 }
+
+
+var cloud1InitialLatLng = [ 33.76838748946505, -117.95282363891603 ],
+    cloud1ImageFile = map_files_base+'/library/images/cloud1.png',
+    cloud1ShadowImageFile = map_files_base+'/library/images/cloud1_shadow.png';
+var cloud1 = new Cloud(cloud1ImageFile,cloud1ShadowImageFile,cloud1InitialLatLng,[-50,-50], -100, 100, -.6);
+
+
+var cloud2InitialLatLng = [ 33.842189853534656, -117.88192749023439 ],
+    cloud2ImageFile = map_files_base+'/library/images/cloud3.png',
+    cloud2ShadowImageFile = map_files_base+'/library/images/cloud3_shadow.png';
+var cloud2 = new Cloud(cloud2ImageFile,cloud2ShadowImageFile,cloud2InitialLatLng,[-30,-30],  -100, 100, .5);
+
+var cloud3InitialLatLng = [ 33.82436579739009, -117.9976272583008 ],
+    cloud3ImageFile = map_files_base+'/library/images/cloud2.png',
+    cloud3ShadowImageFile = map_files_base+'/library/images/cloud2_shadow.png';
+var cloud3 = new Cloud(cloud3ImageFile,cloud3ShadowImageFile,cloud3InitialLatLng,[-20,-20], -200, 1, .8);
+
+function Cloud (imageFile, shadowImageFile, latLng, shadowOffset, moveBoundLeft, moveBoundRight, speed) { //string, string, tuple, tuple
+   
+   	this.t = 0;
+    this.latLng = latLng;
+    this.dir = 1;
+    this.moveBoundLeft = moveBoundLeft;
+    this.moveBoundRight = moveBoundRight;
+    this.speed = speed;
+    
+    this.cloudIcon = L.icon({
+			iconUrl: imageFile,
+			shadowUrl: shadowImageFile,
+			shadowAnchor: shadowOffset,//tuple  // the same for the shadow
+		});
+		
+	this.cloud = new L.marker(latLng,{
+		icon:this.cloudIcon,
+		zIndexOffset:200,
+	}).addTo(map);
+  		
+  	prettyOverlayGroup.addLayer(this.cloud);
+    
+    this.updateAnimation = function() {
+        this.cloud.setLatLng(L.latLng(
+        this.latLng[0] ,
+        this.latLng[1] + (this.t/10000)%.2));
+    	this.t += this.dir*this.speed;
+    	
+    	if(this.t > this.moveBoundRight || this.t<this.moveBoundLeft) this.dir = -this.dir;
+    };
+    
+}
+
+window.setInterval(function() {
+   cloud1.updateAnimation();
+   cloud2.updateAnimation();
+   cloud3.updateAnimation();
+}, 50);
 
 function arrangeLabels() {
   var move = 1;

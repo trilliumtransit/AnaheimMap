@@ -30,6 +30,7 @@ Template Name: Standalone map
 <script src="<?php echo get_template_directory_uri(); ?>/library/js/art.js"></script>
 <script src="<?php echo get_template_directory_uri(); ?>/AnaheimMap/library/js/layout.js"></script>
 <script src="<?php echo get_template_directory_uri(); ?>/AnaheimMap/library/js/planner.js"></script>
+<script src="<?php echo get_template_directory_uri(); ?>/AnaheimMap/library/js/map_editor.js"></script>
 <script src="<?php echo get_template_directory_uri(); ?>/AnaheimMap/library/js/sliderTabs-1.1/jquery.sliderTabs.js"></script>
 <link href='<?php echo get_template_directory_uri(); ?>/AnaheimMap/library/js/sliderTabs-1.1/styles/jquery.sliderTabs.css' rel='stylesheet' />
 <link rel="stylesheet" href="http://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
