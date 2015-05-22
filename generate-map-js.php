@@ -38,7 +38,14 @@ L.Control.Command = L.Control.extend({
         L.DomEvent
             .addListener(controlDiv, 'click', L.DomEvent.stopPropagation)
             .addListener(controlDiv, 'dblclick', L.DomEvent.stopPropagation)
+            .addListener(controlDiv, 'drag, dragstart, dragend', L.DomEvent.stopPropagation)
             .addListener(controlDiv, 'click', L.DomEvent.preventDefault)
+            .addListener(controlDiv,'mouseover', function () {
+       			 map.dragging.disable();
+    		})
+    		.addListener(controlDiv,'mouseout', function () {
+       			 map.dragging.enable();
+    		})
         .addListener(controlDiv, 'click', function () {  });
 
         var controlUI = L.DomUtil.create('div', 'leaflet-control-command-interior', controlDiv);
@@ -172,7 +179,9 @@ var imageUrl = 'http://<?php echo $naked_url_base; ?>/wp-content/themes/art/libr
 var blueFadeOverlay = L.imageOverlay(imageUrl, imageBounds).addTo(map);
 prettyOverlayGroup.addLayer(blueFadeOverlay);
  imageUrl = 'http://<?php echo $naked_url_base; ?>/wp-content/themes/art/AnaheimMap/library/images/anaheim_resort_area_label.png';
-  imageBounds = [[33.82322493125927, -117.91866302490236], [33.8050403230646, -117.88347244262695]];
+ var xBoundOffset = .005;
+ var yBoundOffset = .003;
+  imageBounds = [[33.82322493125927 + yBoundOffset, -117.91866302490236+ xBoundOffset], [33.8050403230646+ yBoundOffset, -117.88347244262695+ xBoundOffset]];
 
 var overlay_anaheim_label = L.imageOverlay(imageUrl, imageBounds).addTo(map);
 prettyOverlayGroup.addLayer(overlay_anaheim_label);
@@ -649,6 +658,8 @@ function create_landmark_marker(i,width,height,landmark_id,icon_index,landmark_l
 		icon: zoom_level_icon,
 		title: landmark_name,
 		zIndexOffset: 100,
+		origLat:landmark_lat,
+		origLng:landmark_lon
 		
 	
 
@@ -965,8 +976,12 @@ function refresh_landmark_view() {
 			//setCustomLatLng(landmark_id);
 			
 			// if control panel script is included
+			var foundExistingIconEdit = false;
 			if(typeof bindNewMarkerToEditorData == 'function') {
-				bindNewMarkerToEditorData(landmark_id);
+				foundExistingIconEdit = bindNewMarkerToEditorData(landmark_id);
+			}
+			if(!foundExistingIconEdit) {
+				marker_set[i].setLatLng(new L.LatLng(marker_set[i].options.origLat,marker_set[i].options.origLng));
 			}
 		}
 	}
@@ -1048,14 +1063,30 @@ console.log("add_route_alignment("+route_ids_array+")");
 
 
 // set up landmark_icons
-$.ajax({
-    url: map_files_base+"icons.csv",
+// generate icons
+
+/*$.ajax({
+    url: map_files_base+"get_icon_info.php",
     async: false,
     success: function (csvd) {
         landmark_icons =  $.csv.toObjects(csvd);
     },
     dataType: "text"
+});*/
+
+$.ajax({
+    url: map_files_base+"get_icon_info.php",
+    async: false,
+    success: function (csvd) {
+
+        landmark_icons =  $.csv.toObjects(csvd);
+    	console.log(landmark_icons);		
+    },
+    dataType: "text"
 });
+
+// need to create landmark_icons by reading the icons folder
+
 
 
 function load_landmarks_markers() {
@@ -1069,7 +1100,7 @@ function load_landmarks_markers() {
 				
 				var landmarks_array_temp =  $.csv.toObjects(csvd);
 		
-				console.log(landmarks_array_temp);
+				//console.log(landmarks_array_temp);
 		
 				for (var i = 0, len = landmarks_array_temp.length; i < len; i++) {
 							
@@ -1125,6 +1156,11 @@ function load_landmarks_markers() {
 		
 					}
 				toggle_landmark_visibility();
+				////
+					if(typeof useSavedDataToRefreshIcons !== 'undefined') {
+						// will update icons to saved styling.
+						useSavedDataToRefreshIcons();
+					}
 				},
 			dataType: "text"
 		
@@ -1739,6 +1775,8 @@ function Cloud (imageFile, shadowImageFile, latLng, shadowOffset, moveBoundLeft,
 	this.cloud = new L.marker(latLng,{
 		icon:this.cloudIcon,
 		zIndexOffset:200,
+		clickable: false,
+		className: 'cloud'	
 	}).addTo(map);
   		
   	prettyOverlayGroup.addLayer(this.cloud);

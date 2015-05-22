@@ -21,12 +21,56 @@ function updateEditedMarkers(marker, allZoom) { // object, bool
 
 function bindNewMarkerToEditorData(landmark_id) {
 	var zoom = map.getZoom();
+	// if there are edits for the icon refresh the icon
+	var foundExistingIconEdit = false;
 	if(typeof editedMarkers[landmark_id] !== 'undefined') {
 		console.log('icon has been edited before,  binding...');
 		if(typeof editedMarkers[landmark_id][zoom] !== 'undefined') {
 				console.log('binding new marker');
 				editedMarkers[landmark_id][zoom].updateMarker();
+				foundExistingIconEdit = true;
 		}
+	}
+	
+	return foundExistingIconEdit;
+	
+}
+
+
+var savedEdits;
+function useSavedDataToRefreshIcons() {
+	if(savedEdits.length > 4){
+		var jsonArray = jQuery.parseJSON( savedEdits );
+		jsonArray.forEach(function(value) {
+			console.log(value);
+			var newID = value.id;
+			var newZoom = value.zoom;
+			if(! editedMarkers[newID]) {
+				// add entry
+				//add an array at for this marker
+					editedMarkers[newID] = new Array();
+					//
+
+			}
+			if(! editedMarkers[newID][newZoom]) {
+				// find corresponding marker
+				//console.log(landmark_markers);
+				var newEditableMarker = new EditableMarker(landmark_markers[newID]);
+				newEditableMarker.id = newID;
+				newEditableMarker.zoom = value.zoom;
+				newEditableMarker.imgHeight = value.imgHeight;
+				newEditableMarker.imgWidth = value.imgWidth;
+				newEditableMarker.initialImgHeight = value.imgHeight;
+				newEditableMarker.initialImgWidth = value.imgWidth;
+				newEditableMarker.labelOffsetX = value.labelOffsetX;
+				newEditableMarker.labelOffsetY = value.labelOffsetY;
+				newEditableMarker.initialLatLng = new L.LatLng(value.latlng.lat,value.latlng.lng);
+				newEditableMarker.currentLatLng = new L.LatLng(value.latlng.lat,value.latlng.lng);
+				editedMarkers[newID][newZoom] = newEditableMarker;
+			
+			}
+		});
+		refresh_landmark_view();
 	}
 }
 
@@ -34,6 +78,58 @@ function bindNewMarkerToEditorData(landmark_id) {
 
 
 $(document).ready(function(){
+
+	// find and load json
+	//console.log(map_files_base+'savedMapEdits.json');
+	
+	$.ajax({
+		  dataType: "text",
+		  url: map_files_base+'savedMapEdits.json',
+		  success:  function(data) {
+			 //
+					//data = data.replace("[","");
+		   			//data = data.replace("]","");
+		   			console.log(data); 
+		   			savedEdits = data;
+				   
+		   
+			}
+	});
+
+
+	
+
+	$('#panel-save-to-server').click(function() {
+		//save json
+		var organizedArray = new Array();
+		editedMarkers.forEach(function(zoomLevel) {
+				//console.log(editedMarker);
+			zoomLevel.forEach(function(editedMarker) {
+				var infoToPush = {};
+				infoToPush["id"] = editedMarker.id;
+				infoToPush["landmark_name"] = editedMarker.marker.landmark_name;
+				infoToPush["zoom"] = editedMarker.zoom;
+				infoToPush["latlng"] = editedMarker.currentLatLng;
+				infoToPush["labelOffsetX"] = editedMarker.labelOffsetX;
+				infoToPush["labelOffsetY"] = editedMarker.labelOffsetY;
+				infoToPush["imgWidth"] =  editedMarker.imgWidth;
+				infoToPush["imgHeight"] = editedMarker.imgHeight;
+				organizedArray.push(infoToPush);	
+			});		  
+		});
+		console.log(organizedArray);
+		console.log(JSON.stringify(organizedArray));
+		
+		
+		$.ajax({
+			url: map_files_base+'save_map_edits.php',
+			type: 'POST',
+			contentType: 'application/json',
+			data: JSON.stringify(organizedArray),
+			dataType: 'json'
+		});
+	
+	});
 
 
 	$('#panel-start-stop-editing').click(function() {
@@ -59,8 +155,9 @@ $(document).ready(function(){
 	
 	map.on('zoomend', function(e) {
 		var zoom = map.getZoom();	
-		if(typeof editorSelected !== 'undefined') {
+		if(typeof editorSelected !== 'undefined' && editorSelected !== "null") {
 		 editorSelected.disable();
+		 editorSelected = "null";
 			$('#control-zoom-level').text('Zoom Level: '+zoom);
 			// finds the new marker at new zoom level
 		
@@ -90,15 +187,39 @@ $(document).ready(function(){
 			
 	});
 	
+	/*function safeButtonBind(buttonID, actionFunction) {
+		var interval;
+		$('#'+buttonID).mousedown(function() {
+  		interval = setInterval(actionFunction(), 50);
+		}).on('mouseout',function() {
+			clearInterval(interval);
+		}).on('mouseup',function() {
+			clearInterval(interval);
+		});
+	}*/
 	
-	$('#panel-increase-icon-size').click(function () {
-		
-		editorSelected.increaseSize();
+	
+	var increaseIconSizeInterval;
+		$('#panel-increase-icon-size').mousedown(function() {
+  		increaseIconSizeInterval = setInterval(function() {
+  			editorSelected.increaseSize();
+  		}, 50);
+		}).on('mouseout',function() {
+			clearInterval(increaseIconSizeInterval);
+		}).on('mouseup',function() {
+			clearInterval(increaseIconSizeInterval);
 	});
+	//safeButtonBind('panel-increase-icon-size', editorSelected.decreaseSize);
 	
-	$('#panel-decrease-icon-size').click(function () {
-		
-		editorSelected.decreaseSize();
+	var decreaseIconSizeInterval;
+		$('#panel-decrease-icon-size').mousedown(function() {
+  		decreaseIconSizeInterval = setInterval(function() {
+  			editorSelected.decreaseSize();
+  		}, 50);
+		}).on('mouseout',function() {
+			clearInterval(decreaseIconSizeInterval);
+		}).on('mouseup',function() {
+			clearInterval(decreaseIconSizeInterval);
 	});
 	
 	$('#panel-increase-font-size').click(function() {
@@ -109,10 +230,51 @@ $(document).ready(function(){
 	
 	});
 	
-	$('#panel-move-label-left').click(function() {
-		console.log('moving label left');
-		editorSelected.moveLabelLeft();
+	var moveLabelLeftInterval;
+		$('#panel-move-label-left').mousedown(function() {
+  		moveLabelLeftInterval = setInterval(function() {
+  			editorSelected.moveLabelLeft();
+  		}, 50);
+		}).on('mouseout',function() {
+			clearInterval(moveLabelLeftInterval);
+		}).on('mouseup',function() {
+			clearInterval(moveLabelLeftInterval);
 	});
+	
+	var moveLabelRightInterval;
+		$('#panel-move-label-right').mousedown(function() {
+  		moveLabelRightInterval = setInterval(function() {
+  			editorSelected.moveLabelRight();
+  		}, 50);
+		}).on('mouseout',function() {
+			clearInterval(moveLabelRightInterval);
+		}).on('mouseup',function() {
+			clearInterval(moveLabelRightInterval);
+	});
+	
+	var moveLabelUpInterval;
+		$('#panel-move-label-up').mousedown(function() {
+  		moveLabelUpInterval = setInterval(function() {
+  			editorSelected.moveLabelUp();
+  		}, 50);
+		}).on('mouseout',function() {
+			clearInterval(moveLabelUpInterval);
+		}).on('mouseup',function() {
+			clearInterval(moveLabelUpInterval);
+	});
+	
+	var moveLabelDownInterval;
+		$('#panel-move-label-down').mousedown(function() {
+  		moveLabelDownInterval = setInterval(function() {
+  			editorSelected.moveLabelDown();
+  		}, 50);
+		}).on('mouseout',function() {
+			clearInterval(moveLabelDownInterval);
+		}).on('mouseup',function() {
+			clearInterval(moveLabelDownInterval);
+	});
+	
+	
 	$('#panel-move-label-right').click(function() {
 		editorSelected.moveLabelRight();
 	});
@@ -168,27 +330,48 @@ function editorRespondToIconClick(marker) {
 		//currentMarker = new EditableMarker(marker[0]);	
 		var zoom = map.getZoom();
 		var foundExisting = false;	
-		if(typeof editorSelected !== 'undefined') {
+		
+		var editor = false;
+		var needsLookup = true;
+		
+		if(typeof editorSelected !== 'undefined' && editorSelected !== "null") 
+			editor = true;
+		
+		if(editor) {
+			if(editorSelected.uniqueID === map.getZoom() +'_'+marker[0].landmark_id) {
+	
+				console.log('do nothing, selected icon was clicked again');
+				needsLookup = false;
+			} 
+		} 
+		
+		if(needsLookup) {
+		
+			// new icon was clicked, look up if it has edits
+			var found = false;
 			if(typeof editedMarkers[marker[0].landmark_id] !== 'undefined') {
 				if(typeof editedMarkers[marker[0].landmark_id][zoom] !== 'undefined') {
-					if(editedMarkers[marker[0].landmark_id][zoom].uniqueID !== editorSelected.uniqueID) {
-						editorSelected.disable();
+					
+						if(editor) editorSelected.disable();
 						editorSelected = editedMarkers[marker[0].landmark_id][zoom];
 						editorSelected.enable();
-					} 
+						found = true;
+					
 				} 
 			}
+			if(!found) {
+			// create a new one
+				if(editor) editorSelected.disable();
+				var newEditableMarker = new EditableMarker(marker[0]);
+				editorSelected = newEditableMarker;
+				editorSelected.enable();
+			}
+		
 		}
-		if(typeof editorSelected === 'undefined'){
-			var newEditableMarker = new EditableMarker(marker[0]);
-			editorSelected = newEditableMarker;
-			editorSelected.enable();
-		} else if (!foundExisting && editorSelected.uniqueID !== map.getZoom() +'_'+marker[0].landmark_id) { 
-			var newEditableMarker = new EditableMarker(marker[0]);
-			editorSelected.disable();
-			editorSelected = newEditableMarker;
-			editorSelected.enable();
-		}
+		
+		
+		
+		
 		
 	}
 }
@@ -225,7 +408,8 @@ function EditableMarker(marker) {
 	
 	this.marker.on('dragend', function(event){
 		console.log('dragend');
-		that.updateAfterMove(event);
+		if(that.zoom == map.getZoom())
+			that.updateAfterMove(event);
 			
 		
 	});
@@ -250,7 +434,7 @@ function EditableMarker(marker) {
 	
 	
 	this.enable = function() {
-	
+		console.log('enable ' + this.marker.landmark_name);
 		this.currentlySaved = false;
 		$(this.marker._icon).addClass('editor-selected');
 		$('.control-selected-landmark').attr('value',(this.marker.landmark_name));
@@ -261,6 +445,8 @@ function EditableMarker(marker) {
 		this.initialLatLng = this.marker._latlng;
 		this.initialImgWidth = $domImg.width();
 		this.initialImgHeight = $domImg.height();
+		this.imgWidth = $domImg.width();
+		this.imgHeight = $domImg.height();
 		
 		this.initialLabelOffsetX = this.labelOffsetX;
 		this.initialLabelOffsetY = this.labelOffsetY;
@@ -269,6 +455,7 @@ function EditableMarker(marker) {
 	}
 		
 	this.disable = function() {
+		console.log('disable ' + this.marker.landmark_name);
 		$(this.marker._icon).removeClass('editor-selected');
 		
 		// revert unsaved changes
@@ -276,12 +463,13 @@ function EditableMarker(marker) {
 		
 			//this.marker._latlng = this.initialLatLng;
 			
-			this.imgWidth = this.initialImgWidth;
-			this.imgHeight = this.initialImgHeight;
-			
+			this.setImgSize (this.initialImgWidth, this.initialImgHeight);
 			this.setLabelOffset(this.initialLabelOffsetX,this.initialLabelOffsetY);
-			
 			this.marker.setLatLng(this.initialLatLng);
+			// need to add label size
+			
+			
+			
 		} else {
 			this.saved = true;
 		}
@@ -365,9 +553,9 @@ function EditableMarker(marker) {
 		//console.log(this.marker);
 		//console.log(event.target);
 		//console.log(this.savedInitialLatLng);
-		this.latLngOffset = new L.LatLng(this.currentLatLng.lat - this.initialLatLng.lat,
-							 this.currentLatLng.lng - this.initialLatLng.lng);
-		console.log(this.latLngOffset.lat);
+		//this.latLngOffset = new L.LatLng(this.currentLatLng.lat - this.initialLatLng.lat,
+		//					 this.currentLatLng.lng - this.initialLatLng.lng);
+		//console.log(this.latLngOffset.lat);
 		
 		this.edited = true;
 	}
@@ -377,6 +565,7 @@ function EditableMarker(marker) {
 		//img size
 		this.setImgSize(this.imgWidth,this.imgHeight);
 		//font size
+		this.marker.setLatLng(this.currentLatLng);
 		this.setLabelOffset(this.labelOffsetX,
 							this.labelOffsetY);
 		//label pos
