@@ -15,6 +15,7 @@ else {
 function fetchURL() {
 
 	global $landmarks_spreadsheet;
+	global $time;
 
     $url = $landmarks_spreadsheet; // Be careful with posting variables.
     $cache_file = "cache/".hash('md5', $url).".csv"; // Create a unique name for the cache file using a quick md5 hash.
