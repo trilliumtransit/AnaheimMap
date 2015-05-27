@@ -141,7 +141,7 @@ else {var route_ids_list = route_ids_array.join();}
 
 var boundsPadding = -.15;
 var southWest = L.latLng(33.765528, -118.042018 + boundsPadding),
-    northEast = L.latLng(33.863041, -117.803086),
+    northEast = L.latLng(33.86, -117.803086),
     bounds = L.latLngBounds(southWest, northEast);
     
     
@@ -173,18 +173,21 @@ var newControlPanelHTML = controlPanelHtml.replace(/(\r\n|\n|\r)/gm,"");
 $('.leaflet-control-command-interior').html(newControlPanelHTML);
 
 
-var overlayOffset = -.04;
-var imageUrl = 'http://<?php echo $naked_url_base; ?>/wp-content/themes/art/library/images/map_blue_coverfade.png',
-    imageBounds = [[33.634773754186114, -117.56418228149414 + overlayOffset], [33.970128544237255, -118.1689453125 + overlayOffset]];
-var blueFadeOverlay = L.imageOverlay(imageUrl, imageBounds).addTo(map);
-prettyOverlayGroup.addLayer(blueFadeOverlay);
- imageUrl = 'http://<?php echo $naked_url_base; ?>/wp-content/themes/art/AnaheimMap/library/images/anaheim_resort_area_label.png';
- var xBoundOffset = .005;
- var yBoundOffset = .003;
-  imageBounds = [[33.82322493125927 + yBoundOffset, -117.91866302490236+ xBoundOffset], [33.8050403230646+ yBoundOffset, -117.88347244262695+ xBoundOffset]];
+if(system_map) {
+	var overlayOffset = -.04;
+	var imageUrl = 'http://<?php echo $naked_url_base; ?>/wp-content/themes/art/library/images/map_blue_coverfade.png',
+		imageBounds = [[33.634773754186114, -117.56418228149414 + overlayOffset], [33.970128544237255, -118.1689453125 + overlayOffset]];
+	var blueFadeOverlay = L.imageOverlay(imageUrl, imageBounds).addTo(map);
+	prettyOverlayGroup.addLayer(blueFadeOverlay);
+	 imageUrl = 'http://<?php echo $naked_url_base; ?>/wp-content/themes/art/AnaheimMap/library/images/anaheim_resort_area_label.png';
+	 var xBoundOffset = .005;
+	 var yBoundOffset = .003;
+	  imageBounds = [[33.82322493125927 + yBoundOffset, -117.91866302490236+ xBoundOffset], [33.8050403230646+ yBoundOffset, -117.88347244262695+ xBoundOffset]];
 
-var overlay_anaheim_label = L.imageOverlay(imageUrl, imageBounds).addTo(map);
-prettyOverlayGroup.addLayer(overlay_anaheim_label);
+	var overlay_anaheim_label = L.imageOverlay(imageUrl, imageBounds).addTo(map);
+	prettyOverlayGroup.addLayer(overlay_anaheim_label);
+}
+
 prettyOverlayGroup.addTo(map);
 //overlay.setOpacity(.5);
 //alert(topPane);
@@ -644,13 +647,13 @@ function remove_route_alignment(ids) {
 }
 
 
-function create_landmark_marker(i,width,height,landmark_id,icon_index,landmark_lat,landmark_lon,filename,category_name,landmark_name,min_zoom_level,max_zoom_level, major) {
+function create_landmark_marker(i,width,height,landmark_id,icon_index,landmark_lat,landmark_lon,filename,category_name,landmark_name,min_zoom_level,max_zoom_level, major, show_label) {
 
 	if (!isInArray(category_name,landmark_categories)) {
 		landmark_categories.push(category_name);
 	}
  
-	var zoom_level_icon = landmark_icon(width,height,icon_index,filename,landmark_name,landmark_id, major);
+	var zoom_level_icon = landmark_icon(width,height,icon_index,filename,landmark_name,landmark_id, major, show_label);
 
 	
 		landmark_markers[landmark_id] = L.marker([landmark_lat, landmark_lon], {
@@ -814,7 +817,7 @@ e.target.setPopupContent(popup_content);
 }
 
 
-function landmark_icon(width,height,icon_index,filename, title, landmark_id, major ) {
+function landmark_icon(width,height,icon_index,filename, title, landmark_id, major, show_label ) {
 	var current_zoom = map.getZoom();
 	if(typeof current_zoom == 'undefined'){current_zoom = 15;}
 	
@@ -837,6 +840,7 @@ function landmark_icon(width,height,icon_index,filename, title, landmark_id, maj
 		labelAnchor: [-scaled_width, scaled_height]
 		});*/
 	if(major == 1 || major == "1" ) {
+	if(show_label == 1) {
 	landmark_icons[icon_index].icons[current_zoom] = new L.divIcon({
                 className: 'label',
                 html: '<div class="landmark-icon" id="landmark-icon-'+landmark_id+'">'+
@@ -847,6 +851,17 @@ function landmark_icon(width,height,icon_index,filename, title, landmark_id, maj
                 iconSize: [100, 40],
                 iconAnchor: [(scaled_width + 60)/2, (scaled_height + 50)/2],
                 });
+        } else {
+        	landmark_icons[icon_index].icons[current_zoom] = new L.divIcon({
+                className: 'label',
+                html: '<div class="landmark-icon" id="landmark-icon-'+landmark_id+'">'+
+						'<img src="'+map_files_base+'landmark_icons/'+filename+'" width="'+scaled_width+'" /> '+
+						
+                	'<br style="clear: both;" /></div>',
+                iconSize: [100, 40],
+                iconAnchor: [(scaled_width + 60)/2, (scaled_height + 50)/2],
+                });
+        }
     } else {
     	landmark_icons[icon_index].icons[current_zoom] = new L.Icon({ 
 		iconUrl: map_files_base+'landmark_icons/'+filename,
@@ -970,14 +985,16 @@ function refresh_landmark_view() {
 			var width = landmark_icons[icon_index].width;
 			var filename = landmark_icons[icon_index].filename;
 			var major = landmarks[landmark_id].major;
+			var show_label = landmarks[landmark_id].show_label;
 			
 			var landmark_name = marker_set[i].landmark_name;
-			marker_set[i].setIcon(landmark_icon(width,height,icon_index,filename,landmark_name,landmark_id, major));
+			marker_set[i].setIcon(landmark_icon(width,height,icon_index,filename,landmark_name,landmark_id, major, show_label));
 			//setCustomLatLng(landmark_id);
 			
 			// if control panel script is included
 			var foundExistingIconEdit = false;
 			if(typeof bindNewMarkerToEditorData == 'function') {
+				//bindNewMarkerToEditorData(landmark_id);
 				foundExistingIconEdit = bindNewMarkerToEditorData(landmark_id);
 			}
 			if(!foundExistingIconEdit) {
@@ -1109,6 +1126,7 @@ function load_landmarks_markers() {
 					landmarks[landmarks_array_temp[i].landmark_id].landmark_name = landmarks_array_temp[i].landmark_name;
 					landmarks[landmarks_array_temp[i].landmark_id].min_zoom_level = landmarks_array_temp[i].min_zoom_level;
 					landmarks[landmarks_array_temp[i].landmark_id].max_zoom_level = landmarks_array_temp[i].max_zoom_level;
+					landmarks[landmarks_array_temp[i].landmark_id].show_label = landmarks_array_temp[i].show_label;
 					var min_zoom_level = landmarks_array_temp[i].min_zoom_level,
 					max_zoom_level = landmarks_array_temp[i].max_zoom_level;
 					landmark_name = landmarks_array_temp[i].landmark_name;
@@ -1138,10 +1156,11 @@ function load_landmarks_markers() {
 						var filename = landmark_icons[icon_index].filename;
 						var landmark_id = landmarks_array_temp[i].landmark_id;
 						var major = landmarks_array_temp[i].major;
+						var show_label = landmarks_array_temp[i].show_label;
 		
 						// var current_zoom = map.getZoom();
 		
-						create_landmark_marker(i,width,height,landmark_id,icon_index,landmark_lat_temp,landmark_lon_temp,filename,landmarks_array_temp[i].category_name,landmark_name,min_zoom_level,max_zoom_level,major);
+						create_landmark_marker(i,width,height,landmark_id,icon_index,landmark_lat_temp,landmark_lon_temp,filename,landmarks_array_temp[i].category_name,landmark_name,min_zoom_level,max_zoom_level,major,show_label);
 				
 						var LamMarker = landmark_markers[landmark_id];
 						LamMarker.on('popupopen', update_landmark_info);
@@ -1155,12 +1174,14 @@ function load_landmarks_markers() {
 						}
 		
 					}
-				toggle_landmark_visibility();
+				
 				////
 					if(typeof useSavedDataToRefreshIcons !== 'undefined') {
 						// will update icons to saved styling.
 						useSavedDataToRefreshIcons();
 					}
+					toggle_landmark_visibility();
+					refresh_landmark_view();
 				},
 			dataType: "text"
 		
@@ -1216,12 +1237,8 @@ toggle_stop_visibility();
 map.on('zoomend', function(e) {
 		var newZoom = map.getZoom();
 		console.log(newZoom);
-		if(newZoom!= 13) {
-			if(map.hasLayer(prettyOverlayGroup)) map.removeLayer(prettyOverlayGroup);
-		} else {
-			if(!map.hasLayer(prettyOverlayGroup)) prettyOverlayGroup.addTo(map);
-		}
-		refresh_landmark_view();
+		
+		
 		toggle_stop_visibility();
 		toggle_landmark_visibility();
 		
@@ -1232,8 +1249,16 @@ map.on('zoomend', function(e) {
 		$('#<?php echo $container_id; ?>').addClass('zoom-level-'+map.getZoom());
 		//arrangeLabels();
 
+		if(map.getZoom() == 13) {
+			if(!map.hasLayer(prettyOverlayGroup)) prettyOverlayGroup.addTo(map);
+		}
+		refresh_landmark_view();
 });
-
+map.on('zoomstart', function(e) {
+	if(map.getZoom() == 13) {
+			if(map.hasLayer(prettyOverlayGroup)) map.removeLayer(prettyOverlayGroup);
+		} 
+});
 
 // adding events for Google Analytics here
 
@@ -1740,22 +1765,23 @@ function spaceOutLabels() {
 
 }
 
+if(system_map) {
+	var cloud1InitialLatLng = [ 33.781715581089884, -117.95076370239259 ],
+		cloud1ImageFile = map_files_base+'/library/images/cloud1.png',
+		cloud1ShadowImageFile = map_files_base+'/library/images/cloud1_shadow.png';
+	var cloud1 = new Cloud(cloud1ImageFile,cloud1ShadowImageFile,cloud1InitialLatLng,[-50,-50], -100, 100, -.6);
 
-var cloud1InitialLatLng = [ 33.781715581089884, -117.95076370239259 ],
-    cloud1ImageFile = map_files_base+'/library/images/cloud1.png',
-    cloud1ShadowImageFile = map_files_base+'/library/images/cloud1_shadow.png';
-var cloud1 = new Cloud(cloud1ImageFile,cloud1ShadowImageFile,cloud1InitialLatLng,[-50,-50], -100, 100, -.6);
 
+	var cloud2InitialLatLng = [ 33.842189853534656, -117.88192749023439 ],
+		cloud2ImageFile = map_files_base+'/library/images/cloud3.png',
+		cloud2ShadowImageFile = map_files_base+'/library/images/cloud3_shadow.png';
+	var cloud2 = new Cloud(cloud2ImageFile,cloud2ShadowImageFile,cloud2InitialLatLng,[-30,-30],  -100, 100, .5);
 
-var cloud2InitialLatLng = [ 33.842189853534656, -117.88192749023439 ],
-    cloud2ImageFile = map_files_base+'/library/images/cloud3.png',
-    cloud2ShadowImageFile = map_files_base+'/library/images/cloud3_shadow.png';
-var cloud2 = new Cloud(cloud2ImageFile,cloud2ShadowImageFile,cloud2InitialLatLng,[-30,-30],  -100, 100, .5);
-
-var cloud3InitialLatLng = [ 33.82436579739009, -117.9976272583008 ],
-    cloud3ImageFile = map_files_base+'/library/images/cloud2.png',
-    cloud3ShadowImageFile = map_files_base+'/library/images/cloud2_shadow.png';
-var cloud3 = new Cloud(cloud3ImageFile,cloud3ShadowImageFile,cloud3InitialLatLng,[-20,-20], -200, 1, .8);
+	var cloud3InitialLatLng = [ 33.82436579739009, -117.9976272583008 ],
+		cloud3ImageFile = map_files_base+'/library/images/cloud2.png',
+		cloud3ShadowImageFile = map_files_base+'/library/images/cloud2_shadow.png';
+	var cloud3 = new Cloud(cloud3ImageFile,cloud3ShadowImageFile,cloud3InitialLatLng,[-20,-20], -200, 1, .8);
+}
 
 function Cloud (imageFile, shadowImageFile, latLng, shadowOffset, moveBoundLeft, moveBoundRight, speed) { //string, string, tuple, tuple
    

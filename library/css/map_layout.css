@@ -1,3 +1,6 @@
+.standalone-map #interactive-map-holder-wrap {
+  font-size: .8em; }
+
 #interactive-map-holder .leaflet-control-zoom a:link {
   color: black; }
 
@@ -33,9 +36,6 @@
   z-index: 200;
   position: relative;
   font-size: 1.2em; }
-
-#planner-wrap {
-  left: 5%; }
 
 .leaflet-container {
   font: 15px !important; }
@@ -248,9 +248,12 @@
   font-weight: bold;
   font-size: 1.1em;
   color: black;
+  background-image: url(../images/white-glow.png);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
   border: 0;
   line-height: 1.1em;
-  text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff,   1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff; }
+  text-shadow: 1px 1px 2px #fff, -1px -1px 2px #fff,   1px -1px 2px #fff, -1px 1px 2px #fff, 1px 1px 2px #fff; }
   .landmark-icon img {
     margin: 0 30px; }
 
@@ -266,3 +269,8 @@
 .editor-selected .landmark-icon, img.editor-selected {
   background: rgba(255, 0, 0, 0.4);
   border-radius: 10px; }
+
+#interactive-map-holder.leaflet-fullscreen-on {
+  background-image: url(../images/home-map-bg.jpg);
+  background-size: 100% 100%;
+  background-repeat: no-repeat; }

@@ -29,8 +29,14 @@ function bindNewMarkerToEditorData(landmark_id) {
 				console.log('binding new marker');
 				editedMarkers[landmark_id][zoom].updateMarker();
 				foundExistingIconEdit = true;
-		}
+		} 	
+	} else {
+		// make sure it loads default
+		landmark_markers[landmark_id].setLatLng(new L.LatLng(landmarks[landmark_id].lat,landmarks[landmark_id].lon));
+	
 	}
+	
+	
 	
 	return foundExistingIconEdit;
 	
@@ -39,10 +45,11 @@ function bindNewMarkerToEditorData(landmark_id) {
 
 var savedEdits;
 function useSavedDataToRefreshIcons() {
+	console.log('using saved edits: '+savedEdits);
 	if(savedEdits.length > 4){
 		var jsonArray = jQuery.parseJSON( savedEdits );
 		jsonArray.forEach(function(value) {
-			console.log(value);
+			//console.log(value);
 			var newID = value.id;
 			var newZoom = value.zoom;
 			if(! editedMarkers[newID]) {
@@ -75,6 +82,21 @@ function useSavedDataToRefreshIcons() {
 }
 
 
+	$.ajax({
+		  dataType: "text",
+		  url: map_files_base+'savedMapEdits.json',
+		  async:false, 
+		  success:  function(data) {
+			 //
+					//data = data.replace("[","");
+		   			//data = data.replace("]","");
+		   			//console.log(data); 
+		   			savedEdits = data;
+				   
+		   
+			}
+	});
+
 
 
 $(document).ready(function(){
@@ -82,19 +104,7 @@ $(document).ready(function(){
 	// find and load json
 	//console.log(map_files_base+'savedMapEdits.json');
 	
-	$.ajax({
-		  dataType: "text",
-		  url: map_files_base+'savedMapEdits.json',
-		  success:  function(data) {
-			 //
-					//data = data.replace("[","");
-		   			//data = data.replace("]","");
-		   			console.log(data); 
-		   			savedEdits = data;
-				   
-		   
-			}
-	});
+	
 
 
 	
@@ -117,8 +127,8 @@ $(document).ready(function(){
 				organizedArray.push(infoToPush);	
 			});		  
 		});
-		console.log(organizedArray);
-		console.log(JSON.stringify(organizedArray));
+		//console.log(organizedArray);
+		//console.log(JSON.stringify(organizedArray));
 		
 		
 		$.ajax({
@@ -157,6 +167,7 @@ $(document).ready(function(){
 		var zoom = map.getZoom();	
 		if(typeof editorSelected !== 'undefined' && editorSelected !== "null") {
 		 editorSelected.disable();
+		 editorSelected.updateMarker();
 		 editorSelected = "null";
 			$('#control-zoom-level').text('Zoom Level: '+zoom);
 			// finds the new marker at new zoom level
@@ -184,6 +195,7 @@ $(document).ready(function(){
 			}*/
 		
 		}
+		refresh_landmark_view();
 			
 	});
 	

@@ -101,6 +101,17 @@ function setEndFromID(attraction_id) {
 
 $(document).ready(function(){
 
+
+	$('#full-screen-desktop').click(function() {
+		map.toggleFullscreen();
+		if (map.isFullscreen()) {
+		   $(this).find('a').html('<i></i>Go Full Screen');
+		} else {
+		   $(this).find('a').html('<i></i>Exit Full Screen');
+		}
+     
+	});
+
 	var editMarkers	 = getParameterByName('edit');
 	if(editMarkers == 'true') {
 			$('.leaflet-control-command-interior').css('display','inherit');
@@ -153,7 +164,7 @@ $(document).ready(function(){
 	});
 	
 	
-	$('li.menu-item').on( "click touchend", function() {
+	$('li.menu-item').on( "click", function() {
 	
 		$(this).toggleClass('selected');
 		$(this).siblings().removeClass('selected');
@@ -217,7 +228,7 @@ $(document).ready(function(){
    //  console.log(e);
 //});
 
-
+if($( window ).width() > 600) {
   var options = {
             $DragOrientation: 0,
             $BulletNavigatorOptions: {                                //[Optional] Options to specify and enable navigator or not
@@ -232,7 +243,7 @@ $(document).ready(function(){
                     $Orientation: 1                                 //[Optional] The orientation of the navigator, 1 horizontal, 2 vertical, default value is 1
                 },
                 $ThumbnailNavigatorOptions: {
-               	 $DisableDrag:true
+               	 $DisableDrag:false,
                 }
         };
         var jssor_slider1 = new $JssorSlider$('panel-slider-holder_0', options);
@@ -246,7 +257,7 @@ $(document).ready(function(){
 
 	//Planner Data, trip stuff
 
-	
+	}
 
 	$('#main-planner-form').submit(function(event) {
 		
@@ -261,11 +272,17 @@ $(document).ready(function(){
 	
 	$('#return-to-input-link').click(function() {
 			togglePlanner();
+			refresh_landmark_view();
+		toggle_stop_visibility();
+		toggle_landmark_visibility();
 		  // window.history.pushState({urlPath: ' '}, 'Title', ' ');
 	}); 
 	$('.x-box').click(function() {
 		togglePlanner();
 		clearPlanner();
+		refresh_landmark_view();
+		toggle_stop_visibility();
+		toggle_landmark_visibility();
 	});
 	
 	
