@@ -103,7 +103,7 @@ var route_ids_array = [<?php echo $routes ?>];
 var system_map = <?php echo $system_map ?>;
 // define other variables
 var map_files_base = '<?php echo $map_files_base_split[0] ?>';
-var api_base_url = 'http://archive.oregon-gtfs.com/gtfs-api/';
+var api_base_url = 'http://gtfs-api.ed-groth.com/gtfs-api/';
 var base_map_tiles = 'trilliumtransit.5434d913';
 var route_alignments_tiles = 'trilliumtransit.ca9f8a4a';
 var road_label_tiles = 'trilliumtransit.acea92f4';
