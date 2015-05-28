@@ -165,7 +165,7 @@ if(L.Browser.mobile){
 tile_layer[0] = new L.tileLayer('http://{s}.tiles.mapbox.com/v4/' + base_map_tiles + '/{z}/{x}/{y}.png?access_token=' + accessToken, {detectRetina: true,'zIndex': 10});
 if(system_map)tile_layer[1] = new L.tileLayer('http://{s}.tiles.mapbox.com/v4/' + route_alignments_tiles + '/{z}/{x}/{y}.png?access_token=' + accessToken, {detectRetina: true,'zIndex': 500});
 tile_layer[2] = new L.tileLayer('http://{s}.tiles.mapbox.com/v4/' + road_label_tiles + '/{z}/{x}/{y}.png?access_token=' + accessToken,
-		{detectRetina: true,'clickable': 'false', 'zIndex': 1000, pane: 'overlayPane'}).addTo(map);
+		{detectRetina: false,'clickable': 'false', 'zIndex': 1000, pane: 'overlayPane'}).addTo(map);
 //topPane.appendChild(tile_layer[2].getContainer())
 var commandPanel = new L.control.command().addTo(map);
 var controlPanelHtml = '<?php echo str_replace(array("\r\n", "\r", "\n"), "",file_get_contents($map_files_base_split[0].'/map_editor_panel.html')); ?>';
